@@ -6,7 +6,7 @@ Openware config for golang supporting json, yaml and ENV configs 12factor compli
 
 ## Usage
 
-`go get github.com/openware/config`
+`go get github.com/openware/pkg/ika`
 
 ### Example config
 
