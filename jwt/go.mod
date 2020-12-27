@@ -1,4 +1,4 @@
-module github.com/openware/pkg
+module github.com/openware/pkg/jwt
 
 go 1.15
 
