@@ -1,0 +1,16 @@
+---
+type: docker
+kind: pipeline
+name: default
+
+steps:
+  - name: Go test
+    image: golang:1.14
+    environment:
+      GO111MODULE: "on"
+    commands:
+      - make test
+
+trigger:
+  event:
+    - push
