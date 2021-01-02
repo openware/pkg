@@ -81,9 +81,11 @@ type Updater interface {
 //	     ...
 //	 }
 func ReadConfig(path string, cfg interface{}) error {
-	err := parseFile(path, cfg)
-	if err != nil {
-		return err
+	if path != "" {
+		err := parseFile(path, cfg)
+		if err != nil {
+			return err
+		}
 	}
 
 	return readEnvVars(cfg, false)

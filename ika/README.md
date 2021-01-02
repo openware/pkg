@@ -1,6 +1,6 @@
 # Ika: light config for go apps
 
-## Introductions
+## Introduction
 
 Openware config for golang supporting json, yaml and ENV configs 12factor compliant
 
@@ -8,15 +8,25 @@ Openware config for golang supporting json, yaml and ENV configs 12factor compli
 
 `go get github.com/openware/pkg/ika`
 
-### Example config
+### Example config and usage
 
-```
-type config struct {
+```go
+type YourAppConfig struct {
 	Number    int64  `yaml:"number" env:"TEST_NUMBER" env-default:"1"`
 	String    string `yaml:"string" env:"TEST_STRING" env-default:"default"`
 	NoDefault string `yaml:"no-default" env:"TEST_NO_DEFAULT"`
 	NoEnv     string `yaml:"no-env" env-default:"default"`
+	Required  string `yaml:"required" env-required:"true"`
 }
+
+func LoadYourAppConfig(cfgFilePath string) (*YourAppConfig, error) {
+	cfg := &YourAppConfig{}
+	if err := ika.ReadConfig(cfgFilePath, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
 ```
 
 ### Credits
