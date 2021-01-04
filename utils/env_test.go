@@ -1,4 +1,4 @@
-package env
+package utils
 
 import (
 	"testing"
@@ -27,7 +27,8 @@ func Test_DefaultStringEmpty(t *testing.T) {
 
 func Test_SetIfNotEmpty(t *testing.T) {
 	t.Run("", func(t *testing.T) {
-		SetIfNotEmpty(&"", "")
+		str := ""
+		SetIfNotEmpty(&str, "")
 		t.Error("Missing test case")
 	})
 }
