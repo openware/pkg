@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/openware/pkg/utils"
 	"gorm.io/driver/mysql"
@@ -17,6 +18,7 @@ func ConnectDatabase(dbName string) (db *gorm.DB) {
 	dbPort := utils.GetEnv("DATABASE_PORT", "3306")
 	dbUser := utils.GetEnv("DATABASE_USER", "root")
 	dbPass := utils.GetEnv("DATABASE_PASS", "")
+	dbConnectionPool := utils.GetEnv("DATABASE_CONNECTION_POOL", "10")
 
 	var err error
 	var dial gorm.Dialector
@@ -40,6 +42,17 @@ func ConnectDatabase(dbName string) (db *gorm.DB) {
 	if err != nil {
 		panic(err)
 	}
+
+	sql, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+
+	maxConns, err := strconv.Atoi(dbConnectionPool)
+	if err != nil {
+		panic(err)
+	}
+	sql.SetMaxOpenConns(maxConns)
 
 	return db
 }
