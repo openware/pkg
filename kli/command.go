@@ -47,9 +47,6 @@ func (c *Command) setParentCommandPath(parentCommandPath string) {
 	// Set up flag set
 	c.flags = flag.NewFlagSet(c.commandPath, flag.ContinueOnError)
 	c.BoolFlag("help", "Get help on the '"+strings.ToLower(c.commandPath)+"' command.", &c.helpFlag)
-
-	// result.Flags.Usage = result.PrintHelp
-
 }
 
 func (c *Command) setApp(app *Cli) {
@@ -57,38 +54,39 @@ func (c *Command) setApp(app *Cli) {
 }
 
 // parseFlags parses the given flags
-func (c *Command) parseFlags(args []string) error {
-	// Parse flags
+func (c *Command) parseFlags(args []string) ([]string, error) {
+	if len(args) == 0 {
+		return args, nil
+	}
 	tmp := os.Stderr
 	os.Stderr = nil
 	err := c.flags.Parse(args)
 	os.Stderr = tmp
-	return err
+	return c.flags.Args(), err
 }
 
 // Run - Runs the Command with the given arguments
 func (c *Command) run(args []string) error {
 
-	// If we have arguments, process them
+	// Parse flags
+	args, err := c.parseFlags(args)
+	if err != nil {
+		fmt.Printf("Error: %s\n\n", err.Error())
+		c.PrintHelp()
+		return err
+	}
+
+	// Help takes precedence
+	if c.helpFlag {
+		c.PrintHelp()
+		return nil
+	}
+
+	// Check for subcommand
 	if len(args) > 0 {
-		// Check for subcommand
 		subcommand := c.subCommandsMap[args[0]]
 		if subcommand != nil {
 			return subcommand.run(args[1:])
-		}
-
-		// Parse flags
-		err := c.parseFlags(args)
-		if err != nil {
-			fmt.Printf("Error: %s\n\n", err.Error())
-			c.PrintHelp()
-			return err
-		}
-
-		// Help takes precedence
-		if c.helpFlag {
-			c.PrintHelp()
-			return nil
 		}
 	}
 
@@ -111,7 +109,6 @@ func (c *Command) run(args []string) error {
 
 	// Nothing left we can do
 	c.PrintHelp()
-
 	return nil
 }
 
@@ -153,8 +150,7 @@ func (c *Command) PrintHelp() {
 		fmt.Println("")
 	}
 	if c.flagCount > 0 {
-		fmt.Println("Flags:")
-		fmt.Println()
+		fmt.Print("Flags:\n\n")
 		c.flags.SetOutput(os.Stdout)
 		c.flags.PrintDefaults()
 		c.flags.SetOutput(os.Stderr)

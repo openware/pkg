@@ -68,3 +68,100 @@ func TestCli(t *testing.T) {
 		c.LongDescription("long description")
 	})
 }
+
+func TestCliEmpty(t *testing.T) {
+	var mockCli *Cli
+	t.Run("Run NewCli()", func(t *testing.T) {
+		mockCli = NewCli("name", "description", "version")
+		t.Log(mockCli)
+	})
+
+	t.Run("Run defaultBannerFunction()", func(t *testing.T) {
+		err := defaultBannerFunction(mockCli)
+		t.Log(err)
+	})
+}
+
+func TestCliGlobalFlag(t *testing.T) {
+	var rootCli *Cli
+
+	t.Run("rcli -config app.yml create", func(t *testing.T) {
+		var cnf string
+
+		rootCli = NewCli("rcli", "description", "version")
+		rootCli.StringFlag("config", "Application yaml configuration file", &cnf)
+		rootCli.Action(func() error {
+			t.Fail()
+			return nil
+		})
+		create := rootCli.NewSubCommand("create", "Create a sonic application")
+		create.Action(func() error {
+			t.Log("Running Create")
+			return nil
+		})
+		rootCli.Run("-config", "app.yml", "create")
+		t.Logf("After Execution cnf: %s", cnf)
+	})
+
+	t.Run("rcli -config app.yml create -v", func(t *testing.T) {
+		var verb bool
+		var cnf string
+
+		rootCli = NewCli("rcli", "description", "version")
+		rootCli.StringFlag("config", "Application yaml configuration file", &cnf)
+		rootCli.Action(func() error {
+			t.Fail()
+			return nil
+		})
+		create := rootCli.NewSubCommand("create", "Create a sonic application")
+		create.BoolFlag("v", "Activate verbose", &verb)
+		create.Action(func() error {
+			if verb == false {
+				t.Fail()
+			} else {
+				t.Log("Running Create with verbose")
+			}
+			return nil
+		})
+		rootCli.Run("-config", "app.yml", "create", "-v")
+		t.Logf("After Execution")
+	})
+
+	t.Run("rcli create -f file.txt", func(t *testing.T) {
+		var file string
+
+		rootCli = NewCli("rcli", "description", "version")
+		create := rootCli.NewSubCommand("create", "Create a sonic application")
+		create.StringFlag("f", "Pass file", &file)
+		create.Action(func() error {
+			if file == "file.txt" {
+				t.Log("Running Create with -f params")
+			} else {
+				t.Fail()
+			}
+			return nil
+		})
+		rootCli.Run("create", "-f", "file.txt")
+		t.Logf("After Execution")
+	})
+
+	t.Run("rcli -c app.yml create -f file.txt", func(t *testing.T) {
+		var cnf string
+		var file string
+
+		rootCli = NewCli("rcli", "description", "version")
+		rootCli.StringFlag("c", "Pass file", &cnf)
+		create := rootCli.NewSubCommand("create", "Create a sonic application")
+		create.StringFlag("f", "Pass file", &file)
+		create.Action(func() error {
+			if file == "file.txt" && cnf == "app.yml" {
+				t.Log("Running Create with -f -c flags")
+			} else {
+				t.Fail()
+			}
+			return nil
+		})
+		rootCli.Run("-c", "app.yml", "create", "-f", "file.txt")
+		t.Logf("After Execution")
+	})
+}

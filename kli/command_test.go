@@ -20,7 +20,7 @@ func TestCommand(t *testing.T) {
 	})
 
 	t.Run("Run parseFlags()", func(t *testing.T) {
-		err := c.parseFlags([]string{"test", "flags"})
+		_, err := c.parseFlags([]string{"test", "flags"})
 		t.Log(err)
 	})
 

@@ -15,6 +15,21 @@ type Cli struct {
 	bannerFunction func(*Cli) string
 }
 
+// Action represents a function that gets called when the command is executed
+type Action func() error
+
+// NewCli - Creates a new Cli application object
+func NewCli(name, description, version string) *Cli {
+	result := &Cli{
+		version:        version,
+		bannerFunction: defaultBannerFunction,
+	}
+	result.rootCommand = NewCommand(name, description)
+	result.rootCommand.setApp(result)
+	result.rootCommand.setParentCommandPath("")
+	return result
+}
+
 // Version - Get the Application version string
 func (c *Cli) Version() string {
 	return c.version
@@ -122,4 +137,14 @@ func (c *Cli) LongDescription(longdescription string) *Cli {
 // OtherArgs - Returns the non-flag arguments passed to the cli. NOTE: This should only be called within the context of an action.
 func (c *Cli) OtherArgs() []string {
 	return c.rootCommand.flags.Args()
+}
+
+// defaultBannerFunction prints a banner for the application.
+// If version is a blank string, it is ignored.
+func defaultBannerFunction(c *Cli) string {
+	version := ""
+	if len(c.Version()) > 0 {
+		version = " " + c.Version()
+	}
+	return fmt.Sprintf("%s%s - %s", c.Name(), version, c.ShortDescription())
 }
