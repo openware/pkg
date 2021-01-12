@@ -913,13 +913,13 @@ func TestReadDatabaseConfig(t *testing.T) {
 	db_cfg := database.Config{}
 	ReadConfig("config_examples/config_example.yml", &db_cfg)
 	if db_cfg.Driver != "" {
-		t.Error("Has to be empty, but received %v", db_cfg.Driver)
+		t.Errorf("Has to be empty, but received %v", db_cfg.Driver)
 	}
 
 	generic_cfg := GenericConfig{}
 
 	ReadConfig("config_examples/config_example.yml", &generic_cfg)
 	if generic_cfg.DbCfg.Driver == "" {
-		t.Errorf("Has not to be empty, but recived %v", generic_cfg.DbCfg.Driver)
+		t.Errorf("Has not to be empty, but received %v", generic_cfg.DbCfg.Driver)
 	}
 }
