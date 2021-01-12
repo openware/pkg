@@ -49,3 +49,8 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 	sql.SetMaxOpenConns(cnf.Pool)
 	return db, nil
 }
+
+// Create the database MySQL/SQLite by name with existing connection
+func Create(db *gorm.DB, dbName string) error {
+	return db.Exec(fmt.Sprintf("CREATE DATABASE `%s`;", dbName)).Error
+}
