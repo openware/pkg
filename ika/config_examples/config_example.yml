@@ -1,0 +1,12 @@
+port: 6009 
+
+database:
+  driver: mysql
+  host: localhost
+  port: 3006
+  name: opendax
+  user: user
+  pass: changeme
+  driver: mysql
+  
+  
