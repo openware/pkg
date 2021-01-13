@@ -24,8 +24,8 @@ database:
 `
 
 	type config struct {
-		ServerPort string           `yaml:"port"`
-		DbConfig   *database.Config `yaml:"database"` // Very important to pass inside pointer to database.Config
+		ServerPort string          `yaml:"port"`
+		DbConfig   database.Config `yaml:"database"`
 	}
 
 	// In your application you can just create the file ( "config/config.yml" for example )
@@ -44,11 +44,11 @@ database:
 	cfg := config{}
 	ika.ReadConfig(tmpFile.Name(), &cfg)
 
-	_, err = database.Connect(cfg.DbConfig)
+	_, err = database.Connect(&cfg.DbConfig)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println(cfg.DbConfig.Driver)
-	//Output memory
+	//Output: memory
 }
