@@ -52,6 +52,12 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 
 // Create the database MySQL/SQLite by name with existing connection
 // TODO read dbName from gorm config
+// FIXME it doesn't work wirh SQlite
 func Create(db *gorm.DB, dbName string) error {
 	return db.Exec(fmt.Sprintf("CREATE DATABASE `%s`;", dbName)).Error
+}
+
+// FIXME it doesn't work wirh SQlite
+func Drop(db *gorm.DB, dbName string) error {
+	return db.Exec(fmt.Sprintf("DROP DATABASE `%s`;", dbName)).Error
 }
