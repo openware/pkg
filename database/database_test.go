@@ -28,4 +28,11 @@ func Test_Connect(t *testing.T) {
 			t.Error("Has to fail with unsupported driver")
 		}
 	})
+
+	t.Run("Empty configuration", func(t *testing.T) {
+		_, err := database.Connect(&database.Config{})
+		if err == nil {
+			t.Error(err)
+		}
+	})
 }

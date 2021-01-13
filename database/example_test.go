@@ -48,6 +48,7 @@ database:
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(err)
-	//Output nil
+
+	fmt.Println(cfg.DbConfig.Driver)
+	//Output memory
 }
