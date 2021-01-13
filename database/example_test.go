@@ -1,6 +1,7 @@
 package database_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -43,8 +44,10 @@ database:
 	cfg := config{}
 	ika.ReadConfig(tmpFile.Name(), &cfg)
 
-	client, err := database.Connect(cfg.DbConfig)
+	_, err = database.Connect(cfg.DbConfig)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(err)
+	//Output nil
 }
