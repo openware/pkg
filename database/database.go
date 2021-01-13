@@ -2,67 +2,62 @@ package database
 
 import (
 	"fmt"
-	"strconv"
 
-	"github.com/openware/pkg/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-// ConnectDatabase : connect to database MySQL using gorm
+// Internal database pointer
+var db *gorm.DB
+
+// Connect to database MySQL/SQLite using gorm
 // gorm (GO ORM for SQL): http://gorm.io/docs/connecting_to_the_database.html
-func ConnectDatabase(dbName string) (db *gorm.DB) {
-	dbDriver := utils.GetEnv("DATABASE_DRIVER", "mysql")
-	dbHost := utils.GetEnv("DATABASE_HOST", "localhost")
-	dbPort := utils.GetEnv("DATABASE_PORT", "3306")
-	dbUser := utils.GetEnv("DATABASE_USER", "root")
-	dbPass := utils.GetEnv("DATABASE_PASS", "")
-	dbConnectionPool := utils.GetEnv("DATABASE_CONNECTION_POOL", "10")
+// TODO Switch to Config struct
+func Connect(cnf *Config) (*gorm.DB, error) {
 
 	var err error
 	var dial gorm.Dialector
 
-	switch dbDriver {
+	switch cnf.Driver {
 	case "memory":
 		dial = sqlite.Open(":memory:")
 
 	case "mysql":
 		dsn := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-			dbUser, dbPass, dbHost, dbPort, dbName,
+			cnf.User, cnf.Pass, cnf.Host, cnf.Port, cnf.Name,
 		)
 		dial = mysql.Open(dsn)
 
 	default:
-		panic("Unsupported DB_DRIVER: " + dbDriver)
-
+		return nil, fmt.Errorf("Unsupported DATABASE_DRIVER: %s", cnf.Driver)
 	}
+
 	db, err = gorm.Open(dial, &gorm.Config{})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
+	// FIXME delete
 	sql, err := db.DB()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	maxConns, err := strconv.Atoi(dbConnectionPool)
-	if err != nil {
-		panic(err)
-	}
-	sql.SetMaxOpenConns(maxConns)
-
-	return db
+	// FIXME: move into switch case use DSN; won't work with sqlite
+	sql.SetMaxOpenConns(cnf.Pool)
+	return db, nil
 }
 
-// RunMigrations create and modify database tables according to the models
-func RunMigrations(db *gorm.DB) {
-	// Need to implement
+// Create the database MySQL/SQLite by name with existing connection
+// TODO read dbName from gorm config
+// FIXME it doesn't work wirh SQlite
+func Create(db *gorm.DB, dbName string) error {
+	return db.Exec(fmt.Sprintf("CREATE DATABASE `%s`;", dbName)).Error
 }
 
-// LoadSeeds import seed files into database
-func LoadSeeds(db *gorm.DB) {
-	// Need to implement
+// FIXME it doesn't work wirh SQlite
+func Drop(db *gorm.DB, dbName string) error {
+	return db.Exec(fmt.Sprintf("DROP DATABASE `%s`;", dbName)).Error
 }
