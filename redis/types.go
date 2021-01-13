@@ -1,8 +1,6 @@
 package redis
 
 import (
-	"time"
-
 	"github.com/go-redis/redis"
 )
 
@@ -17,11 +15,4 @@ type Config struct {
 // Store represent the Store model
 type Store struct {
 	client *redis.Client
-}
-
-// KVStore represent the repositories
-type KVStore interface {
-	Set(key string, value interface{}, exp time.Duration) error
-	Get(key string) (string, error)
-	Close() error
 }
