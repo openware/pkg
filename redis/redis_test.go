@@ -1,19 +1,13 @@
 package redis
 
 import (
-	"log"
-	"os"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis"
-	"github.com/elliotchance/redismock"
-	"github.com/go-redis/redis"
+	"github.com/alicebob/miniredis/v2"
 	"github.com/stretchr/testify/assert"
-)
-
-var (
-	client *redis.Client
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -21,40 +15,53 @@ var (
 	val = "val"
 )
 
-func TestMain(m *testing.M) {
-	// Start redis mock server
-	mr, err := miniredis.Run()
-	if err != nil {
-		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
+func TestConnect(t *testing.T) {
+	mr, _ := miniredis.Run()
+
+	// Split mock server address to host, port
+	addrs := strings.Split(mr.Addr(), ":")
 
 	// New redis client point to mock server
-	client = redis.NewClient(&redis.Options{
-		Addr: mr.Addr(),
+	store := Connect(&Config{
+		Host: addrs[0],
+		Port: addrs[1],
 	})
-
-	// Assert exit code
-	code := m.Run()
-	os.Exit(code)
+	err := store.Close()
+	require.NoError(t, err)
 }
 
 func TestSet(t *testing.T) {
-	exp := time.Duration(0)
+	mr, _ := miniredis.Run()
 
-	mock := redismock.NewNiceMock(client)
-	mock.On("Set", key, val, exp).Return(redis.NewStatusResult("", nil))
+	// Split mock server address to host, port
+	addrs := strings.Split(mr.Addr(), ":")
 
-	r := create(mock)
-	err := r.Set(key, val, exp)
-	assert.NoError(t, err)
+	// New redis client point to mock server
+	store := Connect(&Config{
+		Host: addrs[0],
+		Port: addrs[1],
+	})
+
+	err := store.Set(key, val, time.Duration(0))
+	require.NoError(t, err)
+	actual, _ := mr.Get(key)
+	assert.Equal(t, val, actual)
 }
 
 func TestGet(t *testing.T) {
-	mock := redismock.NewNiceMock(client)
-	mock.On("Get", key).Return(redis.NewStringResult(val, nil))
+	mr, _ := miniredis.Run()
+	mr.Set(key, val)
 
-	r := create(mock)
-	res, err := r.Get(key)
-	assert.NoError(t, err)
-	assert.Equal(t, val, res)
+	// Split mock server address to host, port
+	addrs := strings.Split(mr.Addr(), ":")
+
+	// New redis client point to mock server
+	store := Connect(&Config{
+		Host: addrs[0],
+		Port: addrs[1],
+	})
+
+	result, err := store.Get(key)
+	require.NoError(t, err)
+	assert.Equal(t, val, result)
 }

@@ -14,24 +14,14 @@ type Config struct {
 	Pass string `env:"REDISPASS" env-description:"Redis user password"`
 }
 
-// repository represent the repository model
-type repository struct {
-	Client redis.Cmdable
+// Store represent the Store model
+type Store struct {
+	client *redis.Client
 }
 
-// Repository represent the repositories
-type Repository interface {
+// KVStore represent the repositories
+type KVStore interface {
 	Set(key string, value interface{}, exp time.Duration) error
 	Get(key string) (string, error)
-}
-
-// Set attaches the redis repository and set the data
-func (r *repository) Set(key string, value interface{}, exp time.Duration) error {
-	return r.Client.Set(key, value, exp).Err()
-}
-
-// Get attaches the redis repository and get the data
-func (r *repository) Get(key string) (string, error) {
-	get := r.Client.Get(key)
-	return get.Result()
+	Close() error
 }
