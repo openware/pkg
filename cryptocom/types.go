@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	// Types
 	AuthRequest      = 1
 	SubscribeRequest = 2
 	HeartBeat        = 3

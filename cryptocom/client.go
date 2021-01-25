@@ -13,7 +13,8 @@ import (
 )
 
 type Client struct {
-	conn *websocket.Conn
+	publicConn  *websocket.Conn
+	privateConn *websocket.Conn
 
 	key    string
 	secret string
@@ -41,13 +42,23 @@ func (c *Client) generateSignature(r *Request) {
 	r.Signature = sha
 }
 
+// Connect("wss://uat-stream.3ona.co")
 func (c *Client) Connect(url string) error {
-	conn, _, err := websocket.DefaultDialer.Dial(url, http.Header{})
+	publicEndpoint := url + "/v2/market"
+	privateEndpoint := url + "/v2/user"
+	conn, _, err := websocket.DefaultDialer.Dial(publicEndpoint, http.Header{})
 	if err != nil {
 		return err
 	}
 
-	c.conn = conn
+	c.publicConn = conn
+
+	conn, _, err = websocket.DefaultDialer.Dial(privateEndpoint, http.Header{})
+	if err != nil {
+		return err
+	}
+
+	c.privateConn = conn
 
 	// c.authenticate()
 
@@ -62,7 +73,7 @@ func (c *Client) Listen() <-chan interface{} {
 		}()
 
 		for {
-			_, m, err := c.conn.ReadMessage()
+			_, m, err := c.publicConn.ReadMessage()
 			if err != nil {
 				fmt.Println("error on read message")
 				return
@@ -76,7 +87,36 @@ func (c *Client) Listen() <-chan interface{} {
 			}
 
 			if parsed.Method == "public/heartbeat" {
-				c.respondHeartBeat(parsed.Id)
+				c.respondHeartBeat("public", parsed.Id)
+				continue
+			}
+
+			c.msgs <- parsed
+		}
+	}()
+
+	go func() {
+		defer func() {
+			close(c.done)
+			close(c.msgs)
+		}()
+
+		for {
+			_, m, err := c.privateConn.ReadMessage()
+			if err != nil {
+				fmt.Println("error on read message")
+				return
+			}
+
+			var parsed Response
+			err = json.Unmarshal(m, &parsed)
+			if err != nil {
+				fmt.Println("error on parse message")
+				continue
+			}
+
+			if parsed.Method == "public/heartbeat" {
+				c.respondHeartBeat("private", parsed.Id)
 				continue
 			}
 
@@ -89,61 +129,73 @@ func (c *Client) Listen() <-chan interface{} {
 
 func (c *Client) authenticate() {
 	r := c.AuthRequest()
-	c.sendRequest(r)
+	c.sendPrivateRequest(r)
 }
 
 // SubscribeTrades is subscription trade channel
 // Example: SubscribeTrades("ETH_BTC", "ETH_CRO")
 func (c *Client) SubscribeTrades(markets ...string) {
-	channels := c.format(markets, func (s string) string {
+	channels := c.format(markets, func(s string) string {
 		return fmt.Sprintf("trade.%s", s)
 	})
 
-	c.SubscribeChannel(channels)
+	r := c.subscribeRequest(channels)
+	c.sendPublicRequest(r)
 }
 
 // SubscribeOrderBook is subscription orderbook channel
 // Example: SubscribeOrderBook(depth, "ETH_BTC", "ETH_CRO")
+// depth: Number of bids and asks to return. Allowed values: 10 or 150
 func (c *Client) SubscribeOrderBook(depth int, markets ...string) {
-	channels := c.format(markets, func (s string) string {
+	channels := c.format(markets, func(s string) string {
 		return fmt.Sprintf("book.%s.%d", s, depth)
 	})
 
-	c.SubscribeChannel(channels)
+	r := c.subscribeRequest(channels)
+	c.sendPublicRequest(r)
 }
 
 // SubscribeTickers is subscription ticker channel
-// Example: SubscribeTickers(depth, "ETH_BTC", "ETH_CRO")
-// depth: Number of bids and asks to return. Allowed values: 10 or 150
 func (c *Client) SubscribeTickers(markets ...string) {
-	channels := c.format(markets, func (s string) string {
+	channels := c.format(markets, func(s string) string {
 		return fmt.Sprintf("ticker.%s", s)
 	})
 
-	c.SubscribeChannel(channels)
-}
-
-// SubscribeChannel is subscription channels by parameter
-func (c *Client) SubscribeChannel(channels []string) {
 	r := c.subscribeRequest(channels)
-	c.sendRequest(r)
+	c.sendPublicRequest(r)
 }
 
-func (c *Client) respondHeartBeat(id int) {
+func (c *Client) respondHeartBeat(scope string, id int) {
 	r := c.hearBeatRequest(id)
-	c.sendRequest(r)
+
+	switch scope {
+	case "private":
+		c.sendPrivateRequest(r)
+	case "public":
+		c.sendPublicRequest(r)
+	}
 }
 
-func (c *Client) sendRequest(r *Request) error {
+func (c *Client) sendPrivateRequest(r *Request) error {
 	b, err := r.Encode()
 
 	if err != nil {
 		return err
 	}
-	return c.conn.WriteMessage(websocket.TextMessage, b)
+	return c.privateConn.WriteMessage(websocket.TextMessage, b)
+}
+
+func (c *Client) sendPublicRequest(r *Request) error {
+	b, err := r.Encode()
+
+	if err != nil {
+		return err
+	}
+	return c.publicConn.WriteMessage(websocket.TextMessage, b)
 }
 
 type formater func(string) string
+
 // Input: ["ETH_BTC", "ETH_CRO"]
 func (c *Client) format(markets []string, fn formater) []string {
 	channels := []string{}

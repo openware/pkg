@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	client := cryptocom.New("test", "test")
+	client := cryptocom.New("nil", "nil")
 
-	err := client.Connect("wss://uat-stream.3ona.co/v2/market")
+	err := client.Connect("wss://uat-stream.3ona.co")
 	if err != nil {
 		fmt.Println(err)
 	}
