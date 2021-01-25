@@ -30,3 +30,5 @@ func (c *Client) hearBeatRequest(id int) *Request {
 		Method: "public/respond-heartbeat",
 	}
 }
+
+func (c *Client) createOrderRequest(market string, side string, oType string, price )

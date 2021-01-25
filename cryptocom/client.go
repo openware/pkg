@@ -132,50 +132,6 @@ func (c *Client) authenticate() {
 	c.sendPrivateRequest(r)
 }
 
-// SubscribeTrades is subscription trade channel
-// Example: SubscribeTrades("ETH_BTC", "ETH_CRO")
-func (c *Client) SubscribeTrades(markets ...string) {
-	channels := c.format(markets, func(s string) string {
-		return fmt.Sprintf("trade.%s", s)
-	})
-
-	r := c.subscribeRequest(channels)
-	c.sendPublicRequest(r)
-}
-
-// SubscribeOrderBook is subscription orderbook channel
-// Example: SubscribeOrderBook(depth, "ETH_BTC", "ETH_CRO")
-// depth: Number of bids and asks to return. Allowed values: 10 or 150
-func (c *Client) SubscribeOrderBook(depth int, markets ...string) {
-	channels := c.format(markets, func(s string) string {
-		return fmt.Sprintf("book.%s.%d", s, depth)
-	})
-
-	r := c.subscribeRequest(channels)
-	c.sendPublicRequest(r)
-}
-
-// SubscribeTickers is subscription ticker channel
-func (c *Client) SubscribeTickers(markets ...string) {
-	channels := c.format(markets, func(s string) string {
-		return fmt.Sprintf("ticker.%s", s)
-	})
-
-	r := c.subscribeRequest(channels)
-	c.sendPublicRequest(r)
-}
-
-func (c *Client) respondHeartBeat(scope string, id int) {
-	r := c.hearBeatRequest(id)
-
-	switch scope {
-	case "private":
-		c.sendPrivateRequest(r)
-	case "public":
-		c.sendPublicRequest(r)
-	}
-}
-
 func (c *Client) sendPrivateRequest(r *Request) error {
 	b, err := r.Encode()
 
@@ -194,14 +150,12 @@ func (c *Client) sendPublicRequest(r *Request) error {
 	return c.publicConn.WriteMessage(websocket.TextMessage, b)
 }
 
-type formater func(string) string
+func (c *Client) subscribePrivateChannels(channels []string) {
+	r := c.subscribeRequest(channels)
+	c.sendPrivateRequest(r)
+}
 
-// Input: ["ETH_BTC", "ETH_CRO"]
-func (c *Client) format(markets []string, fn formater) []string {
-	channels := []string{}
-	for _, v := range markets {
-		channels = append(channels, fn(v))
-	}
-
-	return channels
+func (c *Client) subscribePublicChannels(channels []string) {
+	r := c.subscribeRequest(channels)
+	c.sendPublicRequest(r)
 }
