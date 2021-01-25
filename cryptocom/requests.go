@@ -13,18 +13,12 @@ func (c *Client) AuthRequest() *Request {
 	return r
 }
 
-func (c *Client) subscribeTradesRequest(markets []string) *Request {
-	params := make([]string, 0)
-
-	for _, v := range markets {
-		params = append(params, "trade."+v)
-	}
-
+func (c *Client) subscribeRequest(channels []string) *Request {
 	return &Request{
 		Id:     12,
 		Type:   SubscribeRequest,
 		Method: "subscribe",
-		Params: map[string]interface{}{"channels": params},
+		Params: map[string]interface{}{"channels": channels},
 		Nonce:  generateNonce(),
 	}
 }

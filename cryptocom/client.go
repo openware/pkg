@@ -92,10 +92,27 @@ func (c *Client) authenticate() {
 	c.sendRequest(r)
 }
 
+// Example: SubscribeTrades("ETH_BTC", "ETH_CRO")
 func (c *Client) SubscribeTrades(markets ...string) {
-	r := c.subscribeTradesRequest(markets)
+	channels := c.formatMarkets(markets) // It returns us channel names
+	r := c.subscribeRequest(channels)
 	c.sendRequest(r)
 }
+
+// func (c *Client) SubscribeOrderBook(depth int, markets ...string) {
+// 	r := c.subscribeTradesRequest(markets)
+// 	c.sendRequest(r)
+// }
+
+// func (c *Client) SubscribeTickers(markets ...string) {
+// 	r := c.subscribeTradesRequest(markets)
+// 	c.sendRequest(r)
+// }
+
+// func (c *Client) SubscribeChannel(channels []string) {
+// 	r := c.subscribeRequest(channels)
+// 	c.sendRequest(r)
+// }
 
 func (c *Client) respondHeartBeat(id int) {
 	r := c.hearBeatRequest(id)
@@ -109,4 +126,15 @@ func (c *Client) sendRequest(r *Request) error {
 		return err
 	}
 	return c.conn.WriteMessage(websocket.TextMessage, b)
+}
+
+// Input: ["ETH_BTC", "ETH_CRO"]
+func (c *Client) formatMarkets(markets []string) []string {
+	channels := make([]string, 0)
+
+	for _, v := range markets {
+		channels = append(channels, "trade."+v)
+	}
+
+	return channels
 }
