@@ -95,7 +95,7 @@ func (c *Client) authenticate() {
 // SubscribeTrades is subscription trade channel
 // Example: SubscribeTrades("ETH_BTC", "ETH_CRO")
 func (c *Client) SubscribeTrades(markets ...string) {
-	channels := c.formatMarkets(markets, func (s string) string {
+	channels := c.format(markets, func (s string) string {
 		return fmt.Sprintf("trade.%s", s)
 	})
 
@@ -105,7 +105,7 @@ func (c *Client) SubscribeTrades(markets ...string) {
 // SubscribeOrderBook is subscription orderbook channel
 // Example: SubscribeOrderBook(depth, "ETH_BTC", "ETH_CRO")
 func (c *Client) SubscribeOrderBook(depth int, markets ...string) {
-	channels := c.formatMarkets(markets, func (s string) string {
+	channels := c.format(markets, func (s string) string {
 		return fmt.Sprintf("book.%s.%d", s, depth)
 	})
 
@@ -116,7 +116,7 @@ func (c *Client) SubscribeOrderBook(depth int, markets ...string) {
 // Example: SubscribeTickers(depth, "ETH_BTC", "ETH_CRO")
 // depth: Number of bids and asks to return. Allowed values: 10 or 150
 func (c *Client) SubscribeTickers(markets ...string) {
-	channels := c.formatMarkets(markets, func (s string) string {
+	channels := c.format(markets, func (s string) string {
 		return fmt.Sprintf("ticker.%s", s)
 	})
 
@@ -145,7 +145,7 @@ func (c *Client) sendRequest(r *Request) error {
 
 type formater func(string) string
 // Input: ["ETH_BTC", "ETH_CRO"]
-func (c *Client) formatMarkets(markets []string, fn formater) []string {
+func (c *Client) format(markets []string, fn formater) []string {
 	channels := []string{}
 	for _, v := range markets {
 		channels = append(channels, fn(v))
