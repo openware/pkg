@@ -14,16 +14,17 @@ func (c *Client) AuthRequest() *Request {
 }
 
 func (c *Client) subscribeTradesRequest(markets []string) *Request {
-	mrkts := make(map[string][]string)
-	for i, v := range markets {
-		markets[i] = "trade." + v
+	params := make([]string, 0)
+
+	for _, v := range markets {
+		params = append(params, "trade."+v)
 	}
-	mrkts["channels"] = markets
+
 	return &Request{
 		Id:     12,
 		Type:   SubscribeRequest,
 		Method: "subscribe",
-		Params: mrkts, // Not sure
+		Params: map[string]interface{}{"channels": params},
 		Nonce:  generateNonce(),
 	}
 }

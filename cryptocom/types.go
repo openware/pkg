@@ -20,7 +20,7 @@ type Request struct {
 	ApiKey    string
 	Signature string
 	Nonce     string
-	Params    interface{}
+	Params    map[string]interface{}
 }
 
 type Response struct {
