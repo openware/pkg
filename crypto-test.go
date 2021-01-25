@@ -14,8 +14,9 @@ func main() {
 		fmt.Println(err)
 	}
 
-	client.SubscribeTrades("ETH_BTC")
-
+	// client.SubscribeTrades("ETH_BTC", "ETH_CRO")
+	// client.SubscribeTickers("ETH_BTC", "ETH_CRO")
+	client.SubscribeOrderBook(10, "ETH_BTC", "ETH_CRO")
 	msgs := client.Listen()
 
 	for m := range msgs {
