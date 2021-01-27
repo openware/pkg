@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -24,11 +25,11 @@ type ManagementAPIV2 struct {
 	rootAPIUrl     string
 	endpointPrefix string
 	client         *http.Client
-	keychain       *KeychainData
+	keychain       *Keychain
 }
 
 // New to return ManagementAPIV2 struct
-func New(rootAPIUrl string, endpointPrefix string, keychain *KeychainData) *ManagementAPIV2 {
+func New(rootAPIUrl string, endpointPrefix string, keychain *Keychain) *ManagementAPIV2 {
 	return &ManagementAPIV2{
 		rootAPIUrl:     rootAPIUrl,
 		endpointPrefix: endpointPrefix,
@@ -39,28 +40,20 @@ func New(rootAPIUrl string, endpointPrefix string, keychain *KeychainData) *Mana
 
 func (m *ManagementAPIV2) Request(method string, path string, body []byte) ([]byte, error) {
 	url, err := url.Parse(m.rootAPIUrl)
-	url.Path = path.Join(url.Path, m.endpointPrefix, path)
+	url.Path = filepath.Join(url.Path, m.endpointPrefix, path)
 	req, err := http.NewRequest(method, url.String(), bytes.NewBuffer(body))
 	if err != nil {
 		log.Fatalln("Request", "Can not create new request: "+err.Error())
 		return nil, err
 	}
 
-	privateKey, err := loadPrivateKeyFromString(m.keychain.Value)
-	if err != nil {
-		log.Fatalln(err)
-		return nil, err
-	}
-
-	tokenString, err := generateToken(body, privateKey)
-	if err != nil {
-		log.Fatalln(err)
-		return nil, err
-	}
+	// TODO: Add JWS
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+tokenString)
+
+	// TODO: Uncomment later
+	// req.Header.Add("Authorization", "Bearer "+tokenString)
 
 	res, err := m.client.Do(req)
 	if err != nil {

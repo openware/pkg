@@ -11,6 +11,6 @@ type Withdraw struct {
 	RID            string `json:"rid"`
 	State          string `json:"state"`
 	CreatedAt      string `json:"created_at"`
-	BlockchainTxId string `json:"blockchain_txid"`
+	BlockchainTxID string `json:"blockchain_txid"`
 	TransferType   string `json:"transfer_type"`
 }

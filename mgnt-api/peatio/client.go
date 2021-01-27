@@ -13,7 +13,10 @@ type PeatioAPIV2 struct {
 
 func New(config *mgntapi.PeatioAPIV2Config) *PeatioAPIV2 {
 	return &PeatioAPIV2{
-		apiClient: mgntapi.New("https://dev.yellow.openware.work", "/api/v2/peatio/management/", &config.Keychain.Opendax),
+		apiClient: mgntapi.New(
+			"https://dev.yellow.openware.work",
+			"/api/v2/peatio/management/",
+			&config.Keychain),
 	}
 }
 

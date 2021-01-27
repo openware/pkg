@@ -8,6 +8,6 @@ type BarongAPIV2 struct {
 
 func New(config *mgntapi.BarongAPIV2Config) *BarongAPIV2 {
 	return &BarongAPIV2{
-		apiClient: mgntapi.New("", "", &config.Keychain.Opendax),
+		apiClient: mgntapi.New("", "", &config.Keychain),
 	}
 }
