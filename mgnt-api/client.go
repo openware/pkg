@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"path/filepath"
-	"strconv"
+	"strings"
 	"time"
 
 	jwtgo "github.com/dgrijalva/jwt-go"
@@ -20,25 +21,47 @@ const (
 	RequestTimeout = time.Duration(5 * time.Second)
 )
 
-// ManagementAPIV2 struct to define common data and function
-type ManagementAPIV2 struct {
-	rootAPIUrl     string
-	endpointPrefix string
-	client         *http.Client
-	keychain       *Keychain
+// Client struct to define common data and function
+type Client struct {
+	rootAPIUrl       string
+	endpointPrefix   string
+	client           *http.Client
+	jwtIssuer        string
+	jwtSigningMethod jwtgo.SigningMethod
+	jwtPrivateKey    *rsa.PrivateKey
 }
 
 // New to return ManagementAPIV2 struct
-func New(rootAPIUrl string, endpointPrefix string, keychain *Keychain) *ManagementAPIV2 {
-	return &ManagementAPIV2{
-		rootAPIUrl:     rootAPIUrl,
-		endpointPrefix: endpointPrefix,
-		client:         &http.Client{Timeout: RequestTimeout},
-		keychain:       keychain,
+func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo string, jwtPrivateKey string) (*Client, error) {
+	pk, err := loadPrivateKeyFromString(jwtPrivateKey)
+	if err != nil {
+		return nil, err
 	}
+
+	if jwtAlgo == "" {
+		jwtAlgo = "RS256"
+	}
+
+	sm := jwtgo.GetSigningMethod(jwtAlgo)
+	if sm == nil {
+		return nil, fmt.Errorf("Unsupported signing method %s", jwtAlgo)
+	}
+
+	if jwtIssuer == "" {
+		return nil, fmt.Errorf("JWT issuer unset")
+	}
+
+	return &Client{
+		rootAPIUrl:       rootAPIUrl,
+		endpointPrefix:   endpointPrefix,
+		client:           &http.Client{Timeout: RequestTimeout},
+		jwtIssuer:        jwtIssuer,
+		jwtSigningMethod: sm,
+		jwtPrivateKey:    pk,
+	}, nil
 }
 
-func (m *ManagementAPIV2) Request(method string, path string, body []byte) ([]byte, error) {
+func (m *Client) Request(method string, path string, body []byte) ([]byte, error) {
 	url, err := url.Parse(m.rootAPIUrl)
 	url.Path = filepath.Join(url.Path, m.endpointPrefix, path)
 	req, err := http.NewRequest(method, url.String(), bytes.NewBuffer(body))
@@ -72,18 +95,52 @@ func (m *ManagementAPIV2) Request(method string, path string, body []byte) ([]by
 	return body, nil
 }
 
-func generateToken(data interface{}, key *rsa.PrivateKey) (string, error) {
+func (m *Client) generateJWT(data interface{}, validPeriod time.Duration, opts ...interface{}) (map[string]interface{}, error) {
+	iat := time.Now()
+	jti := RandomString(16)
+	if len(opts) > 0 {
+		iat = time.Unix(opts[0].(int64), 0)
+	}
+	if len(opts) > 1 {
+		jti = opts[1].(string)
+	}
 	claims := jwtgo.MapClaims{
 		"data": data,
-		"iat":  time.Now().Unix(),
-		"exp":  time.Now().UTC().Add(time.Hour).Unix(),
-		"jit":  strconv.FormatInt(time.Now().Unix(), 10),
-		"iss":  "opendax",
+		"iat":  iat.Unix(),
+		"exp":  iat.Add(validPeriod).Unix(),
+		"iss":  m.jwtIssuer,
+		"jti":  jti,
 	}
 
-	t := jwtgo.NewWithClaims(jwtgo.SigningMethodRS256, claims)
+	t := jwtgo.NewWithClaims(m.jwtSigningMethod, claims)
 
-	return t.SignedString(key)
+	sstr, err := t.SigningString()
+	if err != nil {
+		return nil, err
+	}
+
+	hp := strings.Split(sstr, ".")
+	if len(hp) != 2 {
+		return nil, fmt.Errorf("Invalid segment count in sstr %d, expected 2", len(hp))
+	}
+
+	sig, err := t.Method.Sign(sstr, m.jwtPrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	jwt := map[string]interface{}{
+		"payload": hp[1],
+		"signatures": []map[string]interface{}{
+			{
+				"protected": hp[0],
+				"header":    map[string]string{"kid": m.jwtIssuer},
+				"signature": sig,
+			},
+		},
+	}
+
+	return jwt, nil
 }
 
 func loadPrivateKeyFromString(str string) (*rsa.PrivateKey, error) {

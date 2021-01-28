@@ -7,22 +7,19 @@ import (
 	mgntapi "github.com/openware/pkg/mgnt-api"
 )
 
-type PeatioAPIV2 struct {
-	apiClient *mgntapi.ManagementAPIV2
+type PeatioMngAPIV2 struct {
+	cli *mgntapi.Client
 }
 
-func New(config *mgntapi.PeatioAPIV2Config) *PeatioAPIV2 {
-	return &PeatioAPIV2{
-		apiClient: mgntapi.New(
-			"https://dev.yellow.openware.work",
-			"/api/v2/peatio/management/",
-			&config.Keychain),
+func New(cli *mgntapi.Client) *PeatioMngAPIV2 {
+	return &PeatioMngAPIV2{
+		cli: cli,
 	}
 }
 
-func (p *PeatioAPIV2) GetWithdrawById(tid string) (*Withdraw, error) {
+func (p *PeatioMngAPIV2) GetWithdrawById(tid string) (*Withdraw, error) {
 	// TODO: Post with formData
-	res, _ := p.apiClient.Request(http.MethodGet, "withdraws/get", []byte{})
+	res, _ := p.cli.Request(http.MethodGet, "withdraws/get", []byte{})
 	withdraw := &Withdraw{}
 	err := json.Unmarshal([]byte(res), withdraw)
 

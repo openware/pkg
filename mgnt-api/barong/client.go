@@ -2,12 +2,12 @@ package barong
 
 import mgntapi "github.com/openware/pkg/mgnt-api"
 
-type BarongAPIV2 struct {
-	apiClient *mgntapi.ManagementAPIV2
+type BarongMngAPIV2 struct {
+	cli *mgntapi.Client
 }
 
-func New(config *mgntapi.BarongAPIV2Config) *BarongAPIV2 {
-	return &BarongAPIV2{
-		apiClient: mgntapi.New("", "", &config.Keychain),
+func New(cli *mgntapi.Client) *BarongMngAPIV2 {
+	return &BarongMngAPIV2{
+		cli: cli,
 	}
 }
