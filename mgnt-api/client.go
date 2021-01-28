@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -18,7 +19,7 @@ import (
 
 const (
 	// RequestTimeout default value
-	RequestTimeout = time.Duration(5 * time.Second)
+	RequestTimeout = time.Duration(30 * time.Second)
 )
 
 // Client struct to define common data and function
@@ -29,6 +30,11 @@ type Client struct {
 	jwtIssuer        string
 	jwtSigningMethod jwtgo.SigningMethod
 	jwtPrivateKey    *rsa.PrivateKey
+}
+
+// APIError response from management API
+type APIError struct {
+	Message string `json:"error"`
 }
 
 // New to return ManagementAPIV2 struct
@@ -61,35 +67,56 @@ func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo str
 	}, nil
 }
 
-func (m *Client) Request(method string, path string, body []byte) ([]byte, error) {
-	url, err := url.Parse(m.rootAPIUrl)
-	url.Path = filepath.Join(url.Path, m.endpointPrefix, path)
-	req, err := http.NewRequest(method, url.String(), bytes.NewBuffer(body))
-	if err != nil {
-		log.Fatalln("Request", "Can not create new request: "+err.Error())
-		return nil, err
+// Request to call HTTP request
+func (m *Client) Request(method string, path string, body []byte) ([]byte, *APIError) {
+	// Check for allowed HTTP methods
+	if !allowedHTTPMethods(method) {
+		log.Fatalln("Only PUT and POST are allowed")
 	}
 
-	// TODO: Add JWS
+	url, err := url.Parse(m.rootAPIUrl)
+	url.Path = filepath.Join(url.Path, m.endpointPrefix, path)
+
+	// Generate jwt multisig
+	jwt, err := m.generateJWT(body, time.Hour)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Convert jwt to json string
+	jwtstr, err := json.Marshal(jwt)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Create new HTTP request
+	req, err := http.NewRequest(method, url.String(), bytes.NewBuffer(jwtstr))
+	if err != nil {
+		log.Fatalln("Request", "Can not create new request: "+err.Error())
+	}
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
-	// TODO: Uncomment later
-	// req.Header.Add("Authorization", "Bearer "+tokenString)
-
+	// Call HTTP request
 	res, err := m.client.Do(req)
 	if err != nil {
 		log.Fatalln(err)
-		return nil, err
 	}
 
 	defer res.Body.Close()
 
+	// Convert response body to []byte
 	body, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Fatalln(err)
-		return nil, err
+	}
+
+	// Check for API error
+	if res.StatusCode != 201 {
+		apiError := APIError{}
+		_ = json.Unmarshal(body, &apiError)
+		return nil, &apiError
 	}
 
 	return body, nil
@@ -155,4 +182,16 @@ func loadPrivateKeyFromString(str string) (*rsa.PrivateKey, error) {
 	}
 
 	return key, nil
+}
+
+func allowedHTTPMethods(method string) bool {
+	var methods = []string{http.MethodPost, http.MethodPut}
+
+	for _, v := range methods {
+		if v == method {
+			return true
+		}
+	}
+
+	return false
 }
