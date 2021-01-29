@@ -1,4 +1,4 @@
-module github.com/openware/pkg/mgnt-api
+module github.com/openware/pkg/mngapi
 
 go 1.15
 

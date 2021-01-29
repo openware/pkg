@@ -5,22 +5,22 @@ import (
 	"fmt"
 	"net/http"
 
-	mgntapi "github.com/openware/pkg/mgnt-api"
+	"github.com/openware/pkg/mngapi"
 )
 
 type PeatioMngAPIV2 struct {
-	cli *mgntapi.Client
+	cli *mngapi.Client
 }
 
 func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtPrivateKey string) *PeatioMngAPIV2 {
-	cli, _ := mgntapi.New(rootAPIUrl, endpointPrefix, jwtIssuer, "RS256", jwtPrivateKey)
+	cli, _ := mngapi.New(rootAPIUrl, endpointPrefix, jwtIssuer, "RS256", jwtPrivateKey)
 
 	return &PeatioMngAPIV2{
 		cli: cli,
 	}
 }
 
-func (p *PeatioMngAPIV2) GetCurrencyByCode(code string) (*Currency, *mgntapi.APIError) {
+func (p *PeatioMngAPIV2) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
 	path := fmt.Sprintf("/currencies/%v", code)
 	params := []byte{}
 	res, apiError := p.cli.Request(http.MethodPost, path, params)
@@ -34,7 +34,7 @@ func (p *PeatioMngAPIV2) GetCurrencyByCode(code string) (*Currency, *mgntapi.API
 	return currency, nil
 }
 
-func (p *PeatioMngAPIV2) GetWithdrawById(tid string) (*Withdraw, *mgntapi.APIError) {
+func (p *PeatioMngAPIV2) GetWithdrawById(tid string) (*Withdraw, *mngapi.APIError) {
 	params := fmt.Sprintf(`"tid":"%v"`, tid)
 	res, apiError := p.cli.Request(http.MethodPost, "withdraws/get", []byte(params))
 

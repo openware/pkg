@@ -1,4 +1,4 @@
-package mgntapi
+package mngapi
 
 import (
 	"math/rand"
