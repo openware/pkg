@@ -8,7 +8,9 @@ type BarongMngAPIV2 struct {
 	cli *mngapi.Client
 }
 
-func New(cli *mngapi.Client) *BarongMngAPIV2 {
+func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtPrivateKey string) *BarongMngAPIV2 {
+	cli, _ := mngapi.New(rootAPIUrl, endpointPrefix, jwtIssuer, "RS256", jwtPrivateKey)
+
 	return &BarongMngAPIV2{
 		cli: cli,
 	}

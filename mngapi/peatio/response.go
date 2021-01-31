@@ -45,3 +45,15 @@ type Currency struct {
 	CreatedAt           string                 `json:"created_at"`
 	UpdatedAt           string                 `json:"updated_at"`
 }
+
+type Balance struct {
+	UID     string `json:"uid"`
+	Balance string `json:"balance"`
+	Locked  string `json:"locked"`
+}
+
+type PaymentAddress struct {
+	Currencies []string `json:"currencies"`
+	Address    string   `json:"address"`
+	State      string   `json:"state"`
+}

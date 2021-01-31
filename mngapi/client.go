@@ -34,7 +34,9 @@ type Client struct {
 
 // APIError response from management API
 type APIError struct {
-	Message string `json:"error"`
+	StatusCode int      `json:"code"`
+	Error      string   `json:"error",omitempty`
+	Errors     []string `json:"errors",omitempty`
 }
 
 // New to return ManagementAPIV2 struct
@@ -68,7 +70,7 @@ func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo str
 }
 
 // Request to call HTTP request
-func (m *Client) Request(method string, path string, body []byte) ([]byte, *APIError) {
+func (m *Client) Request(method string, path string, body interface{}) ([]byte, *APIError) {
 	// Check for allowed HTTP methods
 	if !allowedHTTPMethods(method) {
 		log.Fatalln("Only PUT and POST are allowed")
@@ -78,7 +80,7 @@ func (m *Client) Request(method string, path string, body []byte) ([]byte, *APIE
 	url.Path = filepath.Join(url.Path, m.endpointPrefix, path)
 
 	// Generate jwt multisig
-	jwt, err := m.generateJWT(body, time.Hour)
+	jwt, err := m.generateJWT(convertToStringInterface(body), time.Hour)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -107,22 +109,28 @@ func (m *Client) Request(method string, path string, body []byte) ([]byte, *APIE
 	defer res.Body.Close()
 
 	// Convert response body to []byte
-	body, err = ioutil.ReadAll(res.Body)
+	resbody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// Check for API error
-	if res.StatusCode != 201 {
+	if !(res.StatusCode == 200 || res.StatusCode == 201) {
 		apiError := APIError{}
-		_ = json.Unmarshal(body, &apiError)
+		apiError.StatusCode = res.StatusCode
+
+		if res.StatusCode > 500 {
+			apiError.Error = res.Status
+		} else {
+			_ = json.Unmarshal(resbody, &apiError)
+		}
 		return nil, &apiError
 	}
 
-	return body, nil
+	return resbody, nil
 }
 
-func (m *Client) generateJWT(data interface{}, validPeriod time.Duration, opts ...interface{}) (map[string]interface{}, error) {
+func (m *Client) generateJWT(data map[string]interface{}, validPeriod time.Duration, opts ...interface{}) (map[string]interface{}, error) {
 	iat := time.Now()
 	jti := RandomString(16)
 	if len(opts) > 0 {
@@ -194,4 +202,12 @@ func allowedHTTPMethods(method string) bool {
 	}
 
 	return false
+}
+
+func convertToStringInterface(input interface{}) map[string]interface{} {
+	var mapinterface map[string]interface{}
+	str, _ := json.Marshal(input)
+	json.Unmarshal(str, &mapinterface)
+
+	return mapinterface
 }
