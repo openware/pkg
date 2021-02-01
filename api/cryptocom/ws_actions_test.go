@@ -158,9 +158,8 @@ func TestCancelOrder(t *testing.T) {
 	testPrivateSubscribe(t, expected, func(client *Client) {
 		client.CancelOrder(
 			1,
-			"ETH",
-			"CRO",
-			remoteID,
+			remoteID.String,
+			"ETH_CRO",
 		)
 	})
 }

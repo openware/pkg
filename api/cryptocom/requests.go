@@ -65,19 +65,14 @@ func (c *Client) createOrderRequest(
 	}
 }
 
-func (c *Client) cancelOrderRequest(
-	reqID int,
-	ask string,
-	bid string,
-	remoteID sql.NullString,
-) *Request {
+func (c *Client) cancelOrderRequest(reqID int, remoteID, market string) *Request {
 	return &Request{
 		Id:     reqID,
 		Type:   OrderRequest,
 		Method: "private/cancel-order",
 		Params: map[string]interface{}{
-			"instrument_name": strings.ToUpper(ask) + "_" + strings.ToUpper(bid),
-			"order_id":        remoteID.String,
+			"instrument_name": market,
+			"order_id":        remoteID,
 		},
 		Nonce: generateNonce(),
 	}

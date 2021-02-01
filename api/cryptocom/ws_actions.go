@@ -134,17 +134,11 @@ func (c *Client) CreateOrder(
 	return c.sendPrivateRequest(r)
 }
 
-func (c *Client) CancelOrder(
-	reqID int,
-	ask string,
-	bid string,
-	remoteID sql.NullString,
-) error {
+func (c *Client) CancelOrder(reqID int, remoteID, market string) error {
 	r := c.cancelOrderRequest(
 		reqID,
-		ask,
-		bid,
 		remoteID,
+		market,
 	)
 	return c.sendPrivateRequest(r)
 }
