@@ -12,7 +12,15 @@ type PeatioMngAPIV2 struct {
 	cli *mngapi.Client
 }
 
-func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtPrivateKey string) *PeatioMngAPIV2 {
+type PeatioMngAPIV2Client interface {
+	GetCurrencyByCode(code string) (*Currency, *mngapi.APIError)
+	CreateWithdraw(params CreateWithdrawParams) (*Withdraw, *mngapi.APIError)
+	GetWithdrawByID(tid string) (*Withdraw, *mngapi.APIError)
+	GetAccountBalance(params GetAccountBalanceParams) (*Balance, *mngapi.APIError)
+	GenerateDepositAddress(params GenerateDepositAddressParams) (*PaymentAddress, *mngapi.APIError)
+}
+
+func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtPrivateKey string) PeatioMngAPIV2Client {
 	cli, _ := mngapi.New(rootAPIUrl, endpointPrefix, jwtIssuer, "RS256", jwtPrivateKey)
 
 	return &PeatioMngAPIV2{
