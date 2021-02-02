@@ -34,34 +34,7 @@ func TestFormat(t *testing.T) {
 	assert.Equal(t, result, expected)
 }
 
-func testPublicSubscribe(t *testing.T, expected string, testFunc testingFunc) {
-	// prepare expected
-	var expectedResponse mockRequest
-	err := json.Unmarshal([]byte(expected), &expectedResponse)
-	if err != nil {
-		t.Fatal("error on parse expected")
-	}
-
-	// prepare mock
-	client := New("test", "test", "test", "test")
-	publiceWritingMessage := bytes.NewBuffer(nil)
-	client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil), publiceWritingMessage)
-
-	// start test
-	testFunc(client)
-
-	var writingMessage mockRequest
-	err = json.Unmarshal(publiceWritingMessage.Bytes(), &writingMessage)
-	if err != nil {
-		t.Fatal("error on parse writing message")
-	}
-
-	assert.Equal(t, expectedResponse.ID, writingMessage.ID)
-	assert.Equal(t, expectedResponse.Method, writingMessage.Method)
-	assert.Equal(t, expectedResponse.Params, writingMessage.Params)
-}
-
-func testPrivateSubscribe(t *testing.T, expected string, testFunc testingFunc) {
+func testSubscribe(t *testing.T, expected string, isPrivate bool, testFunc testingFunc) {
 	// prepare expected
 	var expectedResponse mockRequest
 	err := json.Unmarshal([]byte(expected), &expectedResponse)
@@ -72,17 +45,25 @@ func testPrivateSubscribe(t *testing.T, expected string, testFunc testingFunc) {
 	// prepare mock
 	client := New("test", "test", "test", "test")
 	privateWritingMessage := bytes.NewBuffer(nil)
-	client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), privateWritingMessage, bytes.NewBuffer(nil))
+	publicWritingMessage := bytes.NewBuffer(nil)
+	client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), privateWritingMessage, publicWritingMessage)
 
-	// start test
+	// call test function
 	testFunc(client)
 
+	// get response
 	var writingMessage mockRequest
-	err = json.Unmarshal(privateWritingMessage.Bytes(), &writingMessage)
+	if isPrivate {
+		err = json.Unmarshal(privateWritingMessage.Bytes(), &writingMessage)
+	} else {
+		err = json.Unmarshal(publicWritingMessage.Bytes(), &writingMessage)
+	}
 	if err != nil {
 		t.Fatal("error on parse writing message")
 	}
 
+	// assertion
+	assert.NotEqual(t, mockRequest{}, writingMessage)
 	assert.Equal(t, expectedResponse.ID, writingMessage.ID)
 	assert.Equal(t, expectedResponse.Method, writingMessage.Method)
 	assert.Equal(t, expectedResponse.Params, writingMessage.Params)
@@ -90,37 +71,37 @@ func testPrivateSubscribe(t *testing.T, expected string, testFunc testingFunc) {
 
 func TestPublicOrderBook(t *testing.T) {
 	expected := `{"id":1,"method":"subscribe","nonce":"","params":{"channels":["book.ETH_BTC.10"]}}`
-	testPublicSubscribe(t, expected, func(client *Client) { client.SubscribePublicOrderBook(10, "ETH_BTC") })
+	testSubscribe(t, expected, false, func(client *Client) { client.SubscribePublicOrderBook(10, "ETH_BTC") })
 }
 
 func TestPublicTrades(t *testing.T) {
 	// prepare expected
 	expected := `{"id":1,"method":"subscribe","nonce":"","params":{"channels":["trade.ETH_BTC"]}}`
-	testPublicSubscribe(t, expected, func(client *Client) { client.SubscribePublicTrades("ETH_BTC") })
+	testSubscribe(t, expected, false, func(client *Client) { client.SubscribePublicTrades("ETH_BTC") })
 }
 
 func TestPublicTickers(t *testing.T) {
 	// prepare expected
 	expected := `{"id":1,"method":"subscribe","nonce":"","params":{"channels":["ticker.ETH_BTC"]}}`
-	testPublicSubscribe(t, expected, func(client *Client) { client.SubscribePublicTickers("ETH_BTC") })
+	testSubscribe(t, expected, false, func(client *Client) { client.SubscribePublicTickers("ETH_BTC") })
 }
 
 func TestSubscribePrivateOrders(t *testing.T) {
 	// prepare expected
 	expected := `{"id":1,"method":"subscribe","nonce":"","params":{"channels":["user.order.ETH_BTC"]}}`
-	testPrivateSubscribe(t, expected, func(client *Client) { client.SubscribePrivateOrders("ETH_BTC") })
+	testSubscribe(t, expected, true, func(client *Client) { client.SubscribePrivateOrders("ETH_BTC") })
 }
 
 func TestSubscribePrivateTrades(t *testing.T) {
 	// prepare expected
 	expected := `{"id":1,"method":"subscribe","nonce":"","params":{"channels":["user.trade"]}}`
-	testPrivateSubscribe(t, expected, func(client *Client) { client.SubscribePrivateTrades("ETH_BTC") })
+	testSubscribe(t, expected, true, func(client *Client) { client.SubscribePrivateTrades("ETH_BTC") })
 }
 
 func TestSubscribePrivateBalanceUpdates(t *testing.T) {
 	// prepare expected
 	expected := `{"id":1,"method":"subscribe","nonce":"","params":{"channels":["user.balance"]}}`
-	testPrivateSubscribe(t, expected, func(client *Client) { client.SubscribePrivateBalanceUpdates() })
+	testSubscribe(t, expected, true, func(client *Client) { client.SubscribePrivateBalanceUpdates() })
 }
 
 func TestCreateOrder(t *testing.T) {
@@ -133,7 +114,7 @@ func TestCreateOrder(t *testing.T) {
 		`{"id":1,"method":"private/create-order","nonce":"","params":{"client_oid":"%s","instrument_name":"ETH_CRO","price":"%s","quantity":"%s","side":"%s","type":"LIMIT"}}`,
 		uuid, price.String(), volume.String(), "SELL",
 	)
-	testPrivateSubscribe(t, expected, func(client *Client) {
+	testSubscribe(t, expected, true, func(client *Client) {
 		client.CreateOrder(
 			1,
 			"ETH",
@@ -155,7 +136,7 @@ func TestCancelOrder(t *testing.T) {
 		`{"id":1,"method":"private/cancel-order","nonce":"","params":{"instrument_name":"ETH_CRO","order_id":"%s"}}`,
 		remoteID.String,
 	)
-	testPrivateSubscribe(t, expected, func(client *Client) {
+	testSubscribe(t, expected, true, func(client *Client) {
 		client.CancelOrder(
 			1,
 			remoteID.String,
@@ -167,14 +148,14 @@ func TestCancelOrder(t *testing.T) {
 func TestCancelAllOrders(t *testing.T) {
 	// prepare expected
 	expected := `{"id":1,"method":"private/cancel-all-orders","nonce":"","params":{"instrument_name":"ETH_CRO"}}`
-	testPrivateSubscribe(t, expected, func(client *Client) { client.CancelAllOrders(1, "ETH_CRO") })
+	testSubscribe(t, expected, true, func(client *Client) { client.CancelAllOrders(1, "ETH_CRO") })
 }
 
 func TestGetOrderDetails(t *testing.T) {
 	// prepare expected
 	remoteID := sql.NullString{String: "1138210129647637539", Valid: true}
 	expected := `{"id":1,"method":"private/get-order-detail","nonce":"","params":{"order_id":"1138210129647637539"}}`
-	testPrivateSubscribe(t, expected, func(client *Client) { client.GetOrderDetails(1, remoteID) })
+	testSubscribe(t, expected, true, func(client *Client) { client.GetOrderDetails(1, remoteID) })
 }
 
 func TestRespondHeartBeat(t *testing.T) {
@@ -195,6 +176,7 @@ func TestRespondHeartBeat(t *testing.T) {
 		// prepare expected
 		json.Unmarshal([]byte(expected), &expectedResponse)
 
+		assert.NotEqual(t, mockRequest{}, writingMessage)
 		assert.Equal(t, expectedResponse.ID, writingMessage.ID)
 		assert.Equal(t, expectedResponse.Method, writingMessage.Method)
 		assert.Equal(t, expectedResponse.Params, writingMessage.Params)
@@ -211,6 +193,7 @@ func TestRespondHeartBeat(t *testing.T) {
 		// prepare expected
 		json.Unmarshal([]byte(expected), &expectedResponse)
 
+		assert.NotEqual(t, mockRequest{}, writingMessage)
 		assert.Equal(t, expectedResponse.ID, writingMessage.ID)
 		assert.Equal(t, expectedResponse.Method, writingMessage.Method)
 		assert.Equal(t, expectedResponse.Params, writingMessage.Params)
