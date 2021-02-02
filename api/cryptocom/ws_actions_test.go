@@ -254,7 +254,7 @@ func TestSubscribePrivateOrders(t *testing.T) {
 func TestSubscribePrivateTrades(t *testing.T) {
 	t.Run("Subscribe", func(t *testing.T) {
 		// prepare expected
-		expected := `{"id":1,"method":"subscribe","nonce":"","params":{"channels":["user.trade"]}}`
+		expected := `{"id":1,"method":"subscribe","nonce":"","params":{"channels":["user.trade.ETH_BTC"]}}`
 		testSubscribe(t, expected, true, func(client *Client) { client.SubscribePrivateTrades("ETH_BTC") })
 	})
 
