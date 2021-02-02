@@ -40,7 +40,6 @@ func (cm *connectionMock) Close() error {
 	return nil
 }
 
-// TODO: test all possible requests
 func TestConnectionWrite(t *testing.T) {
 	client := New("test", "test", "test", "test")
 	// publicBuffer := bytes.NewBuffer(nil)

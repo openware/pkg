@@ -84,11 +84,9 @@ func (c *Client) SubscribePrivateOrders(markets ...string) error {
 
 // SubscribePrivateTrades is subscription private user.trade channel
 func (c *Client) SubscribePrivateTrades(markets ...string) error {
-	// channels := c.format(markets, func(s string) string {
-	// 	return fmt.Sprintf("user.trade.%s", s)
-	// })
-
-	channels := []string{"user.trade"}
+	channels := c.format(markets, func(s string) string {
+		return fmt.Sprintf("user.trade.%s", s)
+	})
 
 	err := c.subscribePrivateChannels(channels)
 	if err != nil {
