@@ -5,8 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -19,10 +19,24 @@ const (
 	marketEndpoint = "/v2/market"
 )
 
+type LogFunc func(format string, args ...interface{})
+
+func defaultLogFunc(format string, args ...interface{}) {
+	log.Printf(format, args...)
+}
+
 type Transport interface {
 	ReadMessage() (int, []byte, error)
 	WriteMessage(int, []byte) error
 	Close() error
+}
+
+func (c *Connection) Type() string {
+	if c.IsPrivate {
+		return "private"
+	}
+
+	return "public"
 }
 
 type HTTPClient interface {
@@ -47,6 +61,7 @@ type Client struct {
 	publicSubs  []string
 	httpClient  HTTPClient
 	outbox      chan Response
+	LogFunc     LogFunc
 }
 
 // New returns a pointer of Client struct
@@ -60,10 +75,11 @@ func New(wsRootURL, restRootURL, key, secret string) *Client {
 		privateSubs: make([]string, 0),
 		publicSubs:  make([]string, 0),
 		httpClient:  &http.Client{},
+		LogFunc:     defaultLogFunc,
 	}
 }
 
-// Connect instanciate WS Connections
+// Connect instansiate WS Connections
 func (c *Client) Connect() error {
 	publicWsEndpoint := c.wsRootURL + marketEndpoint
 	privateWsEndpoint := c.wsRootURL + userEndpoint
@@ -115,11 +131,11 @@ func (c *Client) createConnection(endpoint string, isPrivate bool) error {
 }
 
 func (c *Client) readConnection(cnx Connection) {
-	fmt.Println("Start listening connection ...", cnx.Endpoint)
+	c.LogFunc("Start listening connection ... %s", cnx.Endpoint)
 	for {
 		_, m, err := cnx.ReadMessage()
 		if err != nil {
-			fmt.Printf("error on read message. Private cnx - %t\n", cnx.IsPrivate)
+			c.LogFunc("error on read message in %s cnx\n", cnx.Type())
 			for {
 				conn, _, err := websocket.DefaultDialer.Dial(cnx.Endpoint, http.Header{})
 				if err != nil {
@@ -150,12 +166,12 @@ func (c *Client) readConnection(cnx Connection) {
 			continue
 		}
 
-		// fmt.Printf("Received: Private Cnx - %t, msg: %s\n", cnx.IsPrivate, string(m))
+		c.LogFunc("Received [%s]: %s\n", cnx.Type(), string(m))
 
 		var parsed Response
 		err = json.Unmarshal(m, &parsed)
 		if err != nil {
-			fmt.Println("error on parse message")
+			c.LogFunc("error on JSON.Unmarshal")
 			continue
 		}
 
@@ -205,7 +221,9 @@ func (c *Client) sendPrivateRequest(r *Request) error {
 	if err != nil {
 		return err
 	}
-	// fmt.Printf("Sending private: %s\n", string(b))
+
+	c.LogFunc("Sending private: %s\n", string(b))
+
 	return c.privateConn.WriteMessage(websocket.TextMessage, b)
 }
 
@@ -215,8 +233,7 @@ func (c *Client) sendPublicRequest(r *Request) error {
 	if err != nil {
 		return err
 	}
-
-	// fmt.Printf("Sending public: %s\n", string(b))
+	c.LogFunc("Sending public: %s\n", string(b))
 	return c.publicConn.WriteMessage(websocket.TextMessage, b)
 }
 
