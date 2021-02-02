@@ -4,14 +4,20 @@ import (
 	"github.com/openware/pkg/mngapi"
 )
 
-type BarongMngAPIV2 struct {
-	cli *mngapi.Client
-}
+// Client is barong management api client instance
+type Client struct{}
 
-func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtPrivateKey string) *BarongMngAPIV2 {
-	cli, _ := mngapi.New(rootAPIUrl, endpointPrefix, jwtIssuer, "RS256", jwtPrivateKey)
+var (
+	mngapiClient mngapi.DefaultClient
+)
 
-	return &BarongMngAPIV2{
-		cli: cli,
+// New return barong management api client
+func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey string) (*Client, error) {
+	client, err := mngapi.New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
+	if err != nil {
+		return nil, err
 	}
+
+	mngapiClient = client
+	return &Client{}, nil
 }

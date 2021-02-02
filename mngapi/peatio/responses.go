@@ -53,7 +53,9 @@ type Balance struct {
 }
 
 type PaymentAddress struct {
-	Currencies []string `json:"currencies"`
+	UID        string   `json:"uid"`
 	Address    string   `json:"address"`
+	Currencies []string `json:"currencies"`
 	State      string   `json:"state"`
+	Remote     string   `json:"remote"`
 }

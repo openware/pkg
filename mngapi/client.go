@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -18,15 +17,30 @@ import (
 )
 
 const (
-	// RequestTimeout default value
+	// RequestTimeout default value to 30 seconds
 	RequestTimeout = time.Duration(30 * time.Second)
+
+	// JWTExpireDuration default value to 1 hour
+	JWTExpireDuration = time.Hour
+
+	//JWTAlgorithm default value to RS256
+	JWTAlgorithm = "RS256"
 )
 
-// Client struct to define common data and function
+// HTTPClient interface
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+// DefaultClient interface
+type DefaultClient interface {
+	Request(method string, path string, body interface{}) ([]byte, *APIError)
+}
+
+// Client instance
 type Client struct {
 	rootAPIUrl       string
 	endpointPrefix   string
-	client           *http.Client
 	jwtIssuer        string
 	jwtSigningMethod jwtgo.SigningMethod
 	jwtPrivateKey    *rsa.PrivateKey
@@ -35,11 +49,15 @@ type Client struct {
 // APIError response from management API
 type APIError struct {
 	StatusCode int      `json:"code"`
-	Error      string   `json:"error",omitempty`
-	Errors     []string `json:"errors",omitempty`
+	Error      string   `json:"error,omitempty"`
+	Errors     []string `json:"errors,omitempty"`
 }
 
-// New to return ManagementAPIV2 struct
+var (
+	httpClient HTTPClient
+)
+
+// New to return Client struct
 func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo string, jwtPrivateKey string) (*Client, error) {
 	pk, err := loadPrivateKeyFromString(jwtPrivateKey)
 	if err != nil {
@@ -47,7 +65,7 @@ func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo str
 	}
 
 	if jwtAlgo == "" {
-		jwtAlgo = "RS256"
+		jwtAlgo = JWTAlgorithm
 	}
 
 	sm := jwtgo.GetSigningMethod(jwtAlgo)
@@ -59,10 +77,12 @@ func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo str
 		return nil, fmt.Errorf("JWT issuer unset")
 	}
 
+	// Create default http client
+	httpClient = &http.Client{Timeout: RequestTimeout}
+
 	return &Client{
 		rootAPIUrl:       rootAPIUrl,
 		endpointPrefix:   endpointPrefix,
-		client:           &http.Client{Timeout: RequestTimeout},
 		jwtIssuer:        jwtIssuer,
 		jwtSigningMethod: sm,
 		jwtPrivateKey:    pk,
@@ -73,37 +93,38 @@ func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo str
 func (m *Client) Request(method string, path string, body interface{}) ([]byte, *APIError) {
 	// Check for allowed HTTP methods
 	if !allowedHTTPMethods(method) {
-		log.Fatalln("Only PUT and POST are allowed")
+		return nil, &APIError{StatusCode: 500, Error: "HTTP method is not allowed, accept only POST and PUT"}
 	}
 
 	url, err := url.Parse(m.rootAPIUrl)
 	url.Path = filepath.Join(url.Path, m.endpointPrefix, path)
 
-	// Generate jwt multisig
-	jwt, err := m.generateJWT(convertToStringInterface(body), time.Hour)
+	// TODO: Add to support JWT with multiple signatures
+	// Generate JWT
+	jwt, err := m.generateJWT(convertToStringInterface(body), JWTExpireDuration)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, &APIError{StatusCode: 500, Error: err.Error()}
 	}
 
 	// Convert jwt to json string
 	jwtstr, err := json.Marshal(jwt)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, &APIError{StatusCode: 500, Error: err.Error()}
 	}
 
 	// Create new HTTP request
 	req, err := http.NewRequest(method, url.String(), bytes.NewBuffer(jwtstr))
 	if err != nil {
-		log.Fatalln("Request", "Can not create new request: "+err.Error())
+		return nil, &APIError{StatusCode: 500, Error: err.Error()}
 	}
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
 	// Call HTTP request
-	res, err := m.client.Do(req)
+	res, err := httpClient.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, &APIError{StatusCode: 500, Error: err.Error()}
 	}
 
 	defer res.Body.Close()
@@ -111,19 +132,18 @@ func (m *Client) Request(method string, path string, body interface{}) ([]byte, 
 	// Convert response body to []byte
 	resbody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, &APIError{StatusCode: 500, Error: err.Error()}
 	}
 
 	// Check for API error
 	if !(res.StatusCode == 200 || res.StatusCode == 201) {
-		apiError := APIError{}
-		apiError.StatusCode = res.StatusCode
-
-		if res.StatusCode > 500 {
-			apiError.Error = res.Status
-		} else {
-			_ = json.Unmarshal(resbody, &apiError)
+		apiError := APIError{
+			StatusCode: res.StatusCode,
+			Error:      res.Status,
 		}
+
+		_ = json.Unmarshal(resbody, &apiError)
+
 		return nil, &apiError
 	}
 
@@ -193,6 +213,10 @@ func loadPrivateKeyFromString(str string) (*rsa.PrivateKey, error) {
 }
 
 func allowedHTTPMethods(method string) bool {
+	if len(method) == 0 {
+		return false
+	}
+
 	var methods = []string{http.MethodPost, http.MethodPut}
 
 	for _, v := range methods {
