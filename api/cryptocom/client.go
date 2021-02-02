@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -186,14 +187,20 @@ func (c *Client) readConnection(cnx Connection) {
 
 func (c *Client) generateSignature(r *Request) {
 	secret := c.secret
-	params := ""
+	concatenedParams := ""
 
-	// FIXME: Order by alphabet
-	for k, v := range r.Params {
-		params += k + v.(string)
+	var parameters []string
+	for key := range r.Params {
+		parameters = append(parameters, key)
 	}
 
-	data := r.Method + strconv.Itoa(r.Id) + r.ApiKey + string(params) + r.Nonce
+	sort.Strings(parameters)
+
+	for _, v := range parameters {
+		concatenedParams += v + r.Params[v].(string)
+	}
+
+	data := r.Method + strconv.Itoa(r.Id) + r.ApiKey + concatenedParams + r.Nonce
 	h := hmac.New(sha256.New, []byte(secret))
 	h.Write([]byte(data))
 	sha := hex.EncodeToString(h.Sum(nil))
