@@ -111,7 +111,9 @@ func TestRestGetOrderDetails(t *testing.T) {
 		testRest(t,
 			expectedEndpoint,
 			jsonStr,
-			func(client *Client) (Response, error) { return client.RestGetOrderDetails(1, remoteID) },
+			func(client *Client) (Response, error) {
+				return client.RestGetOrderDetails(1, remoteID)
+			},
 		)
 	})
 
