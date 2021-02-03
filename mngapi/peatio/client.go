@@ -9,11 +9,9 @@ import (
 )
 
 // Client is peatio management api client instance
-type Client struct{}
-
-var (
+type Client struct {
 	mngapiClient mngapi.DefaultClient
-)
+}
 
 // New return peatio management api client
 func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey string) (*Client, error) {
@@ -22,13 +20,14 @@ func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey string) (
 		return nil, err
 	}
 
-	mngapiClient = client
-	return &Client{}, nil
+	return &Client{
+		mngapiClient: client,
+	}, nil
 }
 
 // GetCurrencyByCode call peatio management api to get currency information by code name
 func (p *Client) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
-	res, err := mngapiClient.Request(http.MethodPost, fmt.Sprintf("currencies/%v", code), nil)
+	res, err := p.mngapiClient.Request(http.MethodPost, fmt.Sprintf("currencies/%v", code), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +40,7 @@ func (p *Client) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
 
 // CreateWithdraw call peatio management api to create new withdraw
 func (p *Client) CreateWithdraw(params CreateWithdrawParams) (*Withdraw, *mngapi.APIError) {
-	res, err := mngapiClient.Request(http.MethodPost, "withdraw/new", params)
+	res, err := p.mngapiClient.Request(http.MethodPost, "withdraw/new", params)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +58,7 @@ func (p *Client) GetWithdrawByID(tid string) (*Withdraw, *mngapi.APIError) {
 		"tid": tid,
 	}
 
-	res, err := mngapiClient.Request(http.MethodPost, "withdraws/get", params)
+	res, err := p.mngapiClient.Request(http.MethodPost, "withdraws/get", params)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +71,7 @@ func (p *Client) GetWithdrawByID(tid string) (*Withdraw, *mngapi.APIError) {
 
 // GetAccountBalance call peatio management api to get account balance
 func (p *Client) GetAccountBalance(params GetAccountBalanceParams) (*Balance, *mngapi.APIError) {
-	res, err := mngapiClient.Request(http.MethodPost, "accounts/balance", params)
+	res, err := p.mngapiClient.Request(http.MethodPost, "accounts/balance", params)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +84,7 @@ func (p *Client) GetAccountBalance(params GetAccountBalanceParams) (*Balance, *m
 
 // GenerateDepositAddress call peatio management api to generate new deposit address
 func (p *Client) GenerateDepositAddress(params GenerateDepositAddressParams) (*PaymentAddress, *mngapi.APIError) {
-	res, err := mngapiClient.Request(http.MethodPost, "deposit_address/new", params)
+	res, err := p.mngapiClient.Request(http.MethodPost, "deposit_address/new", params)
 	if err != nil {
 		return nil, err
 	}

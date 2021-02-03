@@ -61,7 +61,7 @@ func TestGetCurrencyByCode(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
 		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":"","withdrawal_enabled":"","deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":"","precision":"","position":42,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":"","code":"bnb","min_collection_amount":"0.3455425","visible":"","subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
 		}
@@ -76,7 +76,7 @@ func TestGetCurrencyByCode(t *testing.T) {
 	t.Run("Error response", func(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: nil,
 			apiError: &mngapi.APIError{
 				StatusCode: 422,
@@ -98,7 +98,7 @@ func TestCreateWithdraw(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
 		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
 		}
@@ -118,7 +118,7 @@ func TestCreateWithdraw(t *testing.T) {
 	t.Run("Error response", func(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: nil,
 			apiError: &mngapi.APIError{
 				StatusCode: 404,
@@ -145,7 +145,7 @@ func TestGetWithdrawByID(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
 		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
 		}
@@ -160,7 +160,7 @@ func TestGetWithdrawByID(t *testing.T) {
 	t.Run("Error record not found", func(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: nil,
 			apiError: &mngapi.APIError{
 				StatusCode: 404,
@@ -182,7 +182,7 @@ func TestGetAccountBalance(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
 		expected := `{"uid":"IDCA2AC08296","balance":"996.23352165725","locked":"0.0"}`
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
 		}
@@ -201,7 +201,7 @@ func TestGetAccountBalance(t *testing.T) {
 	t.Run("Error record not found", func(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: nil,
 			apiError: &mngapi.APIError{
 				StatusCode: 404,
@@ -224,7 +224,7 @@ func TestGetAccountBalance(t *testing.T) {
 	t.Run("Error invalid currency", func(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: nil,
 			apiError: &mngapi.APIError{
 				StatusCode: 422,
@@ -250,7 +250,7 @@ func TestGenerateDepositAddress(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
 		expected := `{"uid":"IDCA2AC08296","address":"0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e","currencies":["usdt","bnb","uni"],"state":"active","remote":"false"}`
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
 		}
@@ -269,7 +269,7 @@ func TestGenerateDepositAddress(t *testing.T) {
 	t.Run("Error response", func(t *testing.T) {
 		client, _ := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
-		mngapiClient = &MockClient{
+		client.mngapiClient = &MockClient{
 			response: nil,
 			apiError: &mngapi.APIError{
 				StatusCode: 404,

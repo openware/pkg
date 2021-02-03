@@ -44,6 +44,7 @@ type Client struct {
 	jwtIssuer        string
 	jwtSigningMethod jwtgo.SigningMethod
 	jwtPrivateKey    *rsa.PrivateKey
+	httpClient       HTTPClient
 }
 
 // APIError response from management API
@@ -52,10 +53,6 @@ type APIError struct {
 	Error      string   `json:"error,omitempty"`
 	Errors     []string `json:"errors,omitempty"`
 }
-
-var (
-	httpClient HTTPClient
-)
 
 // New to return Client struct
 func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo string, jwtPrivateKey string) (*Client, error) {
@@ -77,10 +74,8 @@ func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo str
 		return nil, fmt.Errorf("JWT issuer unset")
 	}
 
-	// Create default http client
-	httpClient = &http.Client{Timeout: RequestTimeout}
-
 	return &Client{
+		httpClient:       &http.Client{Timeout: RequestTimeout},
 		rootAPIUrl:       rootAPIUrl,
 		endpointPrefix:   endpointPrefix,
 		jwtIssuer:        jwtIssuer,
@@ -122,7 +117,7 @@ func (m *Client) Request(method string, path string, body interface{}) ([]byte, 
 	req.Header.Add("Content-Type", "application/json")
 
 	// Call HTTP request
-	res, err := httpClient.Do(req)
+	res, err := m.httpClient.Do(req)
 	if err != nil {
 		return nil, &APIError{StatusCode: 500, Error: err.Error()}
 	}

@@ -2,6 +2,7 @@ package mngapi
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -73,7 +74,7 @@ func TestRequest(t *testing.T) {
 
 		expected := `{"uid":"IDCA2AC08296","balance":"9916678.1751516791","locked":"280.0"}`
 		body := ioutil.NopCloser(bytes.NewReader([]byte(expected)))
-		httpClient = &MockHTTPClient{
+		mgnt.httpClient = &MockHTTPClient{
 			httpResponse: &http.Response{
 				StatusCode: 200,
 				Body:       body,
@@ -92,7 +93,7 @@ func TestRequest(t *testing.T) {
 		mgnt, err := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		require.NoError(t, err)
 
-		httpClient = &MockHTTPClient{
+		mgnt.httpClient = &MockHTTPClient{
 			httpResponse: nil,
 			httpError:    nil,
 		}
@@ -105,13 +106,30 @@ func TestRequest(t *testing.T) {
 		assert.Equal(t, apierr.Error, "HTTP method is not allowed, accept only POST and PUT")
 	})
 
+	t.Run("HTTP client error", func(t *testing.T) {
+		mgnt, err := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		require.NoError(t, err)
+
+		mgnt.httpClient = &MockHTTPClient{
+			httpResponse: nil,
+			httpError:    fmt.Errorf("HTTP Error"),
+		}
+
+		res, apierr := mgnt.Request(http.MethodPost, "api/test", nil)
+
+		assert.Nil(t, res)
+		assert.NotNil(t, apierr)
+		assert.Equal(t, apierr.StatusCode, 500)
+		assert.Equal(t, apierr.Error, "HTTP Error")
+	})
+
 	t.Run("Invalid response with one error", func(t *testing.T) {
 		mgnt, err := New(rootURL, peatioPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		require.NoError(t, err)
 
 		expected := `{"error":"Couldn't find record."}`
 		body := ioutil.NopCloser(bytes.NewReader([]byte(expected)))
-		httpClient = &MockHTTPClient{
+		mgnt.httpClient = &MockHTTPClient{
 			httpResponse: &http.Response{
 				StatusCode: 404,
 				Body:       body,
@@ -134,7 +152,7 @@ func TestRequest(t *testing.T) {
 
 		expected := `{"errors":["error_1","error_2"]}`
 		body := ioutil.NopCloser(bytes.NewReader([]byte(expected)))
-		httpClient = &MockHTTPClient{
+		mgnt.httpClient = &MockHTTPClient{
 			httpResponse: &http.Response{
 				StatusCode: 422,
 				Body:       body,

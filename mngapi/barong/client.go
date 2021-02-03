@@ -5,11 +5,9 @@ import (
 )
 
 // Client is barong management api client instance
-type Client struct{}
-
-var (
+type Client struct {
 	mngapiClient mngapi.DefaultClient
-)
+}
 
 // New return barong management api client
 func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey string) (*Client, error) {
@@ -18,6 +16,7 @@ func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey string) (
 		return nil, err
 	}
 
-	mngapiClient = client
-	return &Client{}, nil
+	return &Client{
+		mngapiClient: client,
+	}, nil
 }
