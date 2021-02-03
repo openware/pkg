@@ -51,12 +51,12 @@ func (c *Client) createOrderRequest(
 	uuid uuid.UUID) *Request {
 	var volumeKey string
 	var volumeValue decimal.Decimal
-	if orderSide == "sell" {
-		volumeKey = "quantity"
-		volumeValue = volume
-	} else {
+	if strings.ToUpper(orderType) == "MARKET" && strings.ToUpper(orderSide) == "BUY" {
 		volumeKey = "notional"
 		volumeValue = volume.Mul(price)
+	} else {
+		volumeKey = "quantity"
+		volumeValue = volume
 	}
 
 	return &Request{

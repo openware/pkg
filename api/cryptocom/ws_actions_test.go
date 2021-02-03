@@ -64,6 +64,7 @@ func testSubscribe(t *testing.T, expected string, isPrivate bool, testFunc testi
 
 	// assertion
 	assert.NotEqual(t, mockRequest{}, writingMessage)
+	// doesn't assert on nonce
 	assert.Equal(t, expectedResponse.ID, writingMessage.ID)
 	assert.Equal(t, expectedResponse.Method, writingMessage.Method)
 	assert.Equal(t, expectedResponse.Params, writingMessage.Params)
@@ -317,15 +318,16 @@ func TestSubscribePrivateBalanceUpdates(t *testing.T) {
 }
 
 func TestCreateOrder(t *testing.T) {
-	t.Run("Subscribe BUY", func(t *testing.T) {
+	t.Run("Subscribe BUY Market", func(t *testing.T) {
 		// prepare expected
 		uuid := uuid.New()
 		price := decimal.NewFromFloat(0.01)
 		volume := decimal.NewFromFloat(0.0001)
+		orderType := "MARKET"
 
 		expected := fmt.Sprintf(
-			`{"id":1,"method":"private/create-order","nonce":"","params":{"client_oid":"%s","instrument_name":"ETH_CRO","price":"%s","notional":"%s","side":"%s","type":"LIMIT"}}`,
-			uuid, price.String(), volume.Mul(price), "BUY",
+			`{"id":1,"method":"private/create-order","nonce":"","params":{"client_oid":"%s","instrument_name":"ETH_CRO","price":"%s","notional":"%s","side":"%s","type":"%s"}}`,
+			uuid, price.String(), volume.Mul(price), "BUY", orderType,
 		)
 		testSubscribe(t, expected, true, func(client *Client) {
 			client.CreateOrder(
@@ -333,7 +335,7 @@ func TestCreateOrder(t *testing.T) {
 				"ETH",
 				"CRO",
 				"buy",
-				"LIMIT",
+				orderType,
 				price,
 				volume,
 				uuid,
@@ -341,15 +343,41 @@ func TestCreateOrder(t *testing.T) {
 		})
 	})
 
-	t.Run("Subscribe SELL", func(t *testing.T) {
+	t.Run("Subscribe BUY Limit", func(t *testing.T) {
 		// prepare expected
 		uuid := uuid.New()
 		price := decimal.NewFromFloat(0.01)
 		volume := decimal.NewFromFloat(0.0001)
+		orderType := "LIMIT"
 
 		expected := fmt.Sprintf(
-			`{"id":1,"method":"private/create-order","nonce":"","params":{"client_oid":"%s","instrument_name":"ETH_CRO","price":"%s","quantity":"%s","side":"%s","type":"LIMIT"}}`,
-			uuid, price.String(), volume.String(), "SELL",
+			`{"id":1,"method":"private/create-order","nonce":"","params":{"client_oid":"%s","instrument_name":"ETH_CRO","price":"%s","quantity":"%s","side":"%s","type":"%s"}}`,
+			uuid, price.String(), volume.String(), "BUY", orderType,
+		)
+		testSubscribe(t, expected, true, func(client *Client) {
+			client.CreateOrder(
+				1,
+				"ETH",
+				"CRO",
+				"buy",
+				orderType,
+				price,
+				volume,
+				uuid,
+			)
+		})
+	})
+
+	t.Run("Subscribe SELL Limit", func(t *testing.T) {
+		// prepare expected
+		uuid := uuid.New()
+		price := decimal.NewFromFloat(0.01)
+		volume := decimal.NewFromFloat(0.0001)
+		orderType := "LIMIT"
+
+		expected := fmt.Sprintf(
+			`{"id":1,"method":"private/create-order","nonce":"","params":{"client_oid":"%s","instrument_name":"ETH_CRO","price":"%s","quantity":"%s","side":"%s","type":"%s"}}`,
+			uuid, price.String(), volume.String(), "SELL", orderType,
 		)
 		testSubscribe(t, expected, true, func(client *Client) {
 			client.CreateOrder(
@@ -357,7 +385,7 @@ func TestCreateOrder(t *testing.T) {
 				"ETH",
 				"CRO",
 				"sell",
-				"LIMIT",
+				orderType,
 				price,
 				volume,
 				uuid,
