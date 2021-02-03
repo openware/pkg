@@ -138,6 +138,7 @@ func (c *Client) createConnection(endpoint string, isPrivate bool) error {
 func (c *Client) readConnection(cnx Connection) {
 	defer c.wg.Done()
 	c.wg.Add(1)
+
 	c.LogFunc("Start listening connection ... %s", cnx.Endpoint)
 	for {
 		_, m, err := cnx.ReadMessage()
