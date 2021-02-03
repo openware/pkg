@@ -66,6 +66,7 @@ type Client struct {
 	httpClient  HTTPClient
 	outbox      chan Response
 	LogFunc     LogFunc
+	wg          sync.WaitGroup
 }
 
 // New returns a pointer of Client struct
@@ -113,8 +114,8 @@ func (c *Client) Listen() <-chan Response {
 func (c *Client) Shutdown() {
 	c.privateConn.Close()
 	c.publicConn.Close()
-	//FIXME: Add wait group to wait for go routine finish
-	// close(c.outbox)
+	c.wg.Wait()
+	close(c.outbox)
 }
 
 func (c *Client) createConnection(endpoint string, isPrivate bool) error {
@@ -135,6 +136,8 @@ func (c *Client) createConnection(endpoint string, isPrivate bool) error {
 }
 
 func (c *Client) readConnection(cnx Connection) {
+	defer c.wg.Done()
+	c.wg.Add(1)
 	c.LogFunc("Start listening connection ... %s", cnx.Endpoint)
 	for {
 		_, m, err := cnx.ReadMessage()
@@ -269,9 +272,5 @@ func (c *Client) recordPrivateSubscription(channels []string) {
 }
 
 func isClosedCnxError(err error) bool {
-	if strings.Contains(err.Error(), "use of closed network connection") {
-		return true
-	}
-
-	return false
+	return strings.Contains(err.Error(), "use of closed network connection")
 }
