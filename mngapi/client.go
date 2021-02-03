@@ -39,8 +39,7 @@ type DefaultClient interface {
 
 // Client instance
 type Client struct {
-	rootAPIUrl       string
-	endpointPrefix   string
+	URL              string
 	jwtIssuer        string
 	jwtSigningMethod jwtgo.SigningMethod
 	jwtPrivateKey    *rsa.PrivateKey
@@ -55,7 +54,7 @@ type APIError struct {
 }
 
 // New to return Client struct
-func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo string, jwtPrivateKey string) (*Client, error) {
+func New(URL string, jwtIssuer string, jwtAlgo string, jwtPrivateKey string) (*Client, error) {
 	pk, err := loadPrivateKeyFromString(jwtPrivateKey)
 	if err != nil {
 		return nil, err
@@ -76,8 +75,7 @@ func New(rootAPIUrl string, endpointPrefix string, jwtIssuer string, jwtAlgo str
 
 	return &Client{
 		httpClient:       &http.Client{Timeout: RequestTimeout},
-		rootAPIUrl:       rootAPIUrl,
-		endpointPrefix:   endpointPrefix,
+		URL:              URL,
 		jwtIssuer:        jwtIssuer,
 		jwtSigningMethod: sm,
 		jwtPrivateKey:    pk,
@@ -91,8 +89,8 @@ func (m *Client) Request(method string, path string, body interface{}) ([]byte, 
 		return nil, &APIError{StatusCode: 500, Error: "HTTP method is not allowed, accept only POST and PUT"}
 	}
 
-	url, err := url.Parse(m.rootAPIUrl)
-	url.Path = filepath.Join(url.Path, m.endpointPrefix, path)
+	url, err := url.Parse(m.URL)
+	url.Path = filepath.Join(url.Path, path)
 
 	// TODO: Add to support JWT with multiple signatures
 	// Generate JWT

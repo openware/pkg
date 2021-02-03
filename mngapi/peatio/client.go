@@ -14,8 +14,8 @@ type Client struct {
 }
 
 // New return peatio management api client
-func New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey string) (*Client, error) {
-	client, err := mngapi.New(rootAPIUrl, endpointPrefix, jwtIssuer, jwtAlgo, jwtPrivateKey)
+func New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey string) (*Client, error) {
+	client, err := mngapi.New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 	if err != nil {
 		return nil, err
 	}
