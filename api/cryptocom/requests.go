@@ -50,13 +50,10 @@ func (c *Client) createOrderRequest(
 	volume decimal.Decimal,
 	uuid uuid.UUID) *Request {
 	var volumeKey string
-	var volumeValue decimal.Decimal
 	if strings.ToUpper(orderType) == "MARKET" && strings.ToUpper(orderSide) == "BUY" {
 		volumeKey = "notional"
-		volumeValue = volume.Mul(price)
 	} else {
 		volumeKey = "quantity"
-		volumeValue = volume
 	}
 
 	return &Request{
@@ -68,7 +65,7 @@ func (c *Client) createOrderRequest(
 			"side":            strings.ToUpper(orderSide),
 			"type":            strings.ToUpper(orderType),
 			"price":           price,
-			volumeKey:         volumeValue,
+			volumeKey:         volume,
 			"client_oid":      uuid,
 		},
 		Nonce: generateNonce(),

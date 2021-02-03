@@ -109,6 +109,7 @@ func (c *Client) SubscribePrivateBalanceUpdates() error {
 	return nil
 }
 
+// For MARKET BUY orders, amount is notional (https://exchange-docs.crypto.com/#private-create-order).
 func (c *Client) CreateOrder(
 	reqID int,
 	ask string,
@@ -116,7 +117,7 @@ func (c *Client) CreateOrder(
 	orderSide string,
 	orderType string,
 	price decimal.Decimal,
-	volume decimal.Decimal,
+	amount decimal.Decimal,
 	uuid uuid.UUID,
 ) error {
 	r := c.createOrderRequest(
@@ -126,7 +127,7 @@ func (c *Client) CreateOrder(
 		orderSide,
 		orderType,
 		price,
-		volume,
+		amount,
 		uuid,
 	)
 	return c.sendPrivateRequest(r)

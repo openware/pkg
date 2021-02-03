@@ -327,7 +327,7 @@ func TestCreateOrder(t *testing.T) {
 
 		expected := fmt.Sprintf(
 			`{"id":1,"method":"private/create-order","nonce":"","params":{"client_oid":"%s","instrument_name":"ETH_CRO","price":"%s","notional":"%s","side":"%s","type":"%s"}}`,
-			uuid, price.String(), volume.Mul(price), "BUY", orderType,
+			uuid, price.String(), volume.String(), "BUY", orderType,
 		)
 		testSubscribe(t, expected, true, func(client *Client) {
 			client.CreateOrder(
