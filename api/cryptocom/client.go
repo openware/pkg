@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -49,6 +50,7 @@ type Connection struct {
 	Endpoint  string
 	IsPrivate bool
 	Transport
+	sync.Mutex
 }
 
 type Client struct {
@@ -223,6 +225,7 @@ func (c *Client) subscribePublicChannels(channels []string) error {
 }
 
 func (c *Client) sendPrivateRequest(r *Request) error {
+	defer c.privateConn.Unlock()
 	b, err := r.Encode()
 
 	if err != nil {
@@ -231,16 +234,20 @@ func (c *Client) sendPrivateRequest(r *Request) error {
 
 	c.LogFunc("Sending private: %s\n", string(b))
 
+	c.privateConn.Lock()
 	return c.privateConn.WriteMessage(websocket.TextMessage, b)
 }
 
 func (c *Client) sendPublicRequest(r *Request) error {
+	defer c.publicConn.Unlock()
 	b, err := r.Encode()
 
 	if err != nil {
 		return err
 	}
 	c.LogFunc("Sending public: %s\n", string(b))
+
+	c.publicConn.Lock()
 	return c.publicConn.WriteMessage(websocket.TextMessage, b)
 }
 
