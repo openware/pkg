@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -113,7 +114,7 @@ func (c *Client) Shutdown() {
 	c.privateConn.Close()
 	c.publicConn.Close()
 	//FIXME: Add wait group to wait for go routine finish
-	close(c.outbox)
+	// close(c.outbox)
 }
 
 func (c *Client) createConnection(endpoint string, isPrivate bool) error {
@@ -139,6 +140,10 @@ func (c *Client) readConnection(cnx Connection) {
 		_, m, err := cnx.ReadMessage()
 		if err != nil {
 			c.LogFunc("error on read message in %s cnx\n", cnx.Type())
+			if isClosedCnxError(err) {
+				c.LogFunc("Stop reading from %s cnx. Connection closed\n", cnx.Type())
+				return
+			}
 			for {
 				conn, _, err := websocket.DefaultDialer.Dial(cnx.Endpoint, http.Header{})
 				if err != nil {
@@ -261,4 +266,12 @@ func (c *Client) recordPrivateSubscription(channels []string) {
 	for _, ch := range channels {
 		c.privateSubs = append(c.privateSubs, ch)
 	}
+}
+
+func isClosedCnxError(err error) bool {
+	if strings.Contains(err.Error(), "use of closed network connection") {
+		return true
+	}
+
+	return false
 }
