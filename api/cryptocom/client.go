@@ -139,7 +139,7 @@ func (c *Client) readConnection(cnx Connection) {
 	for {
 		_, m, err := cnx.ReadMessage()
 		if err != nil {
-			c.LogFunc("error on read message in %s cnx\n", cnx.Type())
+			c.LogFunc("error on read message in %s cnx\nError message: %s\n", cnx.Type(), err.Error())
 			if isClosedCnxError(err) {
 				c.LogFunc("Stop reading from %s cnx. Connection closed\n", cnx.Type())
 				return
