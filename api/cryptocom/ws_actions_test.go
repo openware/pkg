@@ -317,7 +317,31 @@ func TestSubscribePrivateBalanceUpdates(t *testing.T) {
 }
 
 func TestCreateOrder(t *testing.T) {
-	t.Run("Subscribe", func(t *testing.T) {
+	t.Run("Subscribe BUY", func(t *testing.T) {
+		// prepare expected
+		uuid := uuid.New()
+		price := decimal.NewFromFloat(0.01)
+		volume := decimal.NewFromFloat(0.0001)
+
+		expected := fmt.Sprintf(
+			`{"id":1,"method":"private/create-order","nonce":"","params":{"client_oid":"%s","instrument_name":"ETH_CRO","price":"%s","notional":"%s","side":"%s","type":"LIMIT"}}`,
+			uuid, price.String(), volume.Mul(price), "BUY",
+		)
+		testSubscribe(t, expected, true, func(client *Client) {
+			client.CreateOrder(
+				1,
+				"ETH",
+				"CRO",
+				"buy",
+				"LIMIT",
+				price,
+				volume,
+				uuid,
+			)
+		})
+	})
+
+	t.Run("Subscribe SELL", func(t *testing.T) {
 		// prepare expected
 		uuid := uuid.New()
 		price := decimal.NewFromFloat(0.01)
@@ -334,8 +358,8 @@ func TestCreateOrder(t *testing.T) {
 				"CRO",
 				"sell",
 				"LIMIT",
-				decimal.NewFromFloat(0.01),
-				decimal.NewFromFloat(0.0001),
+				price,
+				volume,
 				uuid,
 			)
 		})
