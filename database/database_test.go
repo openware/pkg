@@ -80,27 +80,3 @@ database:
 		t.Logf("Selected database driver is %s", cfg.DbConfig.Driver)
 	})
 }
-
-func Test_Create(t *testing.T) {
-	t.Run("Create database with sqlite driver", func(t *testing.T) {
-		err := database.Create(&database.Config{
-			Driver: "memory",
-			Pool:   5,
-		})
-		if err != nil {
-			t.Error(err)
-		}
-	})
-}
-
-func Test_Drop(t *testing.T) {
-	t.Run("Drop database with sqlite driver", func(t *testing.T) {
-		err := database.Drop(&database.Config{
-			Driver: "memory",
-			Pool:   5,
-		})
-		if err != nil {
-			t.Error(err)
-		}
-	})
-}
