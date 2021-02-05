@@ -131,13 +131,13 @@ func (c *Client) getOrderDetailsRequest(reqID int, remoteID sql.NullString) *Req
 	}
 }
 
-func (c *Client) restGetOrderDetailsRequest(reqID int, remoteID sql.NullString) *Request {
+func (c *Client) restGetOrderDetailsRequest(reqID int, remoteID string) *Request {
 	r := &Request{
 		Id:     reqID,
 		Type:   RestOrderRequest,
 		Method: "private/get-order-detail",
 		Params: map[string]interface{}{
-			"order_id": remoteID.String,
+			"order_id": remoteID,
 		},
 		ApiKey: c.key,
 		Nonce:  generateNonce(),

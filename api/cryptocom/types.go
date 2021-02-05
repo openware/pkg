@@ -9,14 +9,14 @@ import (
 
 const (
 	// Types
-	AuthRequest           = 1
-	SubscribeRequest      = 2
-	HeartBeat             = 3
-	OrderRequest          = 4
-	RestOrderRequest      = 5
-	RestBalanceRequest    = 6
-	RestTradesRequest     = 7
-	RestOpenOrdersRequest = 8
+	AuthRequest = iota + 1
+	SubscribeRequest
+	HeartBeat
+	OrderRequest
+	RestOrderRequest
+	RestBalanceRequest
+	RestTradesRequest
+	RestOpenOrdersRequest
 )
 
 type Request struct {

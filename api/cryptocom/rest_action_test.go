@@ -2,7 +2,6 @@ package cryptocom
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -79,7 +78,7 @@ func testRest(t *testing.T, expectEndPoint string, jsonExpected string, fn testR
 }
 
 func TestRestGetOrderDetails(t *testing.T) {
-	remoteID := sql.NullString{String: "1138210129647637539", Valid: true}
+	remoteID := "1138210129647637539"
 
 	t.Run("Success", func(t *testing.T) {
 		// mock response

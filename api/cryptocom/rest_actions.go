@@ -2,13 +2,12 @@ package cryptocom
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 )
 
 const apiVersionSuffix = "/v2/"
 
-func (c *Client) RestGetOrderDetails(reqID int, remoteID sql.NullString) (Response, error) {
+func (c *Client) RestGetOrderDetails(reqID int, remoteID string) (Response, error) {
 	r := c.restGetOrderDetailsRequest(reqID, remoteID)
 	return c.send(r)
 }
