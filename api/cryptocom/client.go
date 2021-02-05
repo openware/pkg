@@ -192,18 +192,15 @@ func (c *Client) readConnection(cnx Connection) {
 
 func (c *Client) generateSignature(r *Request) {
 	secret := c.secret
-	concatenedParams := ""
-
 	var parameters []string
-	for key := range r.Params {
-		parameters = append(parameters, key)
+
+	for key, v := range r.Params {
+		parameters = append(parameters, key+v.(string))
 	}
 
 	sort.Strings(parameters)
 
-	for _, v := range parameters {
-		concatenedParams += v + r.Params[v].(string)
-	}
+	concatenedParams := strings.Join(parameters, "")
 
 	data := r.Method + strconv.Itoa(r.Id) + r.ApiKey + concatenedParams + r.Nonce
 	h := hmac.New(sha256.New, []byte(secret))
