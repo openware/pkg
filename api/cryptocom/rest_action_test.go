@@ -1,89 +1,89 @@
 package cryptocom
 
 import (
-  "bytes"
-  "database/sql"
-  "encoding/json"
-  "errors"
-  "fmt"
-  "io"
-  "net/http"
-  "net/http/httptest"
-  "testing"
+	"bytes"
+	"database/sql"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
-  "github.com/bmizerany/assert"
+	"github.com/bmizerany/assert"
 )
 
 /* global variable declaration */
 var mockRestRootURL string = "restRootURL"
 
 type mockHTTPClient struct {
-  server   *httptest.Server
-  endpoint string
+	server   *httptest.Server
+	endpoint string
 }
 
 func (m *mockHTTPClient) Post(endpoint, contentType string, body io.Reader) (resp *http.Response, err error) {
-  m.endpoint = endpoint
-  return http.DefaultClient.Post(m.server.URL, contentType, body)
+	m.endpoint = endpoint
+	return http.DefaultClient.Post(m.server.URL, contentType, body)
 }
 
 func (m *mockHTTPClient) Get(endpoint string) (resp *http.Response, err error) {
-  m.endpoint = endpoint
-  return http.DefaultClient.Get(m.server.URL)
+	m.endpoint = endpoint
+	return http.DefaultClient.Get(m.server.URL)
 }
 
 type mockHTTPClientError struct {
-  response *http.Response
-  endpoint string
+	response *http.Response
+	endpoint string
 }
 
 func (m *mockHTTPClientError) Post(endpoint, contentType string, body io.Reader) (resp *http.Response, err error) {
-  return nil, errors.New("")
+	return nil, errors.New("")
 }
 
 func (m *mockHTTPClientError) Get(endpoint string) (resp *http.Response, err error) {
-  return nil, errors.New("")
+	return nil, errors.New("")
 }
 
 type testRestFunc func(client *Client) (Response, error)
 
 func testRest(t *testing.T, expectEndPoint string, jsonExpected string, fn testRestFunc) {
-  // prepare mock
-  client := New("test", mockRestRootURL, "test", "test")
+	// prepare mock
+	client := New("test", mockRestRootURL, "test", "test")
 
-  ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte(jsonExpected))
-  }))
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(jsonExpected))
+	}))
 
-  httpClient := &mockHTTPClient{server: ts}
-  client.httpClient = httpClient
-  client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil))
+	httpClient := &mockHTTPClient{server: ts}
+	client.httpClient = httpClient
+	client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil))
 
-  // test function
-  resp, _ := fn(client)
+	// test function
+	resp, _ := fn(client)
 
-  // prepare expect
-  var expectedResponse Response
-  _ = json.NewDecoder(bytes.NewBufferString(jsonExpected)).Decode(&expectedResponse)
+	// prepare expect
+	var expectedResponse Response
+	_ = json.NewDecoder(bytes.NewBufferString(jsonExpected)).Decode(&expectedResponse)
 
-  // assert response
-  assert.NotEqual(t, Response{}, resp)
-  assert.Equal(t, expectedResponse.Method, resp.Method)
-  assert.Equal(t, expectedResponse.Result, resp.Result)
-  assert.Equal(t, expectedResponse.Code, resp.Code)
-  assert.Equal(t, expectedResponse.Message, resp.Message)
+	// assert response
+	assert.NotEqual(t, Response{}, resp)
+	assert.Equal(t, expectedResponse.Method, resp.Method)
+	assert.Equal(t, expectedResponse.Result, resp.Result)
+	assert.Equal(t, expectedResponse.Code, resp.Code)
+	assert.Equal(t, expectedResponse.Message, resp.Message)
 
-  // assert endpoint
-  assert.Equal(t, expectEndPoint, httpClient.endpoint)
+	// assert endpoint
+	assert.Equal(t, expectEndPoint, httpClient.endpoint)
 }
 
 func TestRestGetOrderDetails(t *testing.T) {
-  remoteID := sql.NullString{String: "1138210129647637539", Valid: true}
+	remoteID := sql.NullString{String: "1138210129647637539", Valid: true}
 
-  t.Run("Success", func(t *testing.T) {
-    // mock response
-    jsonStr := `{"id": 1,
+	t.Run("Success", func(t *testing.T) {
+		// mock response
+		jsonStr := `{"id": 1,
       "method": "private/get-order-detail",
       "code": 0,
       "result": { 
@@ -107,31 +107,31 @@ func TestRestGetOrderDetails(t *testing.T) {
           "update_time": 1611750065006
         }
       }}`
-    expectedEndpoint := mockRestRootURL + `/v2/private/get-order-detail`
-    testRest(t,
-      expectedEndpoint,
-      jsonStr,
-      func(client *Client) (Response, error) {
-        return client.RestGetOrderDetails(1, remoteID)
-      },
-    )
-  })
+		expectedEndpoint := mockRestRootURL + `/v2/private/get-order-detail`
+		testRest(t,
+			expectedEndpoint,
+			jsonStr,
+			func(client *Client) (Response, error) {
+				return client.RestGetOrderDetails(1, remoteID)
+			},
+		)
+	})
 
-  t.Run("HTTP client error", func(t *testing.T) {
-    client := &Client{}
-    client.httpClient = &mockHTTPClientError{}
-    response, err := client.RestGetOrderDetails(1, remoteID)
-    assert.Equal(t, Response{}, response)
-    assert.Equal(t, errors.New(""), err)
-  })
+	t.Run("HTTP client error", func(t *testing.T) {
+		client := &Client{}
+		client.httpClient = &mockHTTPClientError{}
+		response, err := client.RestGetOrderDetails(1, remoteID)
+		assert.Equal(t, Response{}, response)
+		assert.Equal(t, errors.New(""), err)
+	})
 }
 
 func TestRestGetBalance(t *testing.T) {
-  reqID := 1
+	reqID := 1
 
-  t.Run("Success", func(t *testing.T) {
-    // mock response
-    jsonStr := fmt.Sprintf(`{"id": %d,
+	t.Run("Success", func(t *testing.T) {
+		// mock response
+		jsonStr := fmt.Sprintf(`{"id": %d,
       "method": "private/get-account-summary",
       "code": 0,
       "result": {
@@ -152,32 +152,32 @@ func TestRestGetBalance(t *testing.T) {
           }
         ]
       }}`,
-      reqID,
-    )
-    expectedEndpoint := mockRestRootURL + `/v2/private/get-account-summary`
-    testRest(t,
-      expectedEndpoint,
-      jsonStr,
-      func(client *Client) (Response, error) { return client.RestGetBalance(reqID) },
-    )
-  })
+			reqID,
+		)
+		expectedEndpoint := mockRestRootURL + `/v2/private/get-account-summary`
+		testRest(t,
+			expectedEndpoint,
+			jsonStr,
+			func(client *Client) (Response, error) { return client.RestGetBalance(reqID) },
+		)
+	})
 
-  t.Run("HTTP client error", func(t *testing.T) {
-    client := &Client{}
-    client.httpClient = &mockHTTPClientError{}
-    response, err := client.RestGetBalance(reqID)
-    assert.Equal(t, Response{}, response)
-    assert.Equal(t, errors.New(""), err)
-  })
+	t.Run("HTTP client error", func(t *testing.T) {
+		client := &Client{}
+		client.httpClient = &mockHTTPClientError{}
+		response, err := client.RestGetBalance(reqID)
+		assert.Equal(t, Response{}, response)
+		assert.Equal(t, errors.New(""), err)
+	})
 }
 
 func TestRestGetTrades(t *testing.T) {
-  // mock response
-  reqID := 1
-  market := "ETH_CRO"
+	// mock response
+	reqID := 1
+	market := "ETH_CRO"
 
-  t.Run("Success", func(t *testing.T) {
-    jsonStr := fmt.Sprintf(`
+	t.Run("Success", func(t *testing.T) {
+		jsonStr := fmt.Sprintf(`
       {
         "id": %d,
         "method": "private/get-trades",
@@ -198,35 +198,35 @@ func TestRestGetTrades(t *testing.T) {
           ]
         }
       }`,
-      reqID,
-      market,
-    )
-    expectedEndpoint := mockRestRootURL + `/v2/private/get-trades`
-    testRest(t,
-      expectedEndpoint,
-      jsonStr,
-      func(client *Client) (Response, error) { return client.RestGetTrades(reqID, market) },
-    )
-  })
+			reqID,
+			market,
+		)
+		expectedEndpoint := mockRestRootURL + `/v2/private/get-trades`
+		testRest(t,
+			expectedEndpoint,
+			jsonStr,
+			func(client *Client) (Response, error) { return client.RestGetTrades(reqID, market) },
+		)
+	})
 
-  t.Run("HTTP client error", func(t *testing.T) {
-    client := &Client{}
-    client.httpClient = &mockHTTPClientError{}
-    response, err := client.RestGetTrades(reqID, market)
-    assert.Equal(t, Response{}, response)
-    assert.Equal(t, errors.New(""), err)
-  })
+	t.Run("HTTP client error", func(t *testing.T) {
+		client := &Client{}
+		client.httpClient = &mockHTTPClientError{}
+		response, err := client.RestGetTrades(reqID, market)
+		assert.Equal(t, Response{}, response)
+		assert.Equal(t, errors.New(""), err)
+	})
 }
 
 func TestRestOpenOrders(t *testing.T) {
-  // mock response
-  reqID := 1
-  market := "ETH_CRO"
-  pageNumber := 1
-  pageSize := 200
+	// mock response
+	reqID := 1
+	market := "ETH_CRO"
+	pageNumber := 1
+	pageSize := 200
 
-  t.Run("Success", func(t *testing.T) {
-    jsonStr := fmt.Sprintf(`
+	t.Run("Success", func(t *testing.T) {
+		jsonStr := fmt.Sprintf(`
     {
       "id": %d,
       "method": "private/get-open-orders",
@@ -255,22 +255,21 @@ func TestRestOpenOrders(t *testing.T) {
         ]
       }
     }`, reqID)
-    expectedEndpoint := mockRestRootURL + `/v2/private/get-open-orders`
-    testRest(t,
-      expectedEndpoint,
-      jsonStr,
-      func(client *Client) (Response, error) {
-        return client.RestOpenOrders(reqID, market, pageNumber, pageSize)
-      },
-    )
-  })
+		expectedEndpoint := mockRestRootURL + `/v2/private/get-open-orders`
+		testRest(t,
+			expectedEndpoint,
+			jsonStr,
+			func(client *Client) (Response, error) {
+				return client.RestOpenOrders(reqID, market, pageNumber, pageSize)
+			},
+		)
+	})
 
-  t.Run("HTTP client error", func(t *testing.T) {
-    client := &Client{}
-    client.httpClient = &mockHTTPClientError{}
-    response, err := client.RestOpenOrders(reqID, market, pageNumber, pageSize)
-    assert.Equal(t, Response{}, response)
-    assert.Equal(t, errors.New(""), err)
-  })
+	t.Run("HTTP client error", func(t *testing.T) {
+		client := &Client{}
+		client.httpClient = &mockHTTPClientError{}
+		response, err := client.RestOpenOrders(reqID, market, pageNumber, pageSize)
+		assert.Equal(t, Response{}, response)
+		assert.Equal(t, errors.New(""), err)
+	})
 }
-
