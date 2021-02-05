@@ -160,12 +160,12 @@ func (c *Client) readConnection(cnx Connection) {
 					c.privateConn = newCnx
 					c.authenticate()
 					if len(c.privateSubs) > 0 {
-						c.subscribePrivateChannels(c.privateSubs)
+						c.subscribePrivateChannels(c.privateSubs, false)
 					}
 				} else {
 					c.publicConn = newCnx
 					if len(c.publicSubs) > 0 {
-						c.subscribePublicChannels(c.publicSubs)
+						c.subscribePublicChannels(c.publicSubs, false)
 					}
 				}
 
@@ -219,14 +219,26 @@ func (c *Client) authenticate() {
 	c.sendPrivateRequest(r)
 }
 
-func (c *Client) subscribePrivateChannels(channels []string) error {
+func (c *Client) subscribePrivateChannels(channels []string, record bool) error {
 	r := c.subscribeRequest(channels)
-	return c.sendPrivateRequest(r)
+	err := c.sendPrivateRequest(r)
+
+	if err != nil && record {
+		c.privateSubs = append(c.privateSubs, channels...)
+	}
+
+	return err
 }
 
-func (c *Client) subscribePublicChannels(channels []string) error {
+func (c *Client) subscribePublicChannels(channels []string, record bool) error {
 	r := c.subscribeRequest(channels)
-	return c.sendPublicRequest(r)
+	err := c.sendPublicRequest(r)
+
+	if err != nil && record {
+		c.publicSubs = append(c.publicSubs, channels...)
+	}
+
+	return err
 }
 
 func (c *Client) sendPrivateRequest(r *Request) error {
