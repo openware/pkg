@@ -1,7 +1,6 @@
 package cryptocom
 
 import (
-	"database/sql"
 	"strconv"
 	"strings"
 
@@ -119,13 +118,13 @@ func (c *Client) cancelAllOrdersRequest(reqID int, market string) *Request {
 	}
 }
 
-func (c *Client) getOrderDetailsRequest(reqID int, remoteID sql.NullString) *Request {
+func (c *Client) getOrderDetailsRequest(reqID int, remoteID string) *Request {
 	return &Request{
 		Id:     reqID,
 		Type:   OrderRequest,
 		Method: "private/get-order-detail",
 		Params: map[string]interface{}{
-			"order_id": remoteID.String,
+			"order_id": remoteID,
 		},
 		Nonce: generateNonce(),
 	}

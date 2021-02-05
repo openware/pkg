@@ -481,7 +481,7 @@ func TestCancelAllOrders(t *testing.T) {
 func TestGetOrderDetails(t *testing.T) {
 	t.Run("Subscribe", func(t *testing.T) {
 		// prepare expected
-		remoteID := sql.NullString{String: "1138210129647637539", Valid: true}
+		remoteID := "1138210129647637539"
 		expected := `{"id":1,"method":"private/get-order-detail","nonce":"","params":{"order_id":"1138210129647637539"}}`
 		testSubscribe(t, expected, true, func(client *Client) { client.GetOrderDetails(1, remoteID) })
 	})
