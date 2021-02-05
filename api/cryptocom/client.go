@@ -55,32 +55,34 @@ type Connection struct {
 }
 
 type Client struct {
-	publicConn  Connection
-	privateConn Connection
-	wsRootURL   string
-	restRootURL string
-	key         string
-	secret      string
-	privateSubs []string
-	publicSubs  []string
-	httpClient  HTTPClient
-	outbox      chan Response
-	LogFunc     LogFunc
-	wg          sync.WaitGroup
+	publicConn    Connection
+	privateConn   Connection
+	isTerminating bool
+	wsRootURL     string
+	restRootURL   string
+	key           string
+	secret        string
+	privateSubs   []string
+	publicSubs    []string
+	httpClient    HTTPClient
+	outbox        chan Response
+	LogFunc       LogFunc
+	wg            sync.WaitGroup
 }
 
 // New returns a pointer of Client struct
 func New(wsRootURL, restRootURL, key, secret string) *Client {
 	return &Client{
-		key:         key,
-		secret:      secret,
-		wsRootURL:   wsRootURL,
-		restRootURL: restRootURL,
-		outbox:      make(chan Response),
-		privateSubs: make([]string, 0),
-		publicSubs:  make([]string, 0),
-		httpClient:  &http.Client{},
-		LogFunc:     defaultLogFunc,
+		key:           key,
+		secret:        secret,
+		wsRootURL:     wsRootURL,
+		restRootURL:   restRootURL,
+		outbox:        make(chan Response),
+		privateSubs:   make([]string, 0),
+		publicSubs:    make([]string, 0),
+		httpClient:    &http.Client{},
+		LogFunc:       defaultLogFunc,
+		isTerminating: false,
 	}
 }
 
@@ -114,6 +116,7 @@ func (c *Client) Listen() <-chan Response {
 }
 
 func (c *Client) Shutdown() {
+	c.isTerminating = true
 	c.privateConn.Close()
 	c.publicConn.Close()
 	c.wg.Wait()
@@ -138,13 +141,15 @@ func (c *Client) readConnection(cnx Connection) {
 		_, m, err := cnx.ReadMessage()
 		if err != nil {
 			c.LogFunc("error on read message in %s cnx\nError message: %s\n", cnx.Type(), err.Error())
-			if isClosedCnxError(err) {
+			if c.isTerminating {
 				c.LogFunc("Stop reading from %s cnx. Connection closed\n", cnx.Type())
 				return
 			}
 			for {
 				conn, _, err := websocket.DefaultDialer.Dial(cnx.Endpoint, http.Header{})
 				if err != nil {
+					c.LogFunc("Reconnection error in %s cnx\n Error message: %s\n", cnx.Type(), err.Error())
+					time.Sleep(1 * time.Second)
 					continue
 				}
 
@@ -252,8 +257,4 @@ func (c *Client) sendPublicRequest(r *Request) error {
 	c.publicConn.Unlock()
 
 	return response
-}
-
-func isClosedCnxError(err error) bool {
-	return strings.Contains(err.Error(), "use of closed network connection")
 }
