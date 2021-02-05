@@ -228,7 +228,6 @@ func (c *Client) subscribePublicChannels(channels []string) error {
 }
 
 func (c *Client) sendPrivateRequest(r *Request) error {
-	defer c.privateConn.Unlock()
 	b, err := r.Encode()
 	if err != nil {
 		return err
@@ -237,11 +236,13 @@ func (c *Client) sendPrivateRequest(r *Request) error {
 	c.LogFunc("Sending private: %s\n", string(b))
 
 	c.privateConn.Lock()
-	return c.privateConn.WriteMessage(websocket.TextMessage, b)
+	response := c.privateConn.WriteMessage(websocket.TextMessage, b)
+	c.privateConn.Unlock()
+
+	return response
 }
 
 func (c *Client) sendPublicRequest(r *Request) error {
-	defer c.publicConn.Unlock()
 	b, err := r.Encode()
 	if err != nil {
 		return err
@@ -250,7 +251,10 @@ func (c *Client) sendPublicRequest(r *Request) error {
 	c.LogFunc("Sending public: %s\n", string(b))
 
 	c.publicConn.Lock()
-	return c.publicConn.WriteMessage(websocket.TextMessage, b)
+	response := c.publicConn.WriteMessage(websocket.TextMessage, b)
+	c.publicConn.Unlock()
+
+	return response
 }
 
 func isClosedCnxError(err error) bool {
