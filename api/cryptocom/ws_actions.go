@@ -10,7 +10,7 @@ import (
 type formater func(string) string
 
 // Input: ["ETH_BTC", "ETH_CRO"]
-func (c *Client) format(markets []string, fn formater) []string {
+func format(markets []string, fn formater) []string {
 	channels := []string{}
 	for _, v := range markets {
 		channels = append(channels, fn(v))
@@ -22,7 +22,7 @@ func (c *Client) format(markets []string, fn formater) []string {
 // SubscribePublicTrades is subscription trade channel
 // Example: SubscribeTrades("ETH_BTC", "ETH_CRO")
 func (c *Client) SubscribePublicTrades(markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("trade.%s", s)
 	})
 
@@ -33,7 +33,7 @@ func (c *Client) SubscribePublicTrades(markets ...string) error {
 // Example: SubscribeOrderBook(depth, "ETH_BTC", "ETH_CRO")
 // depth: Number of bids and asks to return. Allowed values: 10 or 150
 func (c *Client) SubscribePublicOrderBook(depth int, markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("book.%s.%d", s, depth)
 	})
 
@@ -42,7 +42,7 @@ func (c *Client) SubscribePublicOrderBook(depth int, markets ...string) error {
 
 // SubscribePublicTickers is subscription ticker channel
 func (c *Client) SubscribePublicTickers(markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("ticker.%s", s)
 	})
 
@@ -51,7 +51,7 @@ func (c *Client) SubscribePublicTickers(markets ...string) error {
 
 // SubscribePrivateOrders is subscription private order user.order.markets channel
 func (c *Client) SubscribePrivateOrders(markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("user.order.%s", s)
 	})
 
@@ -60,7 +60,7 @@ func (c *Client) SubscribePrivateOrders(markets ...string) error {
 
 // SubscribePrivateTrades is subscription private user.trade channel
 func (c *Client) SubscribePrivateTrades(markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("user.trade.%s", s)
 	})
 
