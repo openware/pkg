@@ -10,7 +10,7 @@ import (
 type formater func(string) string
 
 // Input: ["ETH_BTC", "ETH_CRO"]
-func (c *Client) format(markets []string, fn formater) []string {
+func format(markets []string, fn formater) []string {
 	channels := []string{}
 	for _, v := range markets {
 		channels = append(channels, fn(v))
@@ -19,77 +19,57 @@ func (c *Client) format(markets []string, fn formater) []string {
 	return channels
 }
 
-func subscripPublic(c *Client, channels []string) error {
-	err := c.subscribePublicChannels(channels)
-	if err != nil {
-		return err
-	}
-
-	c.publicSubs = append(c.publicSubs, channels...)
-	return nil
-}
-
-func subscripPrivate(c *Client, channels []string) error {
-	err := c.subscribePrivateChannels(channels)
-	if err != nil {
-		return err
-	}
-
-	c.privateSubs = append(c.privateSubs, channels...)
-	return nil
-}
-
 // SubscribePublicTrades is subscription trade channel
 // Example: SubscribeTrades("ETH_BTC", "ETH_CRO")
 func (c *Client) SubscribePublicTrades(markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("trade.%s", s)
 	})
 
-	return subscripPublic(c, channels)
+	return c.subscribePublicChannels(channels, true)
 }
 
 // SubscribePublicOrderBook is subscription orderbook channel
 // Example: SubscribeOrderBook(depth, "ETH_BTC", "ETH_CRO")
 // depth: Number of bids and asks to return. Allowed values: 10 or 150
 func (c *Client) SubscribePublicOrderBook(depth int, markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("book.%s.%d", s, depth)
 	})
 
-	return subscripPublic(c, channels)
+	return c.subscribePublicChannels(channels, true)
 }
 
 // SubscribePublicTickers is subscription ticker channel
 func (c *Client) SubscribePublicTickers(markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("ticker.%s", s)
 	})
 
-	return subscripPublic(c, channels)
+	return c.subscribePublicChannels(channels, true)
 }
 
 // SubscribePrivateOrders is subscription private order user.order.markets channel
 func (c *Client) SubscribePrivateOrders(markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("user.order.%s", s)
 	})
 
-	return subscripPrivate(c, channels)
+	return c.subscribePrivateChannels(channels, true)
 }
 
 // SubscribePrivateTrades is subscription private user.trade channel
 func (c *Client) SubscribePrivateTrades(markets ...string) error {
-	channels := c.format(markets, func(s string) string {
+	channels := format(markets, func(s string) string {
 		return fmt.Sprintf("user.trade.%s", s)
 	})
 
-	return subscripPrivate(c, channels)
+	return c.subscribePrivateChannels(channels, true)
 }
 
 func (c *Client) SubscribePrivateBalanceUpdates() error {
 	channels := []string{"user.balance"}
-	return subscripPrivate(c, channels)
+	return c.subscribePrivateChannels(channels, true)
 }
 
 // For MARKET BUY orders, amount is notional (https://exchange-docs.crypto.com/#private-create-order).

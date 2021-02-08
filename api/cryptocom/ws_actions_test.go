@@ -15,12 +15,10 @@ import (
 type testingFunc func(client *Client)
 
 func TestFormat(t *testing.T) {
-	client := New("", "", "test", "test")
-
 	markets := []string{"ETH_BTC", "ETH_COV", "XRP_BTC"}
 	expected := []string{"trade.ETH_BTC", "trade.ETH_COV", "trade.XRP_BTC"}
 
-	result := client.format(markets, func(s string) string {
+	result := format(markets, func(s string) string {
 		return fmt.Sprintf("trade.%s", s)
 	})
 

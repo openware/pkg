@@ -55,32 +55,34 @@ type Connection struct {
 }
 
 type Client struct {
-	publicConn  Connection
-	privateConn Connection
-	wsRootURL   string
-	restRootURL string
-	key         string
-	secret      string
-	privateSubs []string
-	publicSubs  []string
-	httpClient  HTTPClient
-	outbox      chan Response
-	LogFunc     LogFunc
-	wg          sync.WaitGroup
+	publicConn    Connection
+	privateConn   Connection
+	isTerminating bool
+	wsRootURL     string
+	restRootURL   string
+	key           string
+	secret        string
+	privateSubs   []string
+	publicSubs    []string
+	httpClient    HTTPClient
+	outbox        chan Response
+	LogFunc       LogFunc
+	wg            sync.WaitGroup
 }
 
 // New returns a pointer of Client struct
 func New(wsRootURL, restRootURL, key, secret string) *Client {
 	return &Client{
-		key:         key,
-		secret:      secret,
-		wsRootURL:   wsRootURL,
-		restRootURL: restRootURL,
-		outbox:      make(chan Response),
-		privateSubs: make([]string, 0),
-		publicSubs:  make([]string, 0),
-		httpClient:  &http.Client{},
-		LogFunc:     defaultLogFunc,
+		key:           key,
+		secret:        secret,
+		wsRootURL:     wsRootURL,
+		restRootURL:   restRootURL,
+		outbox:        make(chan Response),
+		privateSubs:   make([]string, 0),
+		publicSubs:    make([]string, 0),
+		httpClient:    &http.Client{},
+		LogFunc:       defaultLogFunc,
+		isTerminating: false,
 	}
 }
 
@@ -114,6 +116,7 @@ func (c *Client) Listen() <-chan Response {
 }
 
 func (c *Client) Shutdown() {
+	c.isTerminating = true
 	c.privateConn.Close()
 	c.publicConn.Close()
 	c.wg.Wait()
@@ -138,13 +141,15 @@ func (c *Client) readConnection(cnx Connection) {
 		_, m, err := cnx.ReadMessage()
 		if err != nil {
 			c.LogFunc("error on read message in %s cnx\nError message: %s\n", cnx.Type(), err.Error())
-			if isClosedCnxError(err) {
+			if c.isTerminating {
 				c.LogFunc("Stop reading from %s cnx. Connection closed\n", cnx.Type())
 				return
 			}
 			for {
 				conn, _, err := websocket.DefaultDialer.Dial(cnx.Endpoint, http.Header{})
 				if err != nil {
+					c.LogFunc("Reconnection error in %s cnx\n Error message: %s\n", cnx.Type(), err.Error())
+					time.Sleep(1 * time.Second)
 					continue
 				}
 
@@ -155,12 +160,12 @@ func (c *Client) readConnection(cnx Connection) {
 					c.privateConn = newCnx
 					c.authenticate()
 					if len(c.privateSubs) > 0 {
-						c.subscribePrivateChannels(c.privateSubs)
+						c.subscribePrivateChannels(c.privateSubs, false)
 					}
 				} else {
 					c.publicConn = newCnx
 					if len(c.publicSubs) > 0 {
-						c.subscribePublicChannels(c.publicSubs)
+						c.subscribePublicChannels(c.publicSubs, false)
 					}
 				}
 
@@ -192,18 +197,15 @@ func (c *Client) readConnection(cnx Connection) {
 
 func (c *Client) generateSignature(r *Request) {
 	secret := c.secret
-	concatenedParams := ""
-
 	var parameters []string
-	for key := range r.Params {
-		parameters = append(parameters, key)
+
+	for key, v := range r.Params {
+		parameters = append(parameters, key+v.(string))
 	}
 
 	sort.Strings(parameters)
 
-	for _, v := range parameters {
-		concatenedParams += v + r.Params[v].(string)
-	}
+	concatenedParams := strings.Join(parameters, "")
 
 	data := r.Method + strconv.Itoa(r.Id) + r.ApiKey + concatenedParams + r.Nonce
 	h := hmac.New(sha256.New, []byte(secret))
@@ -217,18 +219,29 @@ func (c *Client) authenticate() {
 	c.sendPrivateRequest(r)
 }
 
-func (c *Client) subscribePrivateChannels(channels []string) error {
+func (c *Client) subscribePrivateChannels(channels []string, record bool) error {
 	r := c.subscribeRequest(channels)
-	return c.sendPrivateRequest(r)
+	err := c.sendPrivateRequest(r)
+
+	if err != nil && record {
+		c.privateSubs = append(c.privateSubs, channels...)
+	}
+
+	return err
 }
 
-func (c *Client) subscribePublicChannels(channels []string) error {
+func (c *Client) subscribePublicChannels(channels []string, record bool) error {
 	r := c.subscribeRequest(channels)
-	return c.sendPublicRequest(r)
+	err := c.sendPublicRequest(r)
+
+	if err != nil && record {
+		c.publicSubs = append(c.publicSubs, channels...)
+	}
+
+	return err
 }
 
 func (c *Client) sendPrivateRequest(r *Request) error {
-	defer c.privateConn.Unlock()
 	b, err := r.Encode()
 	if err != nil {
 		return err
@@ -237,11 +250,13 @@ func (c *Client) sendPrivateRequest(r *Request) error {
 	c.LogFunc("Sending private: %s\n", string(b))
 
 	c.privateConn.Lock()
-	return c.privateConn.WriteMessage(websocket.TextMessage, b)
+	response := c.privateConn.WriteMessage(websocket.TextMessage, b)
+	c.privateConn.Unlock()
+
+	return response
 }
 
 func (c *Client) sendPublicRequest(r *Request) error {
-	defer c.publicConn.Unlock()
 	b, err := r.Encode()
 	if err != nil {
 		return err
@@ -250,9 +265,8 @@ func (c *Client) sendPublicRequest(r *Request) error {
 	c.LogFunc("Sending public: %s\n", string(b))
 
 	c.publicConn.Lock()
-	return c.publicConn.WriteMessage(websocket.TextMessage, b)
-}
+	response := c.publicConn.WriteMessage(websocket.TextMessage, b)
+	c.publicConn.Unlock()
 
-func isClosedCnxError(err error) bool {
-	return strings.Contains(err.Error(), "use of closed network connection")
+	return response
 }
