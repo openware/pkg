@@ -10,23 +10,24 @@ import (
 )
 
 type connectionMock struct {
-	Buffer       *bytes.Buffer
-	ResponseMock *bytes.Buffer
+	Buffer   *bytes.Buffer
+	Response chan *bytes.Buffer
 }
 
-func (c *Client) connectMock(privateResponse, publicResponse, privateWriter, publicWriter *bytes.Buffer) {
+func (c *Client) connectMock(privateResponse chan *bytes.Buffer, publicResponse chan *bytes.Buffer, privateWriter, publicWriter *bytes.Buffer) {
 	c.publicConn = Connection{
-		Transport: &connectionMock{Buffer: publicWriter, ResponseMock: publicResponse},
+		Transport: &connectionMock{Buffer: publicWriter, Response: publicResponse},
 		IsPrivate: false,
 	}
 	c.privateConn = Connection{
-		Transport: &connectionMock{Buffer: privateWriter, ResponseMock: privateResponse},
+		Transport: &connectionMock{Buffer: privateWriter, Response: privateResponse},
 		IsPrivate: true,
 	}
 }
 
 func (cm *connectionMock) ReadMessage() (int, []byte, error) {
-	return 1, cm.ResponseMock.Bytes(), nil
+	response := <-cm.Response
+	return 1, response.Bytes(), nil
 }
 
 func (cm *connectionMock) WriteMessage(messageType int, data []byte) error {
@@ -36,7 +37,6 @@ func (cm *connectionMock) WriteMessage(messageType int, data []byte) error {
 
 func (cm *connectionMock) Close() error {
 	cm.Buffer.Reset()
-	cm.ResponseMock.Reset()
 	return nil
 }
 
@@ -59,9 +59,9 @@ func TestConnectionWrite(t *testing.T) {
 func TestConnectionRead(t *testing.T) {
 	// prepare mock
 	client := New("", "", "test", "test")
-	publicBuffer := bytes.NewBuffer(nil)
-	privateBuffer := bytes.NewBuffer(nil)
-	client.connectMock(privateBuffer, publicBuffer, bytes.NewBuffer(nil), bytes.NewBuffer(nil))
+	privateResponse := make(chan *bytes.Buffer, 1)
+	publicResponse := make(chan *bytes.Buffer, 1)
+	client.connectMock(privateResponse, publicResponse, bytes.NewBuffer(nil), bytes.NewBuffer(nil))
 
 	// expectations
 	expectStr := `{"id":12,"method":"public/auth","code":10002,"message":"UNAUTHORIZED"}`
@@ -72,8 +72,8 @@ func TestConnectionRead(t *testing.T) {
 	}
 
 	// mocked responses
-	publicBuffer.WriteString(expectStr)
-	privateBuffer.WriteString(expectStr)
+	privateResponse <- bytes.NewBufferString(expectStr)
+	publicResponse <- bytes.NewBufferString(expectStr)
 
 	// Running client
 	msgs := client.Listen()

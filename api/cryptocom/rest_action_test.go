@@ -40,7 +40,10 @@ func testRest(t *testing.T, expectEndPoint string, jsonExpected string, fn testR
 	defer ts.Close()
 
 	client := New(ts.URL, ts.URL, "test", "test")
-	client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil))
+
+	privateResponse := make(chan *bytes.Buffer)
+	publicResponse := make(chan *bytes.Buffer)
+	client.connectMock(privateResponse, publicResponse, bytes.NewBuffer(nil), bytes.NewBuffer(nil))
 
 	// test function
 	resp, _ := fn(client)

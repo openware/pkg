@@ -37,7 +37,10 @@ func testSubscribe(t *testing.T, expected string, isPrivate bool, testFunc testi
 	client := New("test", "test", "test", "test")
 	privateWritingMessage := bytes.NewBuffer(nil)
 	publicWritingMessage := bytes.NewBuffer(nil)
-	client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), privateWritingMessage, publicWritingMessage)
+
+	privateResponse := make(chan *bytes.Buffer)
+	publicResponse := make(chan *bytes.Buffer)
+	client.connectMock(privateResponse, publicResponse, privateWritingMessage, publicWritingMessage)
 
 	// call test function
 	testFunc(client)
@@ -72,34 +75,21 @@ func testResponse(t *testing.T, expected string, isPrivate bool) {
 
 	// prepare mock
 	client := New("test", "test", "test", "test")
-	var privateResponse *bytes.Buffer
-	var publicResponse *bytes.Buffer
-
-	testID := 9999
-	emptyResponse := fmt.Sprintf(`{"id":%d,"method":"subscribe"}`, testID) // Id 9999 is flag for test
-	// mock response.
-	if isPrivate {
-		privateResponse = bytes.NewBufferString(expected)
-		publicResponse = bytes.NewBufferString(emptyResponse)
-	} else {
-		privateResponse = bytes.NewBufferString(emptyResponse)
-		publicResponse = bytes.NewBufferString(expected)
-	}
+	privateResponse := make(chan *bytes.Buffer, 1)
+	publicResponse := make(chan *bytes.Buffer, 1)
 	client.connectMock(privateResponse, publicResponse, bytes.NewBuffer(nil), bytes.NewBuffer(nil))
+	if isPrivate {
+		privateResponse <- bytes.NewBufferString(expected)
+	} else {
+		publicResponse <- bytes.NewBufferString(expected)
+	}
 
 	msgs := client.Listen()
-
-	var response Response
-	for m := range msgs {
-		if m.Id != testID {
-			response = m
-			break
-		}
-	}
+	resp := <-msgs
 
 	// assertion
-	assert.NotEqual(t, Response{}, response)
-	assert.Equal(t, expectedResponse, response)
+	assert.NotEqual(t, Response{}, resp)
+	assert.Equal(t, expectedResponse, resp)
 }
 
 func TestPublicOrderBook(t *testing.T) {
@@ -357,13 +347,13 @@ func TestCreateLimitOrder(t *testing.T) {
 
 	t.Run("Read response", func(t *testing.T) {
 		jsonExpected := `{
-      "id": 11,
-      "method": "private/create-order",
-      "result": {
-        "order_id": "337843775021233500",
-        "client_oid": "my_order_0002"
-      }
-    }`
+			"id": 11,
+			"method": "private/create-order",
+			"result": {
+				"order_id": "337843775021233500",
+				"client_oid": "my_order_0002"
+			}
+		}`
 		testResponse(t, jsonExpected, true)
 	})
 }
@@ -524,7 +514,11 @@ func TestRespondHeartBeat(t *testing.T) {
 		client := New("test", "test", "test", "test")
 		privateWritingMessage := bytes.NewBuffer(nil)
 		publicWritingMessage := bytes.NewBuffer(nil)
-		client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), privateWritingMessage, publicWritingMessage)
+
+		privateResponse := make(chan *bytes.Buffer, 1)
+		publicResponse := make(chan *bytes.Buffer, 1)
+
+		client.connectMock(privateResponse, publicResponse, privateWritingMessage, publicWritingMessage)
 
 		t.Run("private", func(t *testing.T) {
 			var writingMessage Request
