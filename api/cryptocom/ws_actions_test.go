@@ -12,13 +12,6 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type mockRequest struct {
-	ID     int    `json:"id"`
-	Method string `json:"method"`
-	Nonce  string `json:"nonce"`
-	Params map[string]interface{}
-}
-
 type testingFunc func(client *Client)
 
 func TestFormat(t *testing.T) {
@@ -36,7 +29,7 @@ func TestFormat(t *testing.T) {
 
 func testSubscribe(t *testing.T, expected string, isPrivate bool, testFunc testingFunc) {
 	// prepare expected
-	var expectedResponse mockRequest
+	var expectedResponse Request
 	err := json.Unmarshal([]byte(expected), &expectedResponse)
 	if err != nil {
 		t.Fatal("error on parse expected")
@@ -52,7 +45,7 @@ func testSubscribe(t *testing.T, expected string, isPrivate bool, testFunc testi
 	testFunc(client)
 
 	// get response
-	var writingMessage mockRequest
+	var writingMessage Request
 	if isPrivate {
 		err = json.Unmarshal(privateWritingMessage.Bytes(), &writingMessage)
 	} else {
@@ -63,9 +56,9 @@ func testSubscribe(t *testing.T, expected string, isPrivate bool, testFunc testi
 	}
 
 	// assertion
-	assert.NotEqual(t, mockRequest{}, writingMessage)
+	assert.NotEqual(t, Request{}, writingMessage)
 	// doesn't assert on nonce
-	assert.Equal(t, expectedResponse.ID, writingMessage.ID)
+	assert.Equal(t, expectedResponse.Id, writingMessage.Id)
 	assert.Equal(t, expectedResponse.Method, writingMessage.Method)
 	assert.Equal(t, expectedResponse.Params, writingMessage.Params)
 }
@@ -536,8 +529,8 @@ func TestRespondHeartBeat(t *testing.T) {
 		client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), privateWritingMessage, publicWritingMessage)
 
 		t.Run("private", func(t *testing.T) {
-			var writingMessage mockRequest
-			var expectedResponse mockRequest
+			var writingMessage Request
+			var expectedResponse Request
 			expected := `{"id":1,"method":"public/respond-heartbeat"}`
 
 			// start test
@@ -546,13 +539,13 @@ func TestRespondHeartBeat(t *testing.T) {
 			// prepare expected
 			json.Unmarshal([]byte(expected), &expectedResponse)
 
-			assert.NotEqual(t, mockRequest{}, writingMessage)
+			assert.NotEqual(t, Request{}, writingMessage)
 			assert.Equal(t, expectedResponse, writingMessage)
 		})
 
 		t.Run("public", func(t *testing.T) {
-			var writingMessage mockRequest
-			var expectedResponse mockRequest
+			var writingMessage Request
+			var expectedResponse Request
 			expected := `{"id":1,"method":"public/respond-heartbeat"}`
 
 			// start test
@@ -561,7 +554,7 @@ func TestRespondHeartBeat(t *testing.T) {
 			// prepare expected
 			json.Unmarshal([]byte(expected), &expectedResponse)
 
-			assert.NotEqual(t, mockRequest{}, writingMessage)
+			assert.NotEqual(t, Request{}, writingMessage)
 			assert.Equal(t, expectedResponse, writingMessage)
 		})
 	})

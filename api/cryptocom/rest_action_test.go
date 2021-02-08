@@ -13,24 +13,6 @@ import (
 	"github.com/bmizerany/assert"
 )
 
-/* global variable declaration */
-var mockRestRootURL string = "restRootURL"
-
-type mockHTTPClient struct {
-	server   *httptest.Server
-	endpoint string
-}
-
-func (m *mockHTTPClient) Post(endpoint, contentType string, body io.Reader) (resp *http.Response, err error) {
-	m.endpoint = endpoint
-	return http.DefaultClient.Post(m.server.URL, contentType, body)
-}
-
-func (m *mockHTTPClient) Get(endpoint string) (resp *http.Response, err error) {
-	m.endpoint = endpoint
-	return http.DefaultClient.Get(m.server.URL)
-}
-
 type mockHTTPClientError struct {
 	response *http.Response
 	endpoint string
@@ -48,15 +30,16 @@ type testRestFunc func(client *Client) (Response, error)
 
 func testRest(t *testing.T, expectEndPoint string, jsonExpected string, fn testRestFunc) {
 	// prepare mock
-	client := New("test", mockRestRootURL, "test", "test")
-
+	var endpoint string
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(jsonExpected))
+		endpoint = r.URL.String()
 	}))
 
-	httpClient := &mockHTTPClient{server: ts}
-	client.httpClient = httpClient
+	defer ts.Close()
+
+	client := New(ts.URL, ts.URL, "test", "test")
 	client.connectMock(bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil), bytes.NewBuffer(nil))
 
 	// test function
@@ -74,7 +57,7 @@ func testRest(t *testing.T, expectEndPoint string, jsonExpected string, fn testR
 	assert.Equal(t, expectedResponse.Message, resp.Message)
 
 	// assert endpoint
-	assert.Equal(t, expectEndPoint, httpClient.endpoint)
+	assert.Equal(t, expectEndPoint, endpoint)
 }
 
 func TestRestGetOrderDetails(t *testing.T) {
@@ -106,7 +89,7 @@ func TestRestGetOrderDetails(t *testing.T) {
           "update_time": 1611750065006
         }
       }}`
-		expectedEndpoint := mockRestRootURL + `/v2/private/get-order-detail`
+		expectedEndpoint := `/v2/private/get-order-detail`
 		testRest(t,
 			expectedEndpoint,
 			jsonStr,
@@ -153,7 +136,7 @@ func TestRestGetBalance(t *testing.T) {
       }}`,
 			reqID,
 		)
-		expectedEndpoint := mockRestRootURL + `/v2/private/get-account-summary`
+		expectedEndpoint := `/v2/private/get-account-summary`
 		testRest(t,
 			expectedEndpoint,
 			jsonStr,
@@ -200,7 +183,7 @@ func TestRestGetTrades(t *testing.T) {
 			reqID,
 			market,
 		)
-		expectedEndpoint := mockRestRootURL + `/v2/private/get-trades`
+		expectedEndpoint := `/v2/private/get-trades`
 		testRest(t,
 			expectedEndpoint,
 			jsonStr,
@@ -254,7 +237,7 @@ func TestRestOpenOrders(t *testing.T) {
         ]
       }
     }`, reqID)
-		expectedEndpoint := mockRestRootURL + `/v2/private/get-open-orders`
+		expectedEndpoint := `/v2/private/get-open-orders`
 		testRest(t,
 			expectedEndpoint,
 			jsonStr,
