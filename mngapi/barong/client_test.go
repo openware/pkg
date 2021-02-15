@@ -1,6 +1,7 @@
 package barong
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/openware/pkg/mngapi"
@@ -51,5 +52,89 @@ func TestCreateNewClient(t *testing.T) {
 
 		assert.NotNil(t, err)
 		assert.EqualError(t, err, "Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
+	})
+}
+
+func TestCreateServiceAccount(t *testing.T) {
+	t.Run("Success response", func(t *testing.T) {
+		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+
+		expected := `{"email":"test+SI0388B7681C@yellow.com","uid":"SI0388B7681C","role":"service_account","level":3,"state":"active","user":{"email":"test@test.com","uid":"IDCA2AC08296","role":"superadmin","level":3,"otp":true,"state":"active","referral_uid":"","data":"{\"onboarding\":true,\"language\":\"en\"}"},"created_at":"2021-02-15T10:15:18Z","updated_at":"2021-02-15T10:15:18Z"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateServiceAccountParams{
+			OwnerUID: "IDCA2AC08296",
+			Role:     "service_account",
+		}
+		serviceAccount, err := client.CreateServiceAccount(params)
+
+		result, _ := json.Marshal(serviceAccount)
+		assert.Nil(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error user doesn't exist", func(t *testing.T) {
+		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 422,
+				Error:      "User doesnt exist",
+			},
+		}
+
+		params := CreateServiceAccountParams{
+			OwnerUID: "ID123456789",
+			Role:     "service_account",
+		}
+		serviceAccount, err := client.CreateServiceAccount(params)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, err.StatusCode, 422)
+		assert.Equal(t, err.Error, "User doesnt exist")
+		assert.Nil(t, serviceAccount)
+	})
+}
+
+func TestDeleteServiceAccountByUID(t *testing.T) {
+	t.Run("Success response", func(t *testing.T) {
+		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+
+		expected := `{"email":"test+SI0388B7681C@yellow.com","uid":"SI0388B7681C","role":"service_account","level":3,"state":"active","user":{"email":"test@test.com","uid":"IDCA2AC08296","role":"superadmin","level":3,"otp":true,"state":"disabled","referral_uid":"","data":"{\"onboarding\":true,\"language\":\"en\"}"},"created_at":"2021-02-15T10:15:18Z","updated_at":"2021-02-15T10:15:18Z"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		uid := "SI0388B7681C"
+		serviceAccount, err := client.DeleteServiceAccountByUID(uid)
+
+		result, _ := json.Marshal(serviceAccount)
+		assert.Nil(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error record is not found", func(t *testing.T) {
+		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 404,
+				Error:      "Record is not found",
+			},
+		}
+
+		uid := "SI123456789"
+		serviceAccount, err := client.DeleteServiceAccountByUID(uid)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, err.StatusCode, 404)
+		assert.Equal(t, err.Error, "Record is not found")
+		assert.Nil(t, serviceAccount)
 	})
 }

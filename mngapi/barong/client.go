@@ -1,6 +1,9 @@
 package barong
 
 import (
+	"encoding/json"
+	"net/http"
+
 	"github.com/openware/pkg/mngapi"
 )
 
@@ -19,4 +22,35 @@ func New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey string) (*Client, error) {
 	return &Client{
 		mngapiClient: client,
 	}, nil
+}
+
+// CreateServiceAccount call barong management api to create new service account
+func (b *Client) CreateServiceAccount(params CreateServiceAccountParams) (*ServiceAccount, *mngapi.APIError) {
+	res, err := b.mngapiClient.Request(http.MethodPost, "service_accounts/create", params)
+	if err != nil {
+		return nil, err
+	}
+
+	serviceAccount := &ServiceAccount{}
+	_ = json.Unmarshal([]byte(res), serviceAccount)
+
+	return serviceAccount, nil
+}
+
+// DeleteServiceAccountByUID call barong management api to delete service account by uid
+func (b *Client) DeleteServiceAccountByUID(uid string) (*ServiceAccount, *mngapi.APIError) {
+	// Build parameters
+	params := map[string]interface{}{
+		"uid": uid,
+	}
+
+	res, err := b.mngapiClient.Request(http.MethodPost, "service_accounts/delete", params)
+	if err != nil {
+		return nil, err
+	}
+
+	serviceAccount := &ServiceAccount{}
+	_ = json.Unmarshal([]byte(res), serviceAccount)
+
+	return serviceAccount, nil
 }
