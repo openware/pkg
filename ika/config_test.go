@@ -531,7 +531,7 @@ array: [1, 2, 3]`,
 			}
 
 			var cfg config
-			if err = parseFile(tmpFile.Name(), &cfg); (err != nil) != tt.wantErr {
+			if err = FileSource(tmpFile.Name()).Load(&cfg); (err != nil) != tt.wantErr {
 				t.Errorf("wrong error behavior %v, wantErr %v", err, tt.wantErr)
 			}
 			if err == nil && !reflect.DeepEqual(&cfg, tt.want) {
@@ -541,7 +541,7 @@ array: [1, 2, 3]`,
 	}
 
 	t.Run("invalid path", func(t *testing.T) {
-		err := parseFile("invalid file path", nil)
+		err := FileSource("invalid file path").Load(config{})
 		if err == nil {
 			t.Error("expected error for invalid file path")
 		}
@@ -893,7 +893,7 @@ no-env: this
 			defer os.Clearenv()
 
 			var cfg config
-			if err = ReadConfig(tmpFile.Name(), &cfg); (err != nil) != tt.wantErr {
+			if err = ReadConfig(&cfg, FileSource(tmpFile.Name()), EnvSource()); (err != nil) != tt.wantErr {
 				t.Errorf("wrong error behavior %v, wantErr %v", err, tt.wantErr)
 			}
 			if err == nil && !reflect.DeepEqual(&cfg, tt.want) {
