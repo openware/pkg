@@ -28,28 +28,32 @@ func (m *MockClient) Request(method string, path string, body interface{}) ([]by
 
 func TestCreateNewClient(t *testing.T) {
 	t.Run("Success creation", func(t *testing.T) {
-		_, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
+		assert.NotNil(t, client)
 		assert.Nil(t, err)
 	})
 
 	t.Run("JWT issuer unset", func(t *testing.T) {
-		_, err := New(URL, "", jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, "", jwtAlgo, jwtPrivateKey)
 
+		assert.Nil(t, client)
 		assert.NotNil(t, err)
 		assert.EqualError(t, err, "JWT issuer unset")
 	})
 
 	t.Run("Invalid signing algorithm", func(t *testing.T) {
-		_, err := New(URL, jwtIssuer, "RS999", jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, "RS999", jwtPrivateKey)
 
+		assert.Nil(t, client)
 		assert.NotNil(t, err)
 		assert.EqualError(t, err, "Unsupported signing method RS999")
 	})
 
 	t.Run("Invalid private key", func(t *testing.T) {
-		_, err := New(URL, jwtIssuer, jwtAlgo, "")
+		client, err := New(URL, jwtIssuer, jwtAlgo, "")
 
+		assert.Nil(t, client)
 		assert.NotNil(t, err)
 		assert.EqualError(t, err, "Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
 	})
@@ -57,7 +61,8 @@ func TestCreateNewClient(t *testing.T) {
 
 func TestCreateServiceAccount(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		expected := `{"email":"test+SI0388B7681C@yellow.com","uid":"SI0388B7681C","role":"service_account","level":3,"state":"active","user":{"email":"test@test.com","uid":"IDCA2AC08296","role":"superadmin","level":3,"otp":true,"state":"active","referral_uid":"","data":"{\"onboarding\":true,\"language\":\"en\"}"},"created_at":"2021-02-15T10:15:18Z","updated_at":"2021-02-15T10:15:18Z"}`
 		client.mngapiClient = &MockClient{
@@ -69,15 +74,17 @@ func TestCreateServiceAccount(t *testing.T) {
 			OwnerUID: "IDCA2AC08296",
 			Role:     "service_account",
 		}
-		serviceAccount, err := client.CreateServiceAccount(params)
+		serviceAccount, apiError := client.CreateServiceAccount(params)
+		assert.Nil(t, apiError)
 
-		result, _ := json.Marshal(serviceAccount)
-		assert.Nil(t, err)
+		result, err := json.Marshal(serviceAccount)
+		assert.NoError(t, err)
 		assert.Equal(t, result, []byte(expected))
 	})
 
 	t.Run("Error user doesn't exist", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		client.mngapiClient = &MockClient{
 			response: nil,
@@ -91,18 +98,63 @@ func TestCreateServiceAccount(t *testing.T) {
 			OwnerUID: "ID123456789",
 			Role:     "service_account",
 		}
-		serviceAccount, err := client.CreateServiceAccount(params)
+		serviceAccount, apiError := client.CreateServiceAccount(params)
 
-		assert.NotNil(t, err)
-		assert.Equal(t, err.StatusCode, 422)
-		assert.Equal(t, err.Error, "User doesnt exist")
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 422)
+		assert.Equal(t, apiError.Error, "User doesnt exist")
+		assert.Nil(t, serviceAccount)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"email":test@test.com}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateServiceAccountParams{
+			OwnerUID: "ID123456789",
+			Role:     "service_account",
+		}
+		serviceAccount, apiError := client.CreateServiceAccount(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, serviceAccount)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateServiceAccountParams{
+			OwnerUID: "ID123456789",
+			Role:     "service_account",
+		}
+		serviceAccount, apiError := client.CreateServiceAccount(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, serviceAccount)
 	})
 }
 
 func TestDeleteServiceAccountByUID(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		expected := `{"email":"test+SI0388B7681C@yellow.com","uid":"SI0388B7681C","role":"service_account","level":3,"state":"active","user":{"email":"test@test.com","uid":"IDCA2AC08296","role":"superadmin","level":3,"otp":true,"state":"disabled","referral_uid":"","data":"{\"onboarding\":true,\"language\":\"en\"}"},"created_at":"2021-02-15T10:15:18Z","updated_at":"2021-02-15T10:15:18Z"}`
 		client.mngapiClient = &MockClient{
@@ -111,15 +163,17 @@ func TestDeleteServiceAccountByUID(t *testing.T) {
 		}
 
 		uid := "SI0388B7681C"
-		serviceAccount, err := client.DeleteServiceAccountByUID(uid)
+		serviceAccount, apiError := client.DeleteServiceAccountByUID(uid)
+		assert.Nil(t, apiError)
 
-		result, _ := json.Marshal(serviceAccount)
-		assert.Nil(t, err)
+		result, err := json.Marshal(serviceAccount)
+		assert.NoError(t, err)
 		assert.Equal(t, result, []byte(expected))
 	})
 
 	t.Run("Error record is not found", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		client.mngapiClient = &MockClient{
 			response: nil,
@@ -130,11 +184,49 @@ func TestDeleteServiceAccountByUID(t *testing.T) {
 		}
 
 		uid := "SI123456789"
-		serviceAccount, err := client.DeleteServiceAccountByUID(uid)
+		serviceAccount, apiError := client.DeleteServiceAccountByUID(uid)
 
-		assert.NotNil(t, err)
-		assert.Equal(t, err.StatusCode, 404)
-		assert.Equal(t, err.Error, "Record is not found")
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "Record is not found")
+		assert.Nil(t, serviceAccount)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"email":123}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		uid := "SI123456789"
+		serviceAccount, apiError := client.DeleteServiceAccountByUID(uid)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, serviceAccount)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{error}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		uid := "SI123456789"
+		serviceAccount, apiError := client.DeleteServiceAccountByUID(uid)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, serviceAccount)
 	})
 }

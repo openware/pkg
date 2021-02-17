@@ -28,28 +28,32 @@ func (m *MockClient) Request(method string, path string, body interface{}) ([]by
 
 func TestCreateNewClient(t *testing.T) {
 	t.Run("Success creation", func(t *testing.T) {
-		_, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 
+		assert.NotNil(t, client)
 		assert.Nil(t, err)
 	})
 
 	t.Run("JWT issuer unset", func(t *testing.T) {
-		_, err := New(URL, "", jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, "", jwtAlgo, jwtPrivateKey)
 
+		assert.Nil(t, client)
 		assert.NotNil(t, err)
 		assert.EqualError(t, err, "JWT issuer unset")
 	})
 
 	t.Run("Invalid signing algorithm", func(t *testing.T) {
-		_, err := New(URL, jwtIssuer, "RS999", jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, "RS999", jwtPrivateKey)
 
+		assert.Nil(t, client)
 		assert.NotNil(t, err)
 		assert.EqualError(t, err, "Unsupported signing method RS999")
 	})
 
 	t.Run("Invalid private key", func(t *testing.T) {
-		_, err := New(URL, jwtIssuer, jwtAlgo, "")
+		client, err := New(URL, jwtIssuer, jwtAlgo, "")
 
+		assert.Nil(t, client)
 		assert.NotNil(t, err)
 		assert.EqualError(t, err, "Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
 	})
@@ -57,7 +61,8 @@ func TestCreateNewClient(t *testing.T) {
 
 func TestGetCurrencyByCode(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":"","withdrawal_enabled":"","deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":"","precision":"","position":42,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":"","code":"bnb","min_collection_amount":"0.3455425","visible":"","subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
 		client.mngapiClient = &MockClient{
@@ -65,15 +70,17 @@ func TestGetCurrencyByCode(t *testing.T) {
 			apiError: nil,
 		}
 
-		currency, err := client.GetCurrencyByCode("bnb")
+		currency, apiError := client.GetCurrencyByCode("bnb")
+		assert.Nil(t, apiError)
 
-		result, _ := json.Marshal(currency)
-		assert.Nil(t, err)
+		result, err := json.Marshal(currency)
+		assert.NoError(t, err)
 		assert.Equal(t, result, []byte(expected))
 	})
 
 	t.Run("Error response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		client.mngapiClient = &MockClient{
 			response: nil,
@@ -83,18 +90,55 @@ func TestGetCurrencyByCode(t *testing.T) {
 			},
 		}
 
-		currency, err := client.GetCurrencyByCode("bnb")
+		currency, apiError := client.GetCurrencyByCode("bnb")
 
-		assert.NotNil(t, err)
-		assert.Equal(t, err.StatusCode, 422)
-		assert.Equal(t, err.Error, "Invalid")
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 422)
+		assert.Equal(t, apiError.Error, "Invalid")
+		assert.Nil(t, currency)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"id":bnb,price:123.456}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		currency, apiError := client.GetCurrencyByCode("bnb")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, currency)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{""}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		currency, apiError := client.GetCurrencyByCode("bnb")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, currency)
 	})
 }
 
 func TestCreateWithdraw(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
 		client.mngapiClient = &MockClient{
@@ -107,15 +151,17 @@ func TestCreateWithdraw(t *testing.T) {
 			Currency: "bnb",
 			Amount:   10.0,
 		}
-		withdraw, err := client.CreateWithdraw(params)
+		withdraw, apiError := client.CreateWithdraw(params)
+		assert.Nil(t, apiError)
 
-		result, _ := json.Marshal(withdraw)
-		assert.Nil(t, err)
+		result, err := json.Marshal(withdraw)
+		assert.NoError(t, err)
 		assert.Equal(t, result, []byte(expected))
 	})
 
 	t.Run("Error response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		client.mngapiClient = &MockClient{
 			response: nil,
@@ -130,18 +176,65 @@ func TestCreateWithdraw(t *testing.T) {
 			Currency: "bnb",
 			Amount:   10.0,
 		}
-		withdraw, err := client.CreateWithdraw(params)
+		withdraw, apiError := client.CreateWithdraw(params)
 
-		assert.NotNil(t, err)
-		assert.Equal(t, err.StatusCode, 404)
-		assert.Equal(t, err.Error, "404 Not Found")
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "404 Not Found")
+		assert.Nil(t, withdraw)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"tid":1234}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateWithdrawParams{
+			UID:      "IDCA2AC08296",
+			Currency: "bnb",
+			Amount:   10.0,
+		}
+		withdraw, apiError := client.CreateWithdraw(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, withdraw)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"-"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateWithdrawParams{
+			UID:      "IDCA2AC08296",
+			Currency: "bnb",
+			Amount:   10.0,
+		}
+		withdraw, apiError := client.CreateWithdraw(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, withdraw)
 	})
 }
 
 func TestGetWithdrawByID(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
 		client.mngapiClient = &MockClient{
@@ -149,10 +242,11 @@ func TestGetWithdrawByID(t *testing.T) {
 			apiError: nil,
 		}
 
-		withdraw, err := client.GetWithdrawByID("TIDE54B7D229E")
+		withdraw, apiError := client.GetWithdrawByID("TIDE54B7D229E")
+		assert.Nil(t, apiError)
 
-		result, _ := json.Marshal(withdraw)
-		assert.Nil(t, err)
+		result, err := json.Marshal(withdraw)
+		assert.NoError(t, err)
 		assert.Equal(t, result, []byte(expected))
 	})
 
@@ -167,18 +261,55 @@ func TestGetWithdrawByID(t *testing.T) {
 			},
 		}
 
-		withdraw, err := client.GetWithdrawByID("TIDXXXX")
+		withdraw, apiError := client.GetWithdrawByID("TIDXXXX")
 
-		assert.NotNil(t, err)
-		assert.Equal(t, err.StatusCode, 404)
-		assert.Equal(t, err.Error, "Couldn't find record.")
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "Couldn't find record.")
+		assert.Nil(t, withdraw)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"tid":1234}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		withdraw, apiError := client.GetWithdrawByID("TIDE54B7D229E")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, withdraw)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{","}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		withdraw, apiError := client.GetWithdrawByID("TIDE54B7D229E")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, withdraw)
 	})
 }
 
 func TestGetAccountBalance(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		expected := `{"uid":"IDCA2AC08296","balance":"996.23352165725","locked":"0.0"}`
 		client.mngapiClient = &MockClient{
@@ -190,15 +321,17 @@ func TestGetAccountBalance(t *testing.T) {
 			UID:      "IDCA2AC08296",
 			Currency: "bnb",
 		}
-		balance, err := client.GetAccountBalance(params)
+		balance, apiError := client.GetAccountBalance(params)
+		assert.Nil(t, apiError)
 
-		result, _ := json.Marshal(balance)
-		assert.Nil(t, err)
+		result, err := json.Marshal(balance)
+		assert.NoError(t, err)
 		assert.Equal(t, result, []byte(expected))
 	})
 
 	t.Run("Error record not found", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		client.mngapiClient = &MockClient{
 			response: nil,
@@ -212,16 +345,17 @@ func TestGetAccountBalance(t *testing.T) {
 			UID:      "ID1234567890",
 			Currency: "bnb",
 		}
-		balance, err := client.GetAccountBalance(params)
+		balance, apiError := client.GetAccountBalance(params)
 
-		assert.NotNil(t, err)
-		assert.Equal(t, err.StatusCode, 404)
-		assert.Equal(t, err.Error, "Couldn't find record.")
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "Couldn't find record.")
 		assert.Nil(t, balance)
 	})
 
 	t.Run("Error invalid currency", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		client.mngapiClient = &MockClient{
 			response: nil,
@@ -235,18 +369,63 @@ func TestGetAccountBalance(t *testing.T) {
 			UID:      "IDCA2AC08296",
 			Currency: "bnbxxx",
 		}
-		balance, err := client.GetAccountBalance(params)
+		balance, apiError := client.GetAccountBalance(params)
 
-		assert.NotNil(t, err)
-		assert.Equal(t, err.StatusCode, 422)
-		assert.Equal(t, err.Error, "currency does not have a valid value")
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 422)
+		assert.Equal(t, apiError.Error, "currency does not have a valid value")
+		assert.Nil(t, balance)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"balance":996.23352165725,locked:0.0}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := GetAccountBalanceParams{
+			UID:      "IDCA2AC08296",
+			Currency: "bnb",
+		}
+		balance, apiError := client.GetAccountBalance(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, balance)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{aaa: 1}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := GetAccountBalanceParams{
+			UID:      "IDCA2AC08296",
+			Currency: "bnb",
+		}
+		balance, apiError := client.GetAccountBalance(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, balance)
 	})
 }
 
 func TestGenerateDepositAddress(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		expected := `{"uid":"IDCA2AC08296","address":"0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e","currencies":["usdt","bnb","uni"],"state":"active","remote":"false"}`
 		client.mngapiClient = &MockClient{
@@ -258,15 +437,17 @@ func TestGenerateDepositAddress(t *testing.T) {
 			UID:      "IDCA2AC08296",
 			Currency: "bnb",
 		}
-		paymentAddress, err := client.GenerateDepositAddress(params)
+		paymentAddress, apiError := client.GenerateDepositAddress(params)
+		assert.Nil(t, apiError)
 
-		result, _ := json.Marshal(paymentAddress)
-		assert.Nil(t, err)
+		result, err := json.Marshal(paymentAddress)
+		assert.NoError(t, err)
 		assert.Equal(t, result, []byte(expected))
 	})
 
 	t.Run("Error response", func(t *testing.T) {
-		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
 
 		client.mngapiClient = &MockClient{
 			response: nil,
@@ -280,11 +461,55 @@ func TestGenerateDepositAddress(t *testing.T) {
 			UID:      "IDCA2AC08296",
 			Currency: "bnb",
 		}
-		paymentAddress, err := client.GenerateDepositAddress(params)
+		paymentAddress, apiError := client.GenerateDepositAddress(params)
 
-		assert.NotNil(t, err)
-		assert.Equal(t, err.StatusCode, 404)
-		assert.Equal(t, err.Error, "Couldn't find record.")
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "Couldn't find record.")
+		assert.Nil(t, paymentAddress)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"uid":"IDCA2AC08296","address":0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e,"currencies":["usdt","bnb","uni"],"state":"active","remote":"false"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := GenerateDepositAddressParams{
+			UID:      "IDCA2AC08296",
+			Currency: "bnb",
+		}
+		paymentAddress, apiError := client.GenerateDepositAddress(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, paymentAddress)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{[]}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := GenerateDepositAddressParams{
+			UID:      "IDCA2AC08296",
+			Currency: "bnb",
+		}
+		paymentAddress, apiError := client.GenerateDepositAddress(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, paymentAddress)
 	})
 }
