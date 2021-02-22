@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/onsi/ginkgo v1.14.2 // indirect
 	github.com/onsi/gomega v1.10.4 // indirect
-	github.com/openware/pkg/types v0.0.0
+	github.com/openware/pkg/types v0.0.0-20210222131620-5f6fb139bdcd
 	github.com/stretchr/testify v1.6.1
 	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 )
