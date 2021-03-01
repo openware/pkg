@@ -24,23 +24,23 @@ type Currency struct {
 	ExplorerTransaction string                 `json:"explorer_transaction"`
 	ExplorerAddress     string                 `json:"explorer_address"`
 	Type                string                 `json:"type"`
-	DepositEnabled      string                 `json:"deposit_enabled"`
-	WithdrawEnabled     string                 `json:"withdrawal_enabled"`
+	DepositEnabled      bool                   `json:"deposit_enabled"`
+	WithdrawEnabled     bool                   `json:"withdrawal_enabled"`
 	DepositFee          string                 `json:"deposit_fee"`
 	MinDepositAmount    string                 `json:"min_deposit_amount"`
 	WithdrawFee         string                 `json:"withdraw_fee"`
 	MinWithdrawAmount   string                 `json:"min_withdraw_amount"`
 	WithdrawLimit24h    string                 `json:"withdraw_limit_24h"`
 	WithdrawLimit72h    string                 `json:"withdraw_limit_72h"`
-	BaseFactor          string                 `json:"base_factor"`
-	Precision           string                 `json:"precision"`
-	Position            int                    `json:"position"`
+	BaseFactor          int64                  `json:"base_factor"`
+	Precision           int64                  `json:"precision"`
+	Position            int64                  `json:"position"`
 	IconURL             string                 `json:"icon_url"`
-	MinConfirmations    string                 `json:"min_confirmations"`
+	MinConfirmations    int64                  `json:"min_confirmations"`
 	Code                string                 `json:"code"`
 	MinCollectionAmount string                 `json:"min_collection_amount"`
-	Visible             string                 `json:"visible"`
-	SubUnits            int                    `json:"subunits"`
+	Visible             bool                   `json:"visible"`
+	SubUnits            int64                  `json:"subunits"`
 	Options             map[string]interface{} `json:"options"`
 	CreatedAt           string                 `json:"created_at"`
 	UpdatedAt           string                 `json:"updated_at"`
@@ -58,4 +58,18 @@ type PaymentAddress struct {
 	Currencies []string `json:"currencies"`
 	State      string   `json:"state"`
 	Remote     string   `json:"remote"`
+}
+
+type Deposit struct {
+	TID                     string  `json:"tid"`
+	Currency                string  `json:"currency"`
+	UID                     string  `json:"uid"`
+	Type                    string  `json:"type"`
+	Amount                  string  `json:"amount"`
+	State                   string  `json:"state"`
+	CreatedAt               string  `json:"created_at"`
+	CompletedAt             *string `json:"completed_at"`
+	BlockchainTxID          string  `json:"blockchain_txid,omitempty"`
+	BlockchainConfirmations int64   `json:"blockchain_confirmations,omitempty"`
+	TransferType            string  `json:"transfer_type"`
 }

@@ -22,3 +22,21 @@ type GenerateDepositAddressParams struct {
 	Currency string `json:"currency"`
 	Remote   bool   `json:"remote,omitempty"`
 }
+
+type CreateDepositParams struct {
+	UID          string  `json:"uid"`
+	TID          string  `json:"tid,omitempty"`
+	Currency     string  `json:"currency"`
+	Amount       float64 `json:"amount"`
+	State        string  `json:"state,omitempty"`
+	TransferType string  `json:"transfer_type,omitempty"`
+}
+
+type GetDepositsParams struct {
+	UID      string `json:"uid,omitempty"`
+	FromID   int64  `json:"from_id,omitempty"`
+	Currency string `json:"currency,omitempty"`
+	Page     int64  `json:"page,omitempty"`
+	Limit    int64  `json:"limit,omitempty"`
+	State    string `json:"state,omitempty"`
+}

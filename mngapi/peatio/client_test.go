@@ -64,7 +64,7 @@ func TestGetCurrencyByCode(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":"","withdrawal_enabled":"","deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":"","precision":"","position":42,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":"","code":"bnb","min_collection_amount":"0.3455425","visible":"","subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
+		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -511,5 +511,265 @@ func TestGenerateDepositAddress(t *testing.T) {
 		assert.Equal(t, apiError.StatusCode, 500)
 		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, paymentAddress)
+	})
+}
+
+func TestCreateDeposit(t *testing.T) {
+	t.Run("Success response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"tid":"TIDBD6B265303","currency":"usd","uid":"ID732785AC58","type":"fiat","amount":"750.77","state":"submitted","created_at":"2021-03-02T07:33:02+01:00","completed_at":null,"transfer_type":"fiat"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateDepositParams{
+			UID:      "ID732785AC58",
+			Currency: "usd",
+			Amount:   10.0,
+		}
+		deposit, apiError := client.CreateDeposit(params)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(deposit)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 404,
+				Error:      "404 Not Found",
+			},
+		}
+
+		params := CreateDepositParams{
+			UID:      "ID732785AC58",
+			Currency: "bnb",
+			Amount:   10.0,
+		}
+		deposit, apiError := client.CreateDeposit(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "404 Not Found")
+		assert.Nil(t, deposit)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"tid":1234}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateDepositParams{
+			UID:      "ID732785AC58",
+			Currency: "bnb",
+			Amount:   10.0,
+		}
+		deposit, apiError := client.CreateDeposit(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, deposit)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"-"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateDepositParams{
+			UID:      "ID732785AC58",
+			Currency: "bnb",
+			Amount:   10.0,
+		}
+		deposit, apiError := client.CreateDeposit(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, deposit)
+	})
+}
+
+func TestGetDepositByID(t *testing.T) {
+	t.Run("Success response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"tid":"TIDF6289303E1","currency":"btc","uid":"ID6CBD4E84C7","type":"coin","amount":"6346.0","state":"submitted","created_at":"2021-03-02T05:54:52+01:00","completed_at":null,"blockchain_txid":"56bzwdd359kxd0r3qt3mz1cbcrc8o3r5hshlgbag42z7ka2o9hd4b5me80hh0khb","blockchain_confirmations":711753,"transfer_type":"crypto"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		deposit, apiError := client.GetDepositByID("TIDF6289303E1")
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(deposit)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error record not found", func(t *testing.T) {
+		client, _ := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 404,
+				Error:      "Couldn't find record.",
+			},
+		}
+
+		deposit, apiError := client.GetDepositByID("TIDXXXX")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "Couldn't find record.")
+		assert.Nil(t, deposit)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"tid":1234}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		deposit, apiError := client.GetDepositByID("TIDF6289303E1")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, deposit)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{","}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		deposit, apiError := client.GetDepositByID("TIDF6289303E1")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, deposit)
+	})
+}
+
+func TestGetDeposits(t *testing.T) {
+	t.Run("Success response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `[{"tid":"TID9119EEAE36","currency":"usd","uid":"ID9C5C7208EB","type":"fiat","amount":"8423.0","state":"collected","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","transfer_type":"fiat"},{"tid":"TID17505F194C","currency":"btc","uid":"ID0B0C77487A","type":"coin","amount":"191.0","state":"fee_processing","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","blockchain_txid":"wfmvae8elj0egr309u9oodl58ypzifdfjz9vd1i82t3ng4uepmokagack0shfsif","blockchain_confirmations":367597,"transfer_type":"crypto"}]`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := GetDepositsParams{
+			UID: "IDCA2AC08296",
+		}
+		deposits, apiError := client.GetDeposits(params)
+		assert.Nil(t, apiError)
+		assert.NotNil(t, deposits)
+
+		result, err := json.Marshal(deposits)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 422,
+				Error:      "Error",
+			},
+		}
+
+		params := GetDepositsParams{
+			UID: "IDCA2AC08296",
+		}
+		deposits, apiError := client.GetDeposits(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 422)
+		assert.Equal(t, apiError.Error, "Error")
+		assert.Nil(t, deposits)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `[{"tid":"TID9119EEAE36","currency":"usd","uid":"ID9C5C7208EB","type":"fiat","amount":8423.0,"state":"collected","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","transfer_type":"fiat"},{"tid":"TID17505F194C","currency":"btc","uid":"ID0B0C77487A","type":"coin","amount":"191.0","state":"fee_processing","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","blockchain_txid":"wfmvae8elj0egr309u9oodl58ypzifdfjz9vd1i82t3ng4uepmokagack0shfsif","blockchain_confirmations":"367597","transfer_type":"crypto"}]`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := GetDepositsParams{
+			UID: "IDCA2AC08296",
+		}
+		deposits, apiError := client.GetDeposits(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, deposits)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := GetDepositsParams{
+			UID: "IDCA2AC08296",
+		}
+		deposits, apiError := client.GetDeposits(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, deposits)
 	})
 }
