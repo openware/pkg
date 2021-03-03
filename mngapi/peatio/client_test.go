@@ -519,7 +519,7 @@ func TestCreateDeposit(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"tid":"TIDBD6B265303","currency":"usd","uid":"ID732785AC58","type":"fiat","amount":"750.77","state":"submitted","created_at":"2021-03-02T07:33:02+01:00","completed_at":null,"transfer_type":"fiat"}`
+		expected := `{"id":1,"tid":"TIDBD6B265303","currency":"usd","uid":"ID732785AC58","type":"fiat","amount":"750.77","state":"submitted","created_at":"2021-03-02T07:33:02+01:00","completed_at":null,"transfer_type":"fiat"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -615,7 +615,7 @@ func TestGetDepositByID(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"tid":"TIDF6289303E1","currency":"btc","uid":"ID6CBD4E84C7","type":"coin","amount":"6346.0","state":"submitted","created_at":"2021-03-02T05:54:52+01:00","completed_at":null,"blockchain_txid":"56bzwdd359kxd0r3qt3mz1cbcrc8o3r5hshlgbag42z7ka2o9hd4b5me80hh0khb","blockchain_confirmations":711753,"transfer_type":"crypto"}`
+		expected := `{"id":1,"tid":"TIDF6289303E1","currency":"btc","uid":"ID6CBD4E84C7","type":"coin","amount":"6346.0","state":"submitted","created_at":"2021-03-02T05:54:52+01:00","completed_at":null,"blockchain_txid":"56bzwdd359kxd0r3qt3mz1cbcrc8o3r5hshlgbag42z7ka2o9hd4b5me80hh0khb","blockchain_confirmations":711753,"transfer_type":"crypto"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -690,7 +690,7 @@ func TestGetDeposits(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `[{"tid":"TID9119EEAE36","currency":"usd","uid":"ID9C5C7208EB","type":"fiat","amount":"8423.0","state":"collected","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","transfer_type":"fiat"},{"tid":"TID17505F194C","currency":"btc","uid":"ID0B0C77487A","type":"coin","amount":"191.0","state":"fee_processing","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","blockchain_txid":"wfmvae8elj0egr309u9oodl58ypzifdfjz9vd1i82t3ng4uepmokagack0shfsif","blockchain_confirmations":367597,"transfer_type":"crypto"}]`
+		expected := `[{"id":1,"tid":"TID9119EEAE36","currency":"usd","uid":"ID9C5C7208EB","type":"fiat","amount":"8423.0","state":"collected","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","transfer_type":"fiat"},{"id":2,"tid":"TID17505F194C","currency":"btc","uid":"ID0B0C77487A","type":"coin","amount":"191.0","state":"fee_processing","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","blockchain_txid":"wfmvae8elj0egr309u9oodl58ypzifdfjz9vd1i82t3ng4uepmokagack0shfsif","blockchain_confirmations":367597,"transfer_type":"crypto"}]`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -735,7 +735,7 @@ func TestGetDeposits(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `[{"tid":"TID9119EEAE36","currency":"usd","uid":"ID9C5C7208EB","type":"fiat","amount":8423.0,"state":"collected","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","transfer_type":"fiat"},{"tid":"TID17505F194C","currency":"btc","uid":"ID0B0C77487A","type":"coin","amount":"191.0","state":"fee_processing","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","blockchain_txid":"wfmvae8elj0egr309u9oodl58ypzifdfjz9vd1i82t3ng4uepmokagack0shfsif","blockchain_confirmations":"367597","transfer_type":"crypto"}]`
+		expected := `[{"id":1,"tid":"TID9119EEAE36","currency":"usd","uid":"ID9C5C7208EB","type":"fiat","amount":8423.0,"state":"collected","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","transfer_type":"fiat"},{"id":2,"tid":"TID17505F194C","currency":"btc","uid":"ID0B0C77487A","type":"coin","amount":"191.0","state":"fee_processing","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","blockchain_txid":"wfmvae8elj0egr309u9oodl58ypzifdfjz9vd1i82t3ng4uepmokagack0shfsif","blockchain_confirmations":"367597","transfer_type":"crypto"}]`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,

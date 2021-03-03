@@ -32,15 +32,15 @@ type Currency struct {
 	MinWithdrawAmount   string                 `json:"min_withdraw_amount"`
 	WithdrawLimit24h    string                 `json:"withdraw_limit_24h"`
 	WithdrawLimit72h    string                 `json:"withdraw_limit_72h"`
-	BaseFactor          int64                  `json:"base_factor"`
-	Precision           int64                  `json:"precision"`
-	Position            int64                  `json:"position"`
+	BaseFactor          uint64                 `json:"base_factor"`
+	Precision           uint64                 `json:"precision"`
+	Position            uint64                 `json:"position"`
 	IconURL             string                 `json:"icon_url"`
-	MinConfirmations    int64                  `json:"min_confirmations"`
+	MinConfirmations    uint64                 `json:"min_confirmations"`
 	Code                string                 `json:"code"`
 	MinCollectionAmount string                 `json:"min_collection_amount"`
 	Visible             bool                   `json:"visible"`
-	SubUnits            int64                  `json:"subunits"`
+	SubUnits            uint64                 `json:"subunits"`
 	Options             map[string]interface{} `json:"options"`
 	CreatedAt           string                 `json:"created_at"`
 	UpdatedAt           string                 `json:"updated_at"`
@@ -61,6 +61,7 @@ type PaymentAddress struct {
 }
 
 type Deposit struct {
+	ID                      uint64  `json:"id"`
 	TID                     string  `json:"tid"`
 	Currency                string  `json:"currency"`
 	UID                     string  `json:"uid"`
@@ -70,6 +71,6 @@ type Deposit struct {
 	CreatedAt               string  `json:"created_at"`
 	CompletedAt             *string `json:"completed_at"`
 	BlockchainTxID          string  `json:"blockchain_txid,omitempty"`
-	BlockchainConfirmations int64   `json:"blockchain_confirmations,omitempty"`
+	BlockchainConfirmations uint64  `json:"blockchain_confirmations,omitempty"`
 	TransferType            string  `json:"transfer_type"`
 }
