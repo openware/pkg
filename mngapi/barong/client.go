@@ -40,6 +40,22 @@ func (b *Client) CreateServiceAccount(params CreateServiceAccountParams) (*Servi
 	return serviceAccount, nil
 }
 
+// CreateAPIKey calls Barong Management Api to create a new API key for a given 
+func (b *Client) CreateAPIKey(params CreateAPIKeyParams) (*APIKey, *mngapi.APIError) {
+	res, apiError := b.mngapiClient.Request(http.MethodPost, "api_keys", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	apiKey := &APIKey{}
+	err := json.Unmarshal([]byte(res), apiKey)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return apiKey, nil
+}
+
 // DeleteServiceAccountByUID call barong management api to delete service account by uid
 func (b *Client) DeleteServiceAccountByUID(uid string) (*ServiceAccount, *mngapi.APIError) {
 	// Build parameters

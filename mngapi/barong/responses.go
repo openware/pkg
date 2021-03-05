@@ -1,5 +1,6 @@
 package barong
 
+// User represents a User creation response
 type User struct {
 	Email       string `json:"email"`
 	UID         string `json:"uid"`
@@ -11,6 +12,7 @@ type User struct {
 	Data        string `json:"data"`
 }
 
+// ServiceAccount represents a Service Account creation response
 type ServiceAccount struct {
 	Email     string `json:"email"`
 	UID       string `json:"uid"`
@@ -20,4 +22,15 @@ type ServiceAccount struct {
 	User      User   `json:"user"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
+}
+
+// APIKey represents an API Key creation response
+type APIKey struct {
+	KID       string   `json:"kid"`
+	Algorithm string   `json:"algorithm"`
+	Scope     []string `json:"scope"`
+	State     string   `json:"state"`
+	Secret    string   `json:"secret"`
+	CreatedAt string   `json:"created_at"`
+	UpdatedAt string   `json:"updated_at"`
 }
