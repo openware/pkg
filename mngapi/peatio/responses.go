@@ -57,5 +57,5 @@ type PaymentAddress struct {
 	Address    string   `json:"address"`
 	Currencies []string `json:"currencies"`
 	State      string   `json:"state"`
-	Remote     string   `json:"remote"`
+	Remote     bool     `json:"remote"`
 }

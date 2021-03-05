@@ -427,7 +427,7 @@ func TestGenerateDepositAddress(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"uid":"IDCA2AC08296","address":"0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e","currencies":["usdt","bnb","uni"],"state":"active","remote":"false"}`
+		expected := `{"uid":"IDCA2AC08296","address":"0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e","currencies":["usdt","bnb","uni"],"state":"active","remote":false}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -473,7 +473,7 @@ func TestGenerateDepositAddress(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"uid":"IDCA2AC08296","address":0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e,"currencies":["usdt","bnb","uni"],"state":"active","remote":"false"}`
+		expected := `{"uid":"IDCA2AC08296","address":0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e,"currencies":["usdt","bnb","uni"],"state":"active","remote":false}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
