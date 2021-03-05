@@ -109,3 +109,56 @@ func (p *Client) GenerateDepositAddress(params GenerateDepositAddressParams) (*P
 
 	return paymentAddress, nil
 }
+
+// CreateDeposit call peatio management api to create new deposit
+func (p *Client) CreateDeposit(params CreateDepositParams) (*Deposit, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "deposits/new", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	deposit := &Deposit{}
+	err := json.Unmarshal([]byte(res), deposit)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return deposit, nil
+}
+
+// GetDepositByID call peatio management api to get deposit information by transaction ID
+func (p *Client) GetDepositByID(tid string) (*Deposit, *mngapi.APIError) {
+	// Build parameters
+	params := map[string]interface{}{
+		"tid": tid,
+	}
+
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "deposits/get", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	deposit := &Deposit{}
+	err := json.Unmarshal([]byte(res), deposit)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return deposit, nil
+}
+
+// GetDeposits call peatio management api to get deposits as paginated collection
+func (p *Client) GetDeposits(params GetDepositsParams) ([]*Deposit, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "deposits", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	deposits := make([]*Deposit, 0)
+	err := json.Unmarshal([]byte(res), &deposits)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return deposits, nil
+}
