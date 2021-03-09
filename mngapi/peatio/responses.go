@@ -64,6 +64,7 @@ type Deposit struct {
 	ID                      uint64  `json:"id"`
 	TID                     string  `json:"tid"`
 	Currency                string  `json:"currency"`
+	Address                 string  `json:"address"`
 	UID                     string  `json:"uid"`
 	Type                    string  `json:"type"`
 	Amount                  string  `json:"amount"`
