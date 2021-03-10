@@ -162,3 +162,85 @@ func (p *Client) GetDeposits(params GetDepositsParams) ([]*Deposit, *mngapi.APIE
 
 	return deposits, nil
 }
+
+// CreateEngine call peatio management api to create new engine
+func (p *Client) CreateEngine(params CreateEngineParams) (*Engine, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "engines/new", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	engine := &Engine{}
+	err := json.Unmarshal([]byte(res), engine)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return engine, nil
+}
+
+// UpdateEngine call peatio management api to update engine
+func (p *Client) UpdateEngine(params UpdateEngineParams) (*Engine, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "engines/update", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	engine := &Engine{}
+	err := json.Unmarshal([]byte(res), engine)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return engine, nil
+}
+
+// GetEngines call peatio management api to get engines
+func (p *Client) GetEngines(params GetEngineParams) ([]*Engine, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "engines/get", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	engines := make([]*Engine, 0)
+
+	err := json.Unmarshal([]byte(res), &engines)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return engines, nil
+}
+
+// GetMarkets call peatio management api to get all markets
+func (p *Client) GetMarkets() ([]*Market, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "/markets/list", nil)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	markets := make([]*Market, 0)
+
+	err := json.Unmarshal([]byte(res), &markets)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return markets, nil
+}
+
+// UpdateMarket call peatio management api to update market
+func (p *Client) UpdateMarket(params UpdateMarketParams) (*Market, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPut, "/markets/update", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	market := &Market{}
+	err := json.Unmarshal([]byte(res), market)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return market, nil
+}

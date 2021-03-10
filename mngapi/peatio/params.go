@@ -40,3 +40,34 @@ type GetDepositsParams struct {
 	Limit    int64  `json:"limit,omitempty"`
 	State    string `json:"state,omitempty"`
 }
+
+type GetEngineParams struct {
+	Name string `json:"name"`
+}
+
+type CreateEngineParams struct {
+	Name   string `json:"name"`
+	Driver string `json:"driver"`
+	UID    string `json:"uid"`
+	URL    string `json:"url"`
+	State  int    `json:"state"`
+	Key    string `json:"key"`
+	Secret string `json:"secret"`
+}
+
+type UpdateEngineParams struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Driver string `json:"driver"`
+	UID    string `json:"uid"`
+	URL    string `json:"url"`
+	State  int    `json:"state"`
+	Key    string `json:"key"`
+	Secret string `json:"secret"`
+}
+
+type UpdateMarketParams struct {
+	ID       string `json:"id"`
+	EngineID string `json:"engine_id"`
+	// Add more params
+}

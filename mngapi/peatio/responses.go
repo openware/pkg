@@ -75,3 +75,29 @@ type Deposit struct {
 	BlockchainConfirmations uint64  `json:"blockchain_confirmations,omitempty"`
 	TransferType            string  `json:"transfer_type"`
 }
+
+type Engine struct {
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Driver string `json:"driver"`
+	UID    string `json:"uid"`
+	URL    string `json:"url"`
+	State  string `json:"state"`
+}
+
+type Market struct {
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+	BaseUnit        string `json:"base_unit"`
+	QuoteUnit       string `json:"quote_unit"`
+	MinPrice        string `json:"min_price"`
+	MaxPrice        string `json:"max_price"`
+	MinAmount       string `json:"min_amount"`
+	AmountPrecision int    `json:"amount_precision"`
+	PricePrecision  int    `json:"price_precision"`
+	State           string `json:"state"`
+	Position        int    `json:"position"`
+	EngineID        int    `json:"engine_id"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
+}
