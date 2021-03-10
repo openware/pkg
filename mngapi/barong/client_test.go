@@ -82,6 +82,29 @@ func TestCreateServiceAccount(t *testing.T) {
 		assert.Equal(t, result, []byte(expected))
 	})
 
+	t.Run("Success response w/ state", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"email":"test+SI0388B7681C@yellow.com","uid":"SI0388B7681C","role":"service_account","level":3,"state":"active","user":{"email":"test@test.com","uid":"IDCA2AC08296","role":"superadmin","level":3,"otp":true,"state":"active","referral_uid":"","data":"{\"onboarding\":true,\"language\":\"en\"}"},"created_at":"2021-02-15T10:15:18Z","updated_at":"2021-02-15T10:15:18Z"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateServiceAccountParams{
+			OwnerUID: "IDCA2AC08296",
+			Role:     "service_account",
+			State: 	  "active",
+		}
+		serviceAccount, apiError := client.CreateServiceAccount(params)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(serviceAccount)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
 	t.Run("Error user doesn't exist", func(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
