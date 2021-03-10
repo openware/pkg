@@ -26,7 +26,7 @@ func prepareHandler(t *testing.T, handler func(c *websocket.Conn)) *httptest.Ser
 
 func prepareTest(t *testing.T, handler func(c *websocket.Conn)) (*httptest.Server, *Client) {
 	s := prepareHandler(t, handler)
-	u := strings.TrimPrefix(s.URL, "http://")
+	u := "ws://" + strings.TrimPrefix(s.URL, "http://")
 	f, err := New("platform_id", u, nil)
 	assert.NoError(t, err)
 
@@ -62,6 +62,9 @@ func TestGetCorrectData(t *testing.T) {
 		ch <- *p
 	})
 	assert.NoError(t, err)
+	if err != nil {
+		return
+	}
 
 	err = f.Subscribe("testusdt")
 	assert.NoError(t, err)
@@ -92,6 +95,9 @@ func TestOnlySubscribeOnce(t *testing.T) {
 
 	err := f.Connect(func(p *PriceResponse) {})
 	assert.NoError(t, err)
+	if err != nil {
+		return
+	}
 
 	assert.Equal(t, len(f.Streams), 0)
 
