@@ -134,11 +134,11 @@ func (c *Client) Unsubscribe(market string) error {
 }
 
 func (c *Client) refreshStreamsQuery() {
-	markets := &[]string{}
+	markets := []string{}
 	for stream := range c.Streams {
-		*markets = append(*markets, stream)
+		markets = append(markets, stream)
 	}
-	query := "stream=" + strings.Join(*markets, ",")
+	query := "stream=" + strings.Join(markets, ",")
 
 	c.WS.Query = &query
 }
@@ -153,20 +153,45 @@ func (c *Client) getPayload(action string, data interface{}) *[]interface{} {
 }
 
 func (c *Client) parsePriceData(message interface{}) (*PriceResponse, error) {
-	if res, ok := message.([]interface{}); ok {
-		code := res[0].(float64)
-		rType := res[1].(string)
-		if code == responseCode && rType == priceResponseType { // TODO: need to handle other response types later.
-			data := res[2].([]interface{})
-			pRes := &PriceResponse{
-				Market:    data[0].(string),
-				Price:     data[1].(string),
-				CreatedAt: data[2].(float64),
-				UpdatedAt: data[3].(float64),
-			}
-			return pRes, nil
-		}
+	var ok bool
+	var res, data []interface{}
+	var code, createdAt, updatedAt float64
+	var rType, market, price string
+
+	if res, ok = message.([]interface{}); !ok {
+		return nil, errors.New(`Can not parse response`)
+	}
+	if code, ok = res[0].(float64); !ok {
+		return nil, errors.New(`Can not parse response.code`)
+	}
+	if rType, ok = res[1].(string); !ok {
+		return nil, errors.New(`Can not parse response.type`)
+	}
+	// TODO: need to handle other response types later.
+	if code != responseCode && rType != priceResponseType {
 		return nil, nil
 	}
-	return nil, errors.New(`Can not parse message`)
+	if data, ok = res[2].([]interface{}); !ok {
+		return nil, errors.New(`Can not parse response.data`)
+	}
+	if market, ok = data[0].(string); !ok {
+		return nil, errors.New(`Can not parse response.data.Market`)
+	}
+	if price, ok = data[1].(string); !ok {
+		return nil, errors.New(`Can not parse response.data.Price`)
+	}
+	if createdAt, ok = data[2].(float64); !ok {
+		return nil, errors.New(`Can not parse response.data.CreatedAt`)
+	}
+	if updatedAt, ok = data[3].(float64); !ok {
+		return nil, errors.New(`Can not parse response.data.UpdatedAt`)
+	}
+
+	pRes := &PriceResponse{
+		Market:    market,
+		Price:     price,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+	}
+	return pRes, nil
 }
