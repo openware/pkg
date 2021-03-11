@@ -43,7 +43,7 @@ func (p *Client) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
 
 // CreateWithdraw call peatio management api to create new withdraw
 func (p *Client) CreateWithdraw(params CreateWithdrawParams) (*Withdraw, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "withdraw/new", params)
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "withdraws/new", params)
 	if apiError != nil {
 		return nil, apiError
 	}
