@@ -82,6 +82,29 @@ func TestCreateServiceAccount(t *testing.T) {
 		assert.Equal(t, result, []byte(expected))
 	})
 
+	t.Run("Success response w/ state", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"email":"test+SI0388B7681C@yellow.com","uid":"SI0388B7681C","role":"service_account","level":3,"state":"active","user":{"email":"test@test.com","uid":"IDCA2AC08296","role":"superadmin","level":3,"otp":true,"state":"active","referral_uid":"","data":"{\"onboarding\":true,\"language\":\"en\"}"},"created_at":"2021-02-15T10:15:18Z","updated_at":"2021-02-15T10:15:18Z"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateServiceAccountParams{
+			OwnerUID: "IDCA2AC08296",
+			Role:     "service_account",
+			State: 	  "active",
+		}
+		serviceAccount, apiError := client.CreateServiceAccount(params)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(serviceAccount)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
 	t.Run("Error user doesn't exist", func(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
@@ -228,5 +251,55 @@ func TestDeleteServiceAccountByUID(t *testing.T) {
 		assert.Equal(t, apiError.StatusCode, 500)
 		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, serviceAccount)
+	})
+}
+
+func TestCreateAPIKeys(t *testing.T) {
+	t.Run("Successful response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"kid":"133742","algorithm":"HS256","scope":["trade"],"state":"active","secret":"something_in_the_way","created_at":"2021-02-15T10:15:18Z","updated_at":"2021-02-15T10:15:18Z"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateAPIKeyParams{
+			UID:       "IDCA2AC08296",
+			Algorithm: "HS256",
+			Scopes:    "trade",
+		}
+		apiKey, apiError := client.CreateAPIKey(params)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(apiKey)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error could not save secret", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 422,
+				Error:      "api_key.could_not_save_secret",
+			},
+		}
+
+		params := CreateAPIKeyParams{
+			UID:       "IDCA2AC08296",
+			Algorithm: "HS256",
+			Scopes:    "trade",
+		}
+		apiKey, apiError := client.CreateAPIKey(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 422)
+		assert.Equal(t, apiError.Error, "api_key.could_not_save_secret")
+		assert.Nil(t, apiKey)
 	})
 }
