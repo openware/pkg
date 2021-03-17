@@ -244,3 +244,33 @@ func (p *Client) UpdateMarket(params UpdateMarketParams) (*Market, *mngapi.APIEr
 
 	return market, nil
 }
+
+func (p *Client) CreateMarket(params CreateMarketParams) (*Market, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "markets/new", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	market := &Market{}
+	err := json.Unmarshal([]byte(res), market)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return market, nil
+}
+
+func (p *Client) GetMarketByID(id string) (*Market, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, fmt.Sprintf("markets/%v", id), nil)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	market := &Market{}
+	err := json.Unmarshal([]byte(res), market)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return market, nil
+}

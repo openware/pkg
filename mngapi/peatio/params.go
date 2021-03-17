@@ -66,6 +66,19 @@ type UpdateEngineParams struct {
 	Secret string `json:"secret"`
 }
 
+type CreateMarketParams struct {
+	BaseCurrency    string `json:"base_currency"`
+	QuoteCurrency   string `json:"quote_currency"`
+	State           string `json:"state"`
+	EngineName      string `json:"engine_name"`
+	AmountPrecision int64  `json:"amount_precision"`
+	PricePrecision  int64  `json:"price_precision"`
+	MinPrice        string `json:"min_price"`
+	MaxPrice        string `json:"max_price"`
+	MinAmount       string `json:"min_amount"`
+	Position        int64  `json:"position"`
+}
+
 type UpdateMarketParams struct {
 	ID       string `json:"id"`
 	EngineID string `json:"engine_id"`
