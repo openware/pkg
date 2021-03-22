@@ -7,6 +7,7 @@ type CreateServiceAccountParams struct {
 	UID      string `json:"service_account_uid,omitempty"`
 	Email    string `json:"service_account_email,omitempty"`
 	State    string `json:"service_account_state,omitempty"`
+	Level    int    `json:"service_account_level,omitempty"`
 }
 
 // CreateAPIKeyParams contain all the allowed params for API Key creation
