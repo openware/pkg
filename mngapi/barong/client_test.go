@@ -73,6 +73,7 @@ func TestCreateServiceAccount(t *testing.T) {
 		params := CreateServiceAccountParams{
 			OwnerUID: "IDCA2AC08296",
 			Role:     "service_account",
+			Level:    2,
 		}
 		serviceAccount, apiError := client.CreateServiceAccount(params)
 		assert.Nil(t, apiError)
@@ -95,7 +96,8 @@ func TestCreateServiceAccount(t *testing.T) {
 		params := CreateServiceAccountParams{
 			OwnerUID: "IDCA2AC08296",
 			Role:     "service_account",
-			State: 	  "active",
+			State:    "active",
+			Level:    2,
 		}
 		serviceAccount, apiError := client.CreateServiceAccount(params)
 		assert.Nil(t, apiError)
@@ -120,6 +122,7 @@ func TestCreateServiceAccount(t *testing.T) {
 		params := CreateServiceAccountParams{
 			OwnerUID: "ID123456789",
 			Role:     "service_account",
+			Level:    2,
 		}
 		serviceAccount, apiError := client.CreateServiceAccount(params)
 
@@ -142,6 +145,7 @@ func TestCreateServiceAccount(t *testing.T) {
 		params := CreateServiceAccountParams{
 			OwnerUID: "ID123456789",
 			Role:     "service_account",
+			Level:    2,
 		}
 		serviceAccount, apiError := client.CreateServiceAccount(params)
 
@@ -164,6 +168,7 @@ func TestCreateServiceAccount(t *testing.T) {
 		params := CreateServiceAccountParams{
 			OwnerUID: "ID123456789",
 			Role:     "service_account",
+			Level:    2,
 		}
 		serviceAccount, apiError := client.CreateServiceAccount(params)
 
