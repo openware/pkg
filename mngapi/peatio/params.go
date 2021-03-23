@@ -80,7 +80,47 @@ type CreateMarketParams struct {
 }
 
 type UpdateMarketParams struct {
-	ID       string `json:"id"`
-	EngineID string `json:"engine_id"`
-	// Add more params
+	ID        string `json:"id"`
+	EngineID  string `json:"engine_id,omitempty"`
+	MinPrice  string `json:"min_price,omitempty"`
+	MaxPrice  string `json:"max_price,omitempty"`
+	MinAmount string `json:"min_amount,omitempty"`
+}
+
+type CreateCurrencyParams struct {
+	Code              string `json:"code"`
+	Type              string `json:"type,omitempty"`
+	BaseFactor        int64  `json:"base_factor,omitempty"`
+	Position          int64  `json:"position,omitempty"`
+	BlockchainKey     string `json:"blockchain_key,omitempty"`
+	ParentID          string `json:"parent_id,omitempty"`
+	DepositFee        string `json:"deposit_fee,omitempty"`
+	MinDepositAmount  string `json:"min_deposit_amount,omitempty"`
+	WithdrawFee       string `json:"withdraw_fee,omitempty"`
+	MinWithdrawAmount string `json:"min_withdraw_amount,omitempty"`
+	WithdrawLimit24   string `json:"withdraw_limit_24h,omitempty"`
+	WithdrawLimit72   string `json:"withdraw_limit_72h,omitempty"`
+	DepositEnabled    bool   `json:"deposit_enabled,omitempty"`
+	WithdrawEnabled   bool   `json:"withdrawal_enabled,omitempty"`
+	Precision         int64  `json:"precision,omitempty"`
+	Price             string `json:"price,omitempty"`
+	IconURL           string `json:"icon_url,omitempty"`
+	Description       string `json:"description,omitempty"`
+	Homepage          string `json:"homepage,omitempty"`
+}
+
+type UpdateCurrencyParams struct {
+	ID                string `json:"id"`
+	Name              string `json:"name,omitempty"`
+	DepositFee        string `json:"deposit_fee,omitempty"`
+	MinDepositAmount  string `json:"min_deposit_amount,omitempty"`
+	WithdrawFee       string `json:"withdraw_fee,omitempty"`
+	MinWithdrawAmount string `json:"min_withdraw_amount,omitempty"`
+	WithdrawLimit24   string `json:"withdraw_limit_24h,omitempty"`
+	WithdrawLimit72   string `json:"withdraw_limit_72h,omitempty"`
+	Price             string `json:"price,omitempty"`
+	Precision         int64  `json:"precision,omitempty"`
+	Position          int64  `json:"position,omitempty"`
+	DepositEnabled    bool   `json:"deposit_enabled,omitempty"`
+	WithdrawEnabled   bool   `json:"withdrawal_enabled,omitempty"`
 }

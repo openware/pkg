@@ -41,6 +41,36 @@ func (p *Client) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
 	return currency, nil
 }
 
+func (p *Client) CreateCurrency(params CreateCurrencyParams) (*Currency, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "currencies/create", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	currency := &Currency{}
+	err := json.Unmarshal([]byte(res), currency)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return currency, nil
+}
+
+func (p *Client) UpdateCurrency(params UpdateCurrencyParams) (*Currency, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPut, "currencies/update", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	currency := &Currency{}
+	err := json.Unmarshal([]byte(res), currency)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return currency, nil
+}
+
 // CreateWithdraw call peatio management api to create new withdraw
 func (p *Client) CreateWithdraw(params CreateWithdrawParams) (*Withdraw, *mngapi.APIError) {
 	res, apiError := p.mngapiClient.Request(http.MethodPost, "withdraws/new", params)

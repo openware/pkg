@@ -21,6 +21,7 @@ type Currency struct {
 	Description         string                 `json:"descritpion"`
 	Homepage            string                 `json:"homepage"`
 	Price               string                 `json:"price"`
+	ParentID            string                 `json:"parent_id"`
 	ExplorerTransaction string                 `json:"explorer_transaction"`
 	ExplorerAddress     string                 `json:"explorer_address"`
 	Type                string                 `json:"type"`
