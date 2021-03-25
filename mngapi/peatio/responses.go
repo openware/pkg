@@ -102,3 +102,12 @@ type Market struct {
 	CreatedAt       string `json:"created_at"`
 	UpdatedAt       string `json:"updated_at"`
 }
+
+type Member struct {
+	UID   string `json:"uid"`
+	Email string `json:"email"`
+	Level int    `json:"level"`
+	Role  string `json:"role"`
+	Group string `json:"group"`
+	State string `json:"state"`
+}
