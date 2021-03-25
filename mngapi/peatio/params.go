@@ -87,6 +87,10 @@ type UpdateMarketParams struct {
 	MinAmount string `json:"min_amount,omitempty"`
 }
 
+type CurrenciesListParams struct {
+	Type string `json:"type,omitempty"`
+}
+
 type CreateCurrencyParams struct {
 	Code                string `json:"code"`
 	Type                string `json:"type,omitempty"`
