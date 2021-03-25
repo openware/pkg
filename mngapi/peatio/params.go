@@ -126,3 +126,12 @@ type UpdateCurrencyParams struct {
 	DepositEnabled      bool   `json:"deposit_enabled,omitempty"`
 	WithdrawEnabled     bool   `json:"withdrawal_enabled,omitempty"`
 }
+
+type CreateMemberParams struct {
+	Email string `json:"email"`
+	UID   string `json:"uid"`
+	Level int    `json:"level"`
+	Role  string `json:"role"`
+	State string `json:"state"`
+	Group string `json:"group"`
+}

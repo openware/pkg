@@ -304,3 +304,18 @@ func (p *Client) GetMarketByID(id string) (*Market, *mngapi.APIError) {
 
 	return market, nil
 }
+
+func (p *Client) CreateMember(params CreateMemberParams) (*Member, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "members", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	member := &Member{}
+	err := json.Unmarshal([]byte(res), member)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return member, nil
+}
