@@ -41,6 +41,22 @@ func (p *Client) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
 	return currency, nil
 }
 
+// GetCurrenciesList call peatio management api to get currency information by code name
+func (p *Client) GetCurrenciesList(params CurrenciesListParams) (*[]Currency, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "currencies/list", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	currencies := []Currency{}
+	err := json.Unmarshal([]byte(res), &currencies)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return &currencies, nil
+}
+
 func (p *Client) CreateCurrency(params CreateCurrencyParams) (*Currency, *mngapi.APIError) {
 	res, apiError := p.mngapiClient.Request(http.MethodPost, "currencies/create", params)
 	if apiError != nil {
