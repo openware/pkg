@@ -335,3 +335,67 @@ func (p *Client) CreateMember(params CreateMemberParams) (*Member, *mngapi.APIEr
 
 	return member, nil
 }
+
+// CreateWallet call peatio management api to create wallet
+func (p *Client) CreateWallet(params CreateWalletParams) (*Wallet, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "wallets/new", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	wallet := &Wallet{}
+	err := json.Unmarshal([]byte(res), wallet)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return wallet, nil
+}
+
+// UpdateWallet call peatio management api to update wallet
+func (p *Client) UpdateWallet(params UpdateWalletParams) (*Wallet, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "wallets/update", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	wallet := &Wallet{}
+	err := json.Unmarshal([]byte(res), wallet)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return wallet, nil
+}
+
+// GetWallets call peatio management api to get wallets
+func (p *Client) GetWallets() ([]*Wallet, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "wallets", nil)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	wallets := make([]*Wallet, 0)
+
+	err := json.Unmarshal([]byte(res), &wallets)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return wallets, nil
+}
+
+func (p *Client) GetWalletByID(id int) (*Wallet, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, fmt.Sprintf("wallets/%v", id), nil)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	wallet := &Wallet{}
+	err := json.Unmarshal([]byte(res), wallet)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return wallet, nil
+}

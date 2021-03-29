@@ -139,3 +139,32 @@ type CreateMemberParams struct {
 	State string `json:"state"`
 	Group string `json:"group"`
 }
+
+type Settings struct {
+	URI    string `json:"uri,omitempty"`
+	Secret string `json:"secret,omitempty"`
+}
+type CreateWalletParams struct {
+	BlockchainKey string   `json:"blockchain_key"`
+	Name          string   `json:"name"`
+	Kind          string   `json:"kind"`
+	Gateway       string   `json:"gateway"`
+	Address       string   `json:"address"`
+	Currencies    []string `json:"currencies,omitempty"`
+	Settings      Settings `json:"settings,omitempty"`
+	MaxBalance    string   `json:"max_balance,omitempty"`
+	Status        string   `json:"status,omitempty"`
+}
+
+type UpdateWalletParams struct {
+	ID            string   `json:"id"`
+	BlockchainKey string   `json:"blockchain_key,omitempty"`
+	Name          string   `json:"name,omitempty"`
+	Address       string   `json:"address,omitempty"`
+	Gateway       string   `json:"gateway,omitempty"`
+	Kind          string   `json:"kind,omitempty"`
+	Currencies    []string `json:"currencies,omitempty"`
+	Settings      Settings `json:"settings,omitempty"`
+	MaxBalance    string   `json:"max_balance,omitempty"`
+	Status        string   `json:"status,omitempty"`
+}
