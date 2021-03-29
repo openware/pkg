@@ -15,6 +15,7 @@ type CreateWithdrawParams struct {
 	Note          string  `json:"note,omitempty"`
 	Action        string  `json:"action,omitempty"`
 	TransferType  string  `json:"transfer_type,omitempty"`
+	AdditionalFee bool    `json:"additional_fee,omitempty"`
 }
 
 type GenerateDepositAddressParams struct {
