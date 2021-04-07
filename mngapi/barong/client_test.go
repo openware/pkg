@@ -308,3 +308,55 @@ func TestCreateAPIKeys(t *testing.T) {
 		assert.Nil(t, apiKey)
 	})
 }
+
+func TestCreateAttachment(t *testing.T) {
+	t.Run("Successful response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"id":1,"user_uid":"UID388B768"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateAttachmentParams{
+			UID:      "UID388B768",
+			FileName: "test",
+			FileExt:  ".png",
+			Upload:   "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+		}
+		attachment, apiError := client.CreateAttachment(params)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(attachment)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error could not save secret", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 422,
+				Error:      "attachment.could_not_save",
+			},
+		}
+
+		params := CreateAttachmentParams{
+			UID:      "IDCA2AC08296",
+			FileName: "test",
+			FileExt:  ".png",
+			Upload:   "iVBORw0K",
+		}
+		apiKey, apiError := client.CreateAttachment(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 422)
+		assert.Equal(t, apiError.Error, "attachment.could_not_save")
+		assert.Nil(t, apiKey)
+	})
+}

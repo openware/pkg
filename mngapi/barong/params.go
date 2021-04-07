@@ -16,3 +16,11 @@ type CreateAPIKeyParams struct {
 	UID       string `json:"uid,omitempty"`
 	Scopes    string `json:"scopes,omitempty"`
 }
+
+// CreateAttachmentParams contain all the allowed params for API Key creation
+type CreateAttachmentParams struct {
+	UID      string `json:"uid,omitempty"`
+	FileName string `json:"filename,omitempty"`
+	FileExt  string `json:"file_ext,omitempty"`
+	Upload   string `json:"upload,omitempty"`
+}
