@@ -1,0 +1,17 @@
+module github.com/openware/pkg
+
+go 1.16
+
+require (
+	github.com/alicebob/miniredis/v2 v2.14.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/onsi/ginkgo v1.16.1 // indirect
+	github.com/onsi/gomega v1.11.0 // indirect
+	github.com/stretchr/testify v1.7.0
+	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
+	gopkg.in/yaml.v2 v2.4.0
+	gorm.io/driver/mysql v1.0.5
+	gorm.io/driver/sqlite v1.1.4
+	gorm.io/gorm v1.21.8
+)
