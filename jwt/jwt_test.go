@@ -70,4 +70,15 @@ func TestAuth_JWT(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
+
+	t.Run("should validate jwt with referral_id", func(t *testing.T) {
+		token, err := ForgeToken("uid", "email", "role", 3, ks.PrivateKey, jwt.MapClaims{"referral_id": 3})
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, err = ParseAndValidate(token, ks.PublicKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
 }
