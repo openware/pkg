@@ -618,6 +618,10 @@ func StringToOrderType(oType string) (Type, error) {
 	case strings.EqualFold(oType, StopLimit.String()),
 		strings.EqualFold(oType, "EXCHANGE STOP LIMIT"):
 		return StopLimit, nil
+	case strings.EqualFold(oType, TakeProfitLimit.String()),
+		strings.EqualFold(oType, "TAKE PROFIT LIMIT"),
+		strings.EqualFold(oType, "TAKE_PROFIT_LIMIT"):
+		return TakeProfitLimit, nil
 	case strings.EqualFold(oType, TrailingStop.String()),
 		strings.EqualFold(oType, "trailing stop"),
 		strings.EqualFold(oType, "EXCHANGE TRAILING STOP"):

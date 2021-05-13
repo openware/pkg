@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openware/pkg/currency"
 	"github.com/openware/pkg/asset"
+	"github.com/openware/pkg/currency"
 	"github.com/openware/pkg/validate"
 )
 
@@ -502,6 +502,8 @@ var stringsToOrderType = []struct {
 	{"sToP", Stop, nil},
 	{"sToP LiMit", StopLimit, nil},
 	{"ExchangE sToP Limit", StopLimit, nil},
+	{"take_profit_limit", TakeProfitLimit, nil},
+	{"tAkE pROfIT liMit", TakeProfitLimit, nil},
 	{"trailing_stop", TrailingStop, nil},
 	{"TRAILING_STOP", TrailingStop, nil},
 	{"tRaIlInG_sToP", TrailingStop, nil},

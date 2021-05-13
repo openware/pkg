@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/openware/pkg/currency"
 	"github.com/openware/pkg/asset"
+	"github.com/openware/pkg/currency"
 )
 
 // var error definitions
@@ -252,6 +252,7 @@ const (
 	ImmediateOrCancel Type = "IMMEDIATE_OR_CANCEL"
 	Stop              Type = "STOP"
 	StopLimit         Type = "STOP LIMIT"
+	TakeProfitLimit	  Type = "TAKE_PROFIT_LIMIT"
 	StopMarket        Type = "STOP MARKET"
 	TakeProfit        Type = "TAKE PROFIT"
 	TakeProfitMarket  Type = "TAKE PROFIT MARKET"
