@@ -1,7 +1,7 @@
 package exchangeratehost
 
 import (
-	"github.com/openware/pkg/currency/forexprovider/forexprovider/base"
+	"github.com/openware/pkg/currency/forexprovider/base"
 	"github.com/thrasher-corp/gocryptotrader/exchanges/request"
 )
 
