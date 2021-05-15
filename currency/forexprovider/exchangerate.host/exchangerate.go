@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/thrasher-corp/gocryptotrader/common"
+	"github.com/openware/pkg/common"
 	"github.com/openware/pkg/currency/forexprovider/base"
-	"github.com/thrasher-corp/gocryptotrader/exchanges/request"
+	"github.com/openware/pkg/request"
 )
 
 // A client for the exchangerate.host API. NOTE: The format and callback
