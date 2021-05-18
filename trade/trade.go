@@ -10,9 +10,13 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/openware/pkg/common"
-	"github.com/openware/pkg/log"
+	"github.com/openware/pkg/currency"
+	"github.com/openware/pkg/database"
+	tradesql "github.com/openware/pkg/database/repository/trade"
+	"github.com/openware/pkg/asset"
 	"github.com/openware/pkg/kline"
 	"github.com/openware/pkg/order"
+	"github.com/openware/pkg/log"
 )
 
 // Setup creates the trade processor if trading is supported
@@ -25,7 +29,9 @@ func (p *Processor) setup(wg *sync.WaitGroup) {
 
 // AddTradesToBuffer will push trade data onto the buffer
 func AddTradesToBuffer(exchangeName string, data ...Data) error {
-
+	if database.DB == nil || database.DB.Config == nil || !database.DB.Config.Enabled {
+		return nil
+	}
 	if len(data) == 0 {
 		return nil
 	}
@@ -100,12 +106,89 @@ func (p *Processor) Run(wg *sync.WaitGroup) {
 			ticker.Stop()
 			return
 		}
-        // TODO: Move SaveTradesToDatabase to influxdb
-		// err := SaveTradesToDatabase(bufferCopy...)
-		// if err != nil {
-		// 	log.Error(log.Trade, err)
-		// }
+		err := SaveTradesToDatabase(bufferCopy...)
+		if err != nil {
+			log.Error(log.Trade, err)
+		}
 	}
+}
+
+// SaveTradesToDatabase converts trades and saves results to database
+func SaveTradesToDatabase(trades ...Data) error {
+	sqlTrades, err := tradeToSQLData(trades...)
+	if err != nil {
+		return err
+	}
+	return tradesql.Insert(sqlTrades...)
+}
+
+// GetTradesInRange calls db function to return trades in range
+// to minimise tradesql package usage
+func GetTradesInRange(exchangeName, assetType, base, quote string, startDate, endDate time.Time) ([]Data, error) {
+	if exchangeName == "" || assetType == "" || base == "" || quote == "" || startDate.IsZero() || endDate.IsZero() {
+		return nil, errors.New("invalid arguments received")
+	}
+	results, err := tradesql.GetInRange(exchangeName, assetType, base, quote, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+	return SQLDataToTrade(results...)
+}
+
+func tradeToSQLData(trades ...Data) ([]tradesql.Data, error) {
+	sort.Sort(ByDate(trades))
+	var results []tradesql.Data
+	for i := range trades {
+		tradeID, err := uuid.NewV4()
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, tradesql.Data{
+			ID:        tradeID.String(),
+			Timestamp: trades[i].Timestamp,
+			Exchange:  trades[i].Exchange,
+			Base:      trades[i].CurrencyPair.Base.String(),
+			Quote:     trades[i].CurrencyPair.Quote.String(),
+			AssetType: trades[i].AssetType.String(),
+			Price:     trades[i].Price,
+			Amount:    trades[i].Amount,
+			Side:      trades[i].Side.String(),
+			TID:       trades[i].TID,
+		})
+	}
+	return results, nil
+}
+
+// SQLDataToTrade converts sql data to glorious trade data
+func SQLDataToTrade(dbTrades ...tradesql.Data) (result []Data, err error) {
+	for i := range dbTrades {
+		var cp currency.Pair
+		cp, err = currency.NewPairFromStrings(dbTrades[i].Base, dbTrades[i].Quote)
+		if err != nil {
+			return nil, err
+		}
+		cp = cp.Upper()
+		var a = asset.Item(dbTrades[i].AssetType)
+		if !a.IsValid() {
+			return nil, fmt.Errorf("invalid asset type %v", a)
+		}
+		var s order.Side
+		s, err = order.StringToOrderSide(dbTrades[i].Side)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, Data{
+			ID:           uuid.FromStringOrNil(dbTrades[i].ID),
+			Timestamp:    dbTrades[i].Timestamp.UTC(),
+			Exchange:     dbTrades[i].Exchange,
+			CurrencyPair: cp.Upper(),
+			AssetType:    a,
+			Price:        dbTrades[i].Price,
+			Amount:       dbTrades[i].Amount,
+			Side:         s,
+		})
+	}
+	return result, nil
 }
 
 // ConvertTradesToCandles turns trade data into kline.Items

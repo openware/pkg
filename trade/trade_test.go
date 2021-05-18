@@ -6,31 +6,36 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gofrs/uuid"
+	"github.com/openware/pkg/common"
 	"github.com/openware/pkg/currency"
+	"github.com/openware/pkg/database"
+	"github.com/openware/pkg/database/drivers"
+	tradesql "github.com/openware/pkg/database/repository/trade"
 	"github.com/openware/pkg/asset"
 	"github.com/openware/pkg/kline"
 	"github.com/openware/pkg/order"
+	"github.com/openware/pkg/log"
 )
 
-// TODO: Migrate to influexDB using mock
 func TestAddTradesToBuffer(t *testing.T) {
 	t.Parallel()
 	processor.mutex.Lock()
 	processor.bufferProcessorInterval = BufferProcessorIntervalTime
 	processor.mutex.Unlock()
-	// dbConf := database.Config{
-	// 	Enabled: true,
-	// 	Driver:  database.DBSQLite3,
-	// 	ConnectionDetails: drivers.ConnectionDetails{
-	// 		Host:     "localhost",
-	// 		Database: "./rpctestdb",
-	// 	},
-	// }
+	dbConf := database.Config{
+		Enabled: true,
+		Driver:  database.DBSQLite3,
+		ConnectionDetails: drivers.ConnectionDetails{
+			Host:     "localhost",
+			Database: "./rpctestdb",
+		},
+	}
 	var wg sync.WaitGroup
 	wg.Add(1)
 	processor.setup(&wg)
 	wg.Wait()
-	// database.DB.Config = &dbConf
+	database.DB.Config = &dbConf
 	cp, _ := currency.NewPairFromString("BTC-USD")
 	err := AddTradesToBuffer("test!", []Data{
 		{
@@ -92,63 +97,62 @@ func TestAddTradesToBuffer(t *testing.T) {
 	processor.mutex.Unlock()
 }
 
-// TODO: Migrate to influexDB using mock
-// func TestSqlDataToTrade(t *testing.T) {
-// 	t.Parallel()
-// 	uuiderino, _ := uuid.NewV4()
-// 	data, err := SQLDataToTrade(sqltrade.Data{
-// 		ID:        uuiderino.String(),
-// 		Timestamp: time.Time{},
-// 		Exchange:  "hello",
-// 		Base:      currency.BTC.String(),
-// 		Quote:     currency.USD.String(),
-// 		AssetType: "spot",
-// 		Price:     1337,
-// 		Amount:    1337,
-// 		Side:      "buy",
-// 	})
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	if len(data) != 1 {
-// 		t.Fatal("unexpected scenario")
-// 	}
-// 	if data[0].Side != order.Buy {
-// 		t.Error("expected buy side")
-// 	}
-// 	if data[0].CurrencyPair.String() != "BTCUSD" {
-// 		t.Errorf("expected \"BTCUSD\", got %v", data[0].CurrencyPair)
-// 	}
-// 	if data[0].AssetType != asset.Spot {
-// 		t.Error("expected spot")
-// 	}
-// }
-// 
-// func TestTradeToSQLData(t *testing.T) {
-// 	t.Parallel()
-// 	cp := currency.NewPair(currency.BTC, currency.USD)
-// 	sqlData, err := tradeToSQLData(Data{
-// 		Timestamp:    time.Now(),
-// 		Exchange:     "test!",
-// 		CurrencyPair: cp,
-// 		AssetType:    asset.Spot,
-// 		Price:        1337,
-// 		Amount:       1337,
-// 		Side:         order.Buy,
-// 	})
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	if len(sqlData) != 1 {
-// 		t.Fatal("unexpected result")
-// 	}
-// 	if sqlData[0].Base != cp.Base.String() {
-// 		t.Errorf("expected \"BTC\", got %v", sqlData[0].Base)
-// 	}
-// 	if sqlData[0].AssetType != asset.Spot.String() {
-// 		t.Error("expected spot")
-// 	}
-// }
+func TestSqlDataToTrade(t *testing.T) {
+	t.Parallel()
+	uuiderino, _ := uuid.NewV4()
+	data, err := SQLDataToTrade(sqltrade.Data{
+		ID:        uuiderino.String(),
+		Timestamp: time.Time{},
+		Exchange:  "hello",
+		Base:      currency.BTC.String(),
+		Quote:     currency.USD.String(),
+		AssetType: "spot",
+		Price:     1337,
+		Amount:    1337,
+		Side:      "buy",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	if len(data) != 1 {
+		t.Fatal("unexpected scenario")
+	}
+	if data[0].Side != order.Buy {
+		t.Error("expected buy side")
+	}
+	if data[0].CurrencyPair.String() != "BTCUSD" {
+		t.Errorf("expected \"BTCUSD\", got %v", data[0].CurrencyPair)
+	}
+	if data[0].AssetType != asset.Spot {
+		t.Error("expected spot")
+	}
+}
+
+func TestTradeToSQLData(t *testing.T) {
+	t.Parallel()
+	cp := currency.NewPair(currency.BTC, currency.USD)
+	sqlData, err := tradeToSQLData(Data{
+		Timestamp:    time.Now(),
+		Exchange:     "test!",
+		CurrencyPair: cp,
+		AssetType:    asset.Spot,
+		Price:        1337,
+		Amount:       1337,
+		Side:         order.Buy,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	if len(sqlData) != 1 {
+		t.Fatal("unexpected result")
+	}
+	if sqlData[0].Base != cp.Base.String() {
+		t.Errorf("expected \"BTC\", got %v", sqlData[0].Base)
+	}
+	if sqlData[0].AssetType != asset.Spot.String() {
+		t.Error("expected spot")
+	}
+}
 
 func TestConvertTradesToCandles(t *testing.T) {
 	t.Parallel()
@@ -232,19 +236,18 @@ func TestFilterTradesByTime(t *testing.T) {
 	}
 }
 
-// TODO: Migrate to influexDB using mock
-// func TestSaveTradesToDatabase(t *testing.T) {
-// 	t.Parallel()
-// 	err := SaveTradesToDatabase(Data{})
-// 	if err != nil && err.Error() != "exchange name/uuid not set, cannot insert" {
-// 		t.Error(err)
-// 	}
-// }
-// 
-// func TestGetTradesInRange(t *testing.T) {
-// 	t.Parallel()
-// 	_, err := GetTradesInRange("", "", "", "", time.Time{}, time.Time{})
-// 	if err != nil && err.Error() != "invalid arguments received" {
-// 		t.Error(err)
-// 	}
-// }
+func TestSaveTradesToDatabase(t *testing.T) {
+	t.Parallel()
+	err := SaveTradesToDatabase(Data{})
+	if err != nil && err.Error() != "exchange name/uuid not set, cannot insert" {
+		t.Error(err)
+	}
+}
+
+func TestGetTradesInRange(t *testing.T) {
+	t.Parallel()
+	_, err := GetTradesInRange("", "", "", "", time.Time{}, time.Time{})
+	if err != nil && err.Error() != "invalid arguments received" {
+		t.Error(err)
+	}
+}
