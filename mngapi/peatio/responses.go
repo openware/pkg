@@ -73,7 +73,7 @@ type Deposit struct {
 	CreatedAt               string  `json:"created_at"`
 	CompletedAt             *string `json:"completed_at"`
 	BlockchainTxID          string  `json:"blockchain_txid,omitempty"`
-	BlockchainConfirmations uint64  `json:"blockchain_confirmations,string,omitempty"`
+	BlockchainConfirmations string  `json:"blockchain_confirmations,omitempty"`
 	TransferType            string  `json:"transfer_type"`
 }
 
