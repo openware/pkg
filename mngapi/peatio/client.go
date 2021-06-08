@@ -203,7 +203,7 @@ func (p *Client) GetDeposits(params GetDepositsParams) ([]*Deposit, *mngapi.APIE
 	deposits := make([]*Deposit, 0)
 	err := json.Unmarshal([]byte(res), &deposits)
 	if err != nil {
-		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+		return nil, &mngapi.APIError{StatusCode: 500, Error: fmt.Sprintf("payload: %s; error: %s", res, err.Error())}
 	}
 
 	return deposits, nil
