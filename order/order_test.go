@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openware/pkg/currency"
 	"github.com/openware/pkg/asset"
+	"github.com/openware/pkg/currency"
 	"github.com/openware/pkg/validate"
+	"github.com/shopspring/decimal"
 )
 
 var errValidationCheckFailed = errors.New("validation check failed")
@@ -74,7 +75,7 @@ func TestValidate(t *testing.T) {
 			Submit: &Submit{Pair: testPair,
 				Side:      Ask,
 				Type:      Limit,
-				Amount:    1,
+				Amount:    decimal.NewFromInt(1),
 				AssetType: asset.Spot},
 		}, // valid pair, order side, type, amount but invalid price
 		{
@@ -82,8 +83,8 @@ func TestValidate(t *testing.T) {
 			Submit: &Submit{Pair: testPair,
 				Side:      Ask,
 				Type:      Limit,
-				Amount:    1,
-				Price:     1000,
+				Amount:    decimal.NewFromInt(1),
+				Price:     decimal.NewFromInt(1000),
 				AssetType: asset.Spot},
 			ValidOpts: validate.Check(func() error { return errValidationCheckFailed }),
 		}, // custom validation error check
@@ -92,8 +93,8 @@ func TestValidate(t *testing.T) {
 			Submit: &Submit{Pair: testPair,
 				Side:      Ask,
 				Type:      Limit,
-				Amount:    1,
-				Price:     1000,
+				Amount:    decimal.NewFromInt(1),
+				Price:     decimal.NewFromInt(1000),
 				AssetType: asset.Spot},
 			ValidOpts: validate.Check(func() error { return nil }),
 		}, // valid order!

@@ -37,11 +37,11 @@ func (s *Submit) Validate(opt ...validate.Checker) error {
 		return ErrTypeIsInvalid
 	}
 
-	if s.Amount <= 0 {
-		return fmt.Errorf("submit validation error %w, suppled: %.8f", ErrAmountIsInvalid, s.Amount)
+	if !s.Amount.IsPositive() {
+		return fmt.Errorf("submit validation error %w, suppled: %s", ErrAmountIsInvalid, s.Amount.Round(8).String())
 	}
 
-	if s.Type == Limit && s.Price <= 0 {
+	if s.Type == Limit && !s.Price.IsPositive() {
 		return ErrPriceMustBeSetIfLimitOrder
 	}
 

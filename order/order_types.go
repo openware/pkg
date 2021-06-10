@@ -4,8 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/openware/pkg/currency"
 	"github.com/openware/pkg/asset"
+	"github.com/openware/pkg/currency"
+	"github.com/shopspring/decimal"
 )
 
 // var error definitions
@@ -33,17 +34,17 @@ type Submit struct {
 	FillOrKill        bool
 	PostOnly          bool
 	ReduceOnly        bool
-	Leverage          float64
-	Price             float64
-	Amount            float64
-	StopPrice         float64
-	LimitPriceUpper   float64
-	LimitPriceLower   float64
-	TriggerPrice      float64
-	TargetAmount      float64
-	ExecutedAmount    float64
-	RemainingAmount   float64
-	Fee               float64
+	Leverage          decimal.Decimal
+	Price             decimal.Decimal
+	Amount            decimal.Decimal
+	StopPrice         decimal.Decimal
+	LimitPriceUpper   decimal.Decimal
+	LimitPriceLower   decimal.Decimal
+	TriggerPrice      decimal.Decimal
+	TargetAmount      decimal.Decimal
+	ExecutedAmount    decimal.Decimal
+	RemainingAmount   decimal.Decimal
+	Fee               decimal.Decimal
 	Exchange          string
 	InternalOrderID   string
 	ID                string
@@ -67,9 +68,9 @@ type SubmitResponse struct {
 	IsOrderPlaced bool
 	FullyMatched  bool
 	OrderID       string
-	Rate          float64
-	Fee           float64
-	Cost          float64
+	Rate          decimal.Decimal
+	Fee           decimal.Decimal
+	Cost          decimal.Decimal
 	Trades        []TradeHistory
 }
 
