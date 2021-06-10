@@ -2,32 +2,22 @@ package currency
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 )
 
 func TestNewConversionFromString(t *testing.T) {
+	storage.SetDefaults()
 	expected := "AUDUSD"
 	conv, err := NewConversionFromString(expected)
-	if err != nil {
-		t.Error(err)
-	}
-	if conv.String() != expected {
-		t.Errorf("NewConversion() error expected %s but received %s",
-			expected,
-			conv)
-	}
+	require.Nil(t, err)
+	require.Equal(t, expected, conv.String())
 
 	newexpected := strings.ToLower(expected)
 	conv, err = NewConversionFromString(newexpected)
-	if err != nil {
-		t.Error(err)
-	}
-	if conv.String() != newexpected {
-		t.Errorf("NewConversion() error expected %s but received %s",
-			newexpected,
-			conv)
-	}
+	require.Nil(t, err)
+	require.Equal(t, newexpected, conv.String())
 }
 
 func TestNewConversionFromStrings(t *testing.T) {

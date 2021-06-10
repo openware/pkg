@@ -7,17 +7,19 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/openware/pkg/common"
 	"github.com/openware/pkg/currency/forexprovider/base"
-	"github.com/openware/pkg/request"
 	"github.com/openware/pkg/log"
+	"github.com/openware/pkg/request"
 )
 
 // Setup sets appropriate values for CurrencyLayer
 func (e *ExchangeRates) Setup(config base.Settings) error {
 	e.Name = config.Name
 	e.Enabled = config.Enabled
+	e.APIKey = config.APIKey
 	e.RESTPollingDelay = config.RESTPollingDelay
 	e.Verbose = config.Verbose
 	e.PrimaryProvider = config.PrimaryProvider
@@ -85,7 +87,14 @@ func (e *ExchangeRates) GetLatestRates(baseCurrency, symbols string) (Rates, err
 // all supported currencies
 func (e *ExchangeRates) GetHistoricalRates(date, baseCurrency string, symbols []string) (HistoricalRates, error) {
 	var resp HistoricalRates
+
 	v := url.Values{}
+
+	_, err := time.Parse("2006-01-02", date)
+
+	if err != nil {
+		return resp, err
+	}
 
 	if len(symbols) > 0 {
 		s := cleanCurrencies(baseCurrency, strings.Join(symbols, ","))
@@ -112,9 +121,21 @@ func (e *ExchangeRates) GetTimeSeriesRates(startDate, endDate, baseCurrency stri
 		return resp, errors.New("startDate and endDate params must be set")
 	}
 
+	_, errStart := time.Parse(dateLayout, startDate)
+
+	if errStart != nil {
+		return resp, errors.New("startDate is in invalid format")
+	}
+
+	_, errEnd := time.Parse(dateLayout, endDate)
+
+	if errEnd != nil {
+		return resp, errors.New("endDate is in invalid format")
+	}
+
 	v := url.Values{}
-	v.Set("start_at", startDate)
-	v.Set("end_at", endDate)
+	v.Set("start_date", startDate)
+	v.Set("end_date", endDate)
 
 	if len(baseCurrency) > 0 {
 		v.Set("base", baseCurrency)
@@ -151,6 +172,7 @@ func (e *ExchangeRates) GetSupportedCurrencies() ([]string, error) {
 
 // SendHTTPRequest sends a HTTPS request to the desired endpoint and returns the result
 func (e *ExchangeRates) SendHTTPRequest(endPoint string, values url.Values, result interface{}) error {
+	values.Add("api_key", e.APIKey)
 	path := common.EncodeURLValues(exchangeRatesAPI+"/"+endPoint, values)
 	err := e.Requester.SendPayload(context.Background(), &request.Item{
 		Method:  http.MethodGet,
