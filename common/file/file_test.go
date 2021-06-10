@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -278,6 +279,8 @@ func TestWriterNoPermissionFails(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	usr, _ := user.Current()
+	fmt.Println("user", usr)
 	_, err = Writer(filepath.Join(temp, "path", "to", "somefile"))
 	if err == nil {
 		t.Error("Expected to fail when no permissions, but writer succeeded")
