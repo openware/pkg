@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -269,6 +270,12 @@ func TestWriterNoPermissionFails(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Skip file permissions")
 	}
+	usr, _ := user.Current()
+
+	if usr.Name == "root" && runtime.GOOS != "windows" {
+		t.Skip("test run with root user")
+	}
+
 	temp, err := ioutil.TempDir("", "")
 	if err != nil {
 		t.Fatal(err)
@@ -278,6 +285,7 @@ func TestWriterNoPermissionFails(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	_, err = Writer(filepath.Join(temp, "path", "to", "somefile"))
 	if err == nil {
 		t.Error("Expected to fail when no permissions, but writer succeeded")

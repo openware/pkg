@@ -5,6 +5,7 @@ import (
 )
 
 func TestGetDefaultExchangeRates(t *testing.T) {
+	setupMock()
 	rates, err := GetDefaultExchangeRates()
 	if err != nil {
 		t.Error("GetDefaultExchangeRates() err", err)
@@ -19,6 +20,7 @@ func TestGetDefaultExchangeRates(t *testing.T) {
 }
 
 func TestGetExchangeRates(t *testing.T) {
+	setupMock()
 	rates, err := GetExchangeRates()
 	if err != nil {
 		t.Error("GetExchangeRates() err", err)

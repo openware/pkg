@@ -8,15 +8,16 @@ import (
 )
 
 const (
-	exchangeRatesAPI                 = "https://api.exchangeratesapi.io"
+	exchangeRatesAPI                 = "https://api.exchangeratesapi.io/v1"
 	exchangeRatesLatest              = "latest"
-	exchangeRatesHistory             = "history"
+	exchangeRatesHistory             = "timeseries"
 	exchangeRatesSupportedCurrencies = "EUR,CHF,USD,BRL,ISK,PHP,KRW,BGN,MXN," +
 		"RON,CAD,SGD,NZD,THB,HKD,JPY,NOK,HRK,ILS,GBP,DKK,HUF,MYR,RUB,TRY,IDR," +
 		"ZAR,INR,AUD,CZK,SEK,CNY,PLN"
 
 	rateLimitInterval = time.Second * 10
 	requestRate       = 10
+	dateLayout        = "2006-01-02"
 )
 
 // ExchangeRates stores the struct for the ExchangeRatesAPI API

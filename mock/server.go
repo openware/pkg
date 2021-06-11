@@ -19,7 +19,7 @@ import (
 )
 
 // DefaultDirectory defines the main mock directory
-const DefaultDirectory = "../../testdata/http_mock/"
+const DefaultDirectory = "./"
 
 const (
 	contentType           = "Content-Type"
