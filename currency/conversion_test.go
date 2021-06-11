@@ -2,13 +2,55 @@ package currency
 
 import (
 	"fmt"
+	exchangerates "github.com/openware/pkg/currency/forexprovider/exchangeratesapi.io"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"testing"
 )
 
+type mockRoundTripper struct {
+	mock.Mock
+}
+
+func (m *mockRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
+	args := m.Called(request)
+	return args.Get(0).(*http.Response), args.Error(1)
+}
+func setupMock()  {
+	mockRoundTrip := &mockRoundTripper{}
+
+	mockBodyString := `{
+    "success": true,
+    "timestamp": 1519296206,
+    "base": "AUD",
+    "date": "2021-03-17",
+    "rates": {
+        "EUR": 0.566015,
+        "AUD": 1,
+        "CAD": 1.560132,
+        "CHF": 1.154727,
+        "CNY": 7.827874,
+        "GBP": 0.882047,
+        "JPY": 132.360679,
+        "USD": 1.23396
+    }
+}`
+	mockBody := ioutil.NopCloser(strings.NewReader(mockBodyString))
+
+	mockRoundTrip.On("RoundTrip", mock.Anything).Once().Return(&http.Response{
+		StatusCode: 200,
+		Status: "OK",
+		Body: mockBody,
+	}, nil)
+
+	storage.fiatExchangeMarkets.Primary.Provider.(*exchangerates.ExchangeRates).Requester.HTTPClient.Transport = mockRoundTrip
+}
+
 func TestNewConversionFromString(t *testing.T) {
-	storage.SetDefaults()
+	setupMock()
 	expected := "AUDUSD"
 	conv, err := NewConversionFromString(expected)
 	require.Nil(t, err)
@@ -21,6 +63,7 @@ func TestNewConversionFromString(t *testing.T) {
 }
 
 func TestNewConversionFromStrings(t *testing.T) {
+	setupMock()
 	from := "AUD"
 	to := "USD"
 	expected := "AUDUSD"
@@ -38,6 +81,7 @@ func TestNewConversionFromStrings(t *testing.T) {
 }
 
 func TestNewConversion(t *testing.T) {
+	setupMock()
 	from := NewCode("AUD")
 	to := NewCode("USD")
 	expected := "AUDUSD"
@@ -55,6 +99,7 @@ func TestNewConversion(t *testing.T) {
 }
 
 func TestConversionIsInvalid(t *testing.T) {
+	setupMock()
 	from := AUD
 	to := USD
 
@@ -76,6 +121,7 @@ func TestConversionIsInvalid(t *testing.T) {
 }
 
 func TestConversionIsFiatPair(t *testing.T) {
+	setupMock()
 	from := AUD
 	to := USD
 
@@ -167,6 +213,7 @@ func TestConversionsRatesSystem(t *testing.T) {
 }
 
 func TestGetRate(t *testing.T) {
+	setupMock()
 	from := NewCode("AUD")
 	to := NewCode("USD")
 
