@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/openware/pkg/sonic/database"
 	"github.com/openware/pkg/ika"
+	"github.com/openware/pkg/sonic/database"
 )
 
 // TODO
