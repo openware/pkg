@@ -1,4 +1,4 @@
-package database_test
+package database
 
 import (
 	"io/ioutil"
@@ -6,14 +6,13 @@ import (
 	"testing"
 
 	"github.com/openware/pkg/ika"
-	"github.com/openware/pkg/sonic/database"
 )
 
 // TODO
 // Test connection to invalid config, wrong adapter, and more
 func Test_Connect(t *testing.T) {
 	t.Run("Connection to sqlite", func(t *testing.T) {
-		_, err := database.Connect(&database.Config{
+		_, err := Connect(&Config{
 			Driver: "memory",
 			Pool:   5,
 		})
@@ -23,7 +22,7 @@ func Test_Connect(t *testing.T) {
 	})
 
 	t.Run("Wrong driver", func(t *testing.T) {
-		_, err := database.Connect(&database.Config{
+		_, err := Connect(&Config{
 			Driver: "foo1",
 		})
 
@@ -33,7 +32,7 @@ func Test_Connect(t *testing.T) {
 	})
 
 	t.Run("Empty configuration", func(t *testing.T) {
-		_, err := database.Connect(&database.Config{})
+		_, err := Connect(&Config{})
 		if err == nil {
 			t.Error(err)
 		}
@@ -53,7 +52,7 @@ database:
 
 		type config struct {
 			ServerPort string          `yaml:"port"`
-			DbConfig   database.Config `yaml:"database"`
+			DbConfig   Config `yaml:"database"`
 		}
 
 		// In your application you can just create the file ( "config/config.yml" for example )
@@ -72,7 +71,7 @@ database:
 		cfg := config{}
 		ika.ReadConfig(tmpFile.Name(), &cfg)
 
-		_, err = database.Connect(&cfg.DbConfig)
+		_, err = Connect(&cfg.DbConfig)
 		if err != nil {
 			t.Error(err)
 		}
