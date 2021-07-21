@@ -21,7 +21,7 @@ type YourAppConfig struct {
 
 func LoadYourAppConfig(cfgFilePath string) (*YourAppConfig, error) {
 	cfg := &YourAppConfig{}
-	if err := ika.ReadConfig(cfgFilePath, cfg); err != nil {
+	if err := ika.ReadConfig(cfg, ika.FileSource(cfgFilePath), ika.EnvSource()); err != nil {
 		return nil, err
 	}
 	return cfg, nil
