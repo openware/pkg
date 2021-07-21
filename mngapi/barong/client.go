@@ -2,6 +2,7 @@ package barong
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/openware/pkg/mngapi"
@@ -40,7 +41,7 @@ func (b *Client) CreateServiceAccount(params CreateServiceAccountParams) (*Servi
 	return serviceAccount, nil
 }
 
-// CreateAPIKey calls Barong Management Api to create a new API key for a given 
+// CreateAPIKey calls Barong Management Api to create a new API key for a given
 func (b *Client) CreateAPIKey(params CreateAPIKeyParams) (*APIKey, *mngapi.APIError) {
 	res, apiError := b.mngapiClient.Request(http.MethodPost, "api_keys", params)
 	if apiError != nil {
@@ -75,4 +76,21 @@ func (b *Client) DeleteServiceAccountByUID(uid string) (*ServiceAccount, *mngapi
 	}
 
 	return serviceAccount, nil
+}
+
+// CreateAPIKey calls Barong Management Api to create a new API key for a given
+func (b *Client) CreateAttachment(params CreateAttachmentParams) (*Attachment, *mngapi.APIError) {
+	res, apiError := b.mngapiClient.Request(http.MethodPost, "attachments", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	attachment := &Attachment{}
+	err := json.Unmarshal([]byte(res), attachment)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	fmt.Println(attachment)
+	return attachment, nil
 }
