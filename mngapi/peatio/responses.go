@@ -62,19 +62,19 @@ type PaymentAddress struct {
 }
 
 type Deposit struct {
-	ID                      uint64  `json:"id"`
-	TID                     string  `json:"tid"`
-	Currency                string  `json:"currency"`
-	Address                 string  `json:"address"`
-	UID                     string  `json:"uid"`
-	Type                    string  `json:"type"`
-	Amount                  string  `json:"amount"`
-	State                   string  `json:"state"`
-	CreatedAt               string  `json:"created_at"`
-	CompletedAt             *string `json:"completed_at"`
-	BlockchainTxID          string  `json:"blockchain_txid,omitempty"`
-	BlockchainConfirmations string  `json:"blockchain_confirmations,omitempty"`
-	TransferType            string  `json:"transfer_type"`
+	ID                      uint64      `json:"id"`
+	TID                     string      `json:"tid"`
+	Currency                string      `json:"currency"`
+	Address                 string      `json:"address"`
+	UID                     string      `json:"uid"`
+	Type                    string      `json:"type"`
+	Amount                  string      `json:"amount"`
+	State                   string      `json:"state"`
+	CreatedAt               string      `json:"created_at"`
+	CompletedAt             *string     `json:"completed_at"`
+	BlockchainTxID          string      `json:"blockchain_txid,omitempty"`
+	BlockchainConfirmations interface{} `json:"blockchain_confirmations,omitempty"`
+	TransferType            string      `json:"transfer_type"`
 }
 
 type Engine struct {
