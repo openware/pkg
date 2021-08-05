@@ -64,7 +64,7 @@ func TestGetCurrencyByCode(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
+		expected := `{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","status":"enabled","type":"coin","precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","code":"bnb","networks":[]}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -140,7 +140,7 @@ func TestCreateCurrency(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
+		expected := `{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","status":"enabled","type":"coin","precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","code":"bnb","networks":[]}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -230,13 +230,12 @@ func TestCreateCurrency(t *testing.T) {
 		assert.Nil(t, currency)
 	})
 }
-
 func TestCurrenciesList(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `[{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}]`
+		expected := `[{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","status":"enabled","type":"coin","precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","code":"bnb","networks":[]}]`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -256,7 +255,7 @@ func TestCurrenciesList(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `[{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}]`
+		expected := `[{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","status":"enabled","type":"coin","precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","code":"bnb","networks":[]}]`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -326,16 +325,15 @@ func TestUpdateCurrency(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
+		expected := `{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","status":"enabled","type":"coin","precision":10,"position":10,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","code":"bnb","networks":[]}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
 		}
 
 		params := UpdateCurrencyParams{
-			ID:                "bnb",
-			MinWithdrawAmount: "2",
-			Price:             "10.0",
+			ID:       "bnb",
+			Position: 10,
 		}
 		currency, apiError := client.UpdateCurrency(params)
 		assert.Nil(t, apiError)
@@ -358,9 +356,8 @@ func TestUpdateCurrency(t *testing.T) {
 		}
 
 		params := UpdateCurrencyParams{
-			ID:                "bnb",
-			MinWithdrawAmount: "2",
-			Price:             "10.0",
+			ID:       "bnb",
+			Position: 10,
 		}
 		currency, apiError := client.UpdateCurrency(params)
 
@@ -381,9 +378,8 @@ func TestUpdateCurrency(t *testing.T) {
 		}
 
 		params := UpdateCurrencyParams{
-			ID:                "bnb",
-			MinWithdrawAmount: "2",
-			Price:             "10.0",
+			ID:       "bnb",
+			Position: 10,
 		}
 		currency, apiError := client.UpdateCurrency(params)
 
@@ -404,9 +400,8 @@ func TestUpdateCurrency(t *testing.T) {
 		}
 
 		params := UpdateCurrencyParams{
-			ID:                "bnb",
-			MinWithdrawAmount: "2",
-			Price:             "10.0",
+			ID:       "bnb",
+			Position: 10,
 		}
 		currency, apiError := client.UpdateCurrency(params)
 
@@ -415,14 +410,14 @@ func TestUpdateCurrency(t *testing.T) {
 		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, currency)
 	})
-
 }
+
 func TestCreateWithdraw(t *testing.T) {
 	t.Run("Success response", func(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
+		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","blockchain_key":"btc-testnet","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -518,7 +513,7 @@ func TestGetWithdrawByID(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
+		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","blockchain_key":"btc-testnet","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -709,7 +704,7 @@ func TestGenerateDepositAddress(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"uid":"IDCA2AC08296","address":"0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e","currencies":["usdt","bnb","uni"],"state":"active","remote":false}`
+		expected := `{"uid":"IDCA2AC08296","address":"0x5b89a2a38b7398c71cfc420a6ed3b5f2a1a01a3e","blockchain_key":"btc-testnet","currencies":["usdt","bnb","uni"],"state":"active","remote":false}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -801,7 +796,7 @@ func TestCreateDeposit(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":1,"tid":"TIDBD6B265303","currency":"usd","address":"","uid":"ID732785AC58","type":"fiat","amount":"750.77","state":"submitted","created_at":"2021-03-02T07:33:02+01:00","completed_at":null,"transfer_type":"fiat"}`
+		expected := `{"id":1,"tid":"TIDBD6B265303","blockchain_key":"","currency":"usd","address":"","uid":"ID732785AC58","type":"fiat","amount":"750.77","state":"submitted","created_at":"2021-03-02T07:33:02+01:00","completed_at":null,"transfer_type":"fiat"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -897,7 +892,7 @@ func TestGetDepositByID(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":1,"tid":"TIDF6289303E1","currency":"btc","address":"","uid":"ID6CBD4E84C7","type":"coin","amount":"6346.0","state":"submitted","created_at":"2021-03-02T05:54:52+01:00","completed_at":null,"blockchain_txid":"56bzwdd359kxd0r3qt3mz1cbcrc8o3r5hshlgbag42z7ka2o9hd4b5me80hh0khb","blockchain_confirmations":"711753","transfer_type":"crypto"}`
+		expected := `{"id":1,"tid":"TIDF6289303E1","blockchain_key":"","currency":"btc","address":"","uid":"ID6CBD4E84C7","type":"coin","amount":"6346.0","state":"submitted","created_at":"2021-03-02T05:54:52+01:00","completed_at":null,"blockchain_txid":"56bzwdd359kxd0r3qt3mz1cbcrc8o3r5hshlgbag42z7ka2o9hd4b5me80hh0khb","blockchain_confirmations":"711753","transfer_type":"crypto"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -972,7 +967,7 @@ func TestGetDeposits(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `[{"id":1,"tid":"TID9119EEAE36","currency":"usd","address":"","uid":"ID9C5C7208EB","type":"fiat","amount":"8423.0","state":"collected","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","transfer_type":"fiat"},{"id":2,"tid":"TID17505F194C","currency":"btc","address":"","uid":"ID0B0C77487A","type":"coin","amount":"191.0","state":"fee_processing","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","blockchain_txid":"wfmvae8elj0egr309u9oodl58ypzifdfjz9vd1i82t3ng4uepmokagack0shfsif","blockchain_confirmations":"367597","transfer_type":"crypto"}]`
+		expected := `[{"id":1,"tid":"TID9119EEAE36","blockchain_key":"","currency":"usd","address":"","uid":"ID9C5C7208EB","type":"fiat","amount":"8423.0","state":"collected","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","transfer_type":"fiat"},{"id":2,"tid":"TID17505F194C","blockchain_key":"btc-testnet","currency":"btc","address":"","uid":"ID0B0C77487A","type":"coin","amount":"191.0","state":"fee_processing","created_at":"2021-03-02T04:40:06+01:00","completed_at":"2021-03-02T04:40:06+01:00","blockchain_txid":"wfmvae8elj0egr309u9oodl58ypzifdfjz9vd1i82t3ng4uepmokagack0shfsif","blockchain_confirmations":"367597","transfer_type":"crypto"}]`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -2246,5 +2241,270 @@ func TestGetWalletByID(t *testing.T) {
 		assert.Equal(t, apiError.StatusCode, 500)
 		assert.NotEmpty(t, apiError.Error)
 		assert.Nil(t, wallet)
+	})
+}
+
+func TestCreateBlockchainCurrency(t *testing.T) {
+	t.Run("Success response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"id":"1","currency_id":"btc","blockchain_key":"btc-testnet","parent_id":"","status":"enabled","deposit_enabled":false,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.0","withdraw_fee":"0.0000000002557544","min_withdraw_amount":"0.0000000025575447","base_factor":1000000000000000000,"min_collection_amount":"123","options":null}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateBlockchainCurrencyParams{
+			CurrencyID:    "bnb",
+			BlockchainKey: "eth-rinkeby",
+			ParentID:      "eth",
+		}
+		network, apiError := client.CreateBlockchainCurrency(params)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(network)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 404,
+				Error:      "404 Not Found",
+			},
+		}
+
+		params := CreateBlockchainCurrencyParams{
+			CurrencyID:    "bnb",
+			BlockchainKey: "eth-rinkeby",
+			ParentID:      "eth",
+		}
+		network, apiError := client.CreateBlockchainCurrency(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "404 Not Found")
+		assert.Nil(t, network)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"blockchain_key":1234}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateBlockchainCurrencyParams{
+			CurrencyID:    "bnb",
+			BlockchainKey: "eth-rinkeby",
+			ParentID:      "eth",
+		}
+		network, apiError := client.CreateBlockchainCurrency(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, network)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"-"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateBlockchainCurrencyParams{
+			CurrencyID:    "bnb",
+			BlockchainKey: "eth-rinkeby",
+			ParentID:      "eth",
+		}
+
+		network, apiError := client.CreateBlockchainCurrency(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, network)
+	})
+}
+
+func TestUpdateBlockchainCurrency(t *testing.T) {
+	t.Run("Success response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"id":"1","currency_id":"btc","blockchain_key":"btc-testnet","parent_id":"","status":"enabled","deposit_enabled":false,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.0","withdraw_fee":"0.0000000002557544","min_withdraw_amount":"0.0000000025575447","base_factor":1000000000000000000,"min_collection_amount":"123","options":null}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := UpdateBlockchainCurrencyParams{
+			ID:     "1",
+			Status: "hidden",
+		}
+		network, apiError := client.UpdateBlockchainCurrency(params)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(network)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 404,
+				Error:      "404 Not Found",
+			},
+		}
+
+		params := UpdateBlockchainCurrencyParams{
+			ID:     "1",
+			Status: "hidden",
+		}
+		network, apiError := client.UpdateBlockchainCurrency(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 404)
+		assert.Equal(t, apiError.Error, "404 Not Found")
+		assert.Nil(t, network)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"status":1234}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := UpdateBlockchainCurrencyParams{
+			ID:     "1",
+			Status: "hidden",
+		}
+		network, apiError := client.UpdateBlockchainCurrency(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, network)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"-"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := UpdateBlockchainCurrencyParams{
+			ID:     "1",
+			Status: "hidden",
+		}
+		network, apiError := client.UpdateBlockchainCurrency(params)
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, network)
+	})
+}
+
+func TestGetBlockchainCurrencyByID(t *testing.T) {
+	t.Run("Success response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"id":"1","currency_id":"btc","blockchain_key":"btc-testnet","parent_id":"","status":"enabled","deposit_enabled":false,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.0","withdraw_fee":"0.0000000002557544","min_withdraw_amount":"0.0000000025575447","base_factor":1000000000000000000,"min_collection_amount":"123","options":null}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		network, apiError := client.GetBlockchainCurrencyByID("1")
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(network)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Error response", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		client.mngapiClient = &MockClient{
+			response: nil,
+			apiError: &mngapi.APIError{
+				StatusCode: 422,
+				Error:      "Invalid",
+			},
+		}
+
+		network, apiError := client.GetBlockchainCurrencyByID("bnb")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 422)
+		assert.Equal(t, apiError.Error, "Invalid")
+		assert.Nil(t, network)
+	})
+
+	t.Run("Error mismatch data type during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"id":1}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		network, apiError := client.GetBlockchainCurrencyByID("1")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, network)
+	})
+
+	t.Run("Error invalid json response during unmarshal", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{""}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		network, apiError := client.GetBlockchainCurrencyByID("bnb")
+
+		assert.NotNil(t, apiError)
+		assert.Equal(t, apiError.StatusCode, 500)
+		assert.NotEmpty(t, apiError.Error)
+		assert.Nil(t, network)
 	})
 }
