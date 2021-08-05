@@ -4,6 +4,7 @@ type Withdraw struct {
 	TID            string `json:"tid"`
 	UID            string `json:"uid"`
 	Currency       string `json:"currency"`
+	BlockchainKey  string `json:"blockchain_key"`
 	Note           string `json:"note"`
 	Type           string `json:"type"`
 	Amount         string `json:"amount"`
@@ -16,35 +17,35 @@ type Withdraw struct {
 }
 
 type Currency struct {
+	ID          string               `json:"id"`
+	Name        string               `json:"name"`
+	Description string               `json:"description"`
+	Homepage    string               `json:"homepage"`
+	Price       string               `json:"price"`
+	Status      string               `json:"status"`
+	Type        string               `json:"type"`
+	Precision   uint64               `json:"precision"`
+	Position    uint64               `json:"position"`
+	IconURL     string               `json:"icon_url"`
+	Code        string               `json:"code"`
+	Networks    []BlockchainCurrency `json:"networks"`
+}
+
+type BlockchainCurrency struct {
 	ID                  string                 `json:"id"`
-	Name                string                 `json:"name"`
-	Description         string                 `json:"descritpion"`
-	Homepage            string                 `json:"homepage"`
-	Price               string                 `json:"price"`
+	CurrencyID          string                 `json:"currency_id"`
+	BlockchainKey       string                 `json:"blockchain_key"`
 	ParentID            string                 `json:"parent_id"`
-	ExplorerTransaction string                 `json:"explorer_transaction"`
-	ExplorerAddress     string                 `json:"explorer_address"`
-	Type                string                 `json:"type"`
+	Status              string                 `json:"status"`
 	DepositEnabled      bool                   `json:"deposit_enabled"`
 	WithdrawEnabled     bool                   `json:"withdrawal_enabled"`
 	DepositFee          string                 `json:"deposit_fee"`
 	MinDepositAmount    string                 `json:"min_deposit_amount"`
 	WithdrawFee         string                 `json:"withdraw_fee"`
 	MinWithdrawAmount   string                 `json:"min_withdraw_amount"`
-	WithdrawLimit24h    string                 `json:"withdraw_limit_24h"`
-	WithdrawLimit72h    string                 `json:"withdraw_limit_72h"`
 	BaseFactor          uint64                 `json:"base_factor"`
-	Precision           uint64                 `json:"precision"`
-	Position            uint64                 `json:"position"`
-	IconURL             string                 `json:"icon_url"`
-	MinConfirmations    uint64                 `json:"min_confirmations"`
-	Code                string                 `json:"code"`
 	MinCollectionAmount string                 `json:"min_collection_amount"`
-	Visible             bool                   `json:"visible"`
-	SubUnits            uint64                 `json:"subunits"`
 	Options             map[string]interface{} `json:"options"`
-	CreatedAt           string                 `json:"created_at"`
-	UpdatedAt           string                 `json:"updated_at"`
 }
 
 type Balance struct {
@@ -54,16 +55,18 @@ type Balance struct {
 }
 
 type PaymentAddress struct {
-	UID        string   `json:"uid"`
-	Address    string   `json:"address"`
-	Currencies []string `json:"currencies"`
-	State      string   `json:"state"`
-	Remote     bool     `json:"remote"`
+	UID           string   `json:"uid"`
+	Address       string   `json:"address"`
+	BlockchainKey string   `json:"blockchain_key"`
+	Currencies    []string `json:"currencies"`
+	State         string   `json:"state"`
+	Remote        bool     `json:"remote"`
 }
 
 type Deposit struct {
 	ID                      uint64  `json:"id"`
 	TID                     string  `json:"tid"`
+	BlockchainKey           string  `json:"blockchain_key"`
 	Currency                string  `json:"currency"`
 	Address                 string  `json:"address"`
 	UID                     string  `json:"uid"`

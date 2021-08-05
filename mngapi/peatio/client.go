@@ -41,6 +41,22 @@ func (p *Client) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
 	return currency, nil
 }
 
+// GetBlockchainCurrencyByID call peatio management api to get blockchain currency information by id
+func (p *Client) GetBlockchainCurrencyByID(id string) (*BlockchainCurrency, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, fmt.Sprintf("blockchain_currencies/%v", id), nil)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	blockchainCurrency := &BlockchainCurrency{}
+	err := json.Unmarshal([]byte(res), blockchainCurrency)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return blockchainCurrency, nil
+}
+
 // GetCurrenciesList call peatio management api to get currency information by code name
 func (p *Client) GetCurrenciesList(params CurrenciesListParams) (*[]Currency, *mngapi.APIError) {
 	res, apiError := p.mngapiClient.Request(http.MethodPost, "currencies/list", params)
@@ -72,6 +88,21 @@ func (p *Client) CreateCurrency(params CreateCurrencyParams) (*Currency, *mngapi
 	return currency, nil
 }
 
+func (p *Client) CreateBlockchainCurrency(params CreateBlockchainCurrencyParams) (*BlockchainCurrency, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost, "blockchain_currencies/new", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	blockchainCurrency := &BlockchainCurrency{}
+	err := json.Unmarshal([]byte(res), blockchainCurrency)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return blockchainCurrency, nil
+}
+
 func (p *Client) UpdateCurrency(params UpdateCurrencyParams) (*Currency, *mngapi.APIError) {
 	res, apiError := p.mngapiClient.Request(http.MethodPut, "currencies/update", params)
 	if apiError != nil {
@@ -85,6 +116,21 @@ func (p *Client) UpdateCurrency(params UpdateCurrencyParams) (*Currency, *mngapi
 	}
 
 	return currency, nil
+}
+
+func (p *Client) UpdateBlockchainCurrency(params UpdateBlockchainCurrencyParams) (*BlockchainCurrency, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPut, "blockchain_currencies/update", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	blockchainCurrency := &BlockchainCurrency{}
+	err := json.Unmarshal([]byte(res), blockchainCurrency)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return blockchainCurrency, nil
 }
 
 // CreateWithdraw call peatio management api to create new withdraw

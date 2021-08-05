@@ -19,9 +19,10 @@ type CreateWithdrawParams struct {
 }
 
 type GenerateDepositAddressParams struct {
-	UID      string `json:"uid"`
-	Currency string `json:"currency"`
-	Remote   bool   `json:"remote,omitempty"`
+	UID           string `json:"uid"`
+	Currency      string `json:"currency"`
+	BlockchainKey string `json:"blockchain_key,omitempty"`
+	Remote        bool   `json:"remote,omitempty"`
 }
 
 type CreateDepositParams struct {
@@ -34,12 +35,13 @@ type CreateDepositParams struct {
 }
 
 type GetDepositsParams struct {
-	UID      string `json:"uid,omitempty"`
-	FromID   int64  `json:"from_id,omitempty"`
-	Currency string `json:"currency,omitempty"`
-	Page     int64  `json:"page,omitempty"`
-	Limit    int64  `json:"limit,omitempty"`
-	State    string `json:"state,omitempty"`
+	UID           string `json:"uid,omitempty"`
+	FromID        int64  `json:"from_id,omitempty"`
+	Currency      string `json:"currency,omitempty"`
+	BlockchainKey string `json:"blockchain_key,omitempty"`
+	Page          int64  `json:"page,omitempty"`
+	Limit         int64  `json:"limit,omitempty"`
+	State         string `json:"state,omitempty"`
 }
 
 type GetEngineParams struct {
@@ -92,44 +94,55 @@ type CurrenciesListParams struct {
 	Type string `json:"type,omitempty"`
 }
 
+type CreateBlockchainCurrencyParams struct {
+	CurrencyID          string                 `json:"currency_id"`
+	BlockchainKey       string                 `json:"blockchain_key,omitempty"`
+	BaseFactor          int64                  `json:"base_factor,omitempty"`
+	ParentID            string                 `json:"parent_id,omitempty"`
+	DepositFee          string                 `json:"deposit_fee,omitempty"`
+	MinDepositAmount    string                 `json:"min_deposit_amount,omitempty"`
+	MinCollectionAmount string                 `json:"min_collection_amount,omitempty"`
+	WithdrawFee         string                 `json:"withdraw_fee,omitempty"`
+	MinWithdrawAmount   string                 `json:"min_withdraw_amount,omitempty"`
+	DepositEnabled      bool                   `json:"deposit_enabled,omitempty"`
+	WithdrawEnabled     bool                   `json:"withdrawal_enabled,omitempty"`
+	Status              string                 `json:"status,omitempty"`
+	Options             map[string]interface{} `json:"options"`
+}
+
 type CreateCurrencyParams struct {
-	Code                string `json:"code"`
-	Type                string `json:"type,omitempty"`
-	BaseFactor          int64  `json:"base_factor,omitempty"`
-	Position            int64  `json:"position,omitempty"`
-	BlockchainKey       string `json:"blockchain_key,omitempty"`
-	ParentID            string `json:"parent_id,omitempty"`
-	DepositFee          string `json:"deposit_fee,omitempty"`
-	MinDepositAmount    string `json:"min_deposit_amount,omitempty"`
-	MinCollectionAmount string `json:"min_collection_amount,omitempty"`
-	WithdrawFee         string `json:"withdraw_fee,omitempty"`
-	MinWithdrawAmount   string `json:"min_withdraw_amount,omitempty"`
-	WithdrawLimit24     string `json:"withdraw_limit_24h,omitempty"`
-	WithdrawLimit72     string `json:"withdraw_limit_72h,omitempty"`
-	DepositEnabled      bool   `json:"deposit_enabled,omitempty"`
-	WithdrawEnabled     bool   `json:"withdrawal_enabled,omitempty"`
-	Precision           int64  `json:"precision,omitempty"`
-	Price               string `json:"price,omitempty"`
-	IconURL             string `json:"icon_url,omitempty"`
-	Description         string `json:"description,omitempty"`
-	Homepage            string `json:"homepage,omitempty"`
+	Code        string `json:"code"`
+	Type        string `json:"type,omitempty"`
+	Position    int64  `json:"position,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Precision   int64  `json:"precision,omitempty"`
+	Price       string `json:"price,omitempty"`
+	Status      string `json:"status,omitempty"`
+	IconURL     string `json:"icon_url,omitempty"`
+	Description string `json:"description,omitempty"`
+	Homepage    string `json:"homepage,omitempty"`
 }
 
 type UpdateCurrencyParams struct {
-	ID                  string `json:"id"`
-	Name                string `json:"name,omitempty"`
-	DepositFee          string `json:"deposit_fee,omitempty"`
-	MinDepositAmount    string `json:"min_deposit_amount,omitempty"`
-	MinCollectionAmount string `json:"min_collection_amount,omitempty"`
-	WithdrawFee         string `json:"withdraw_fee,omitempty"`
-	MinWithdrawAmount   string `json:"min_withdraw_amount,omitempty"`
-	WithdrawLimit24     string `json:"withdraw_limit_24h,omitempty"`
-	WithdrawLimit72     string `json:"withdraw_limit_72h,omitempty"`
-	Price               string `json:"price,omitempty"`
-	Precision           int64  `json:"precision,omitempty"`
-	Position            int64  `json:"position,omitempty"`
-	DepositEnabled      bool   `json:"deposit_enabled,omitempty"`
-	WithdrawEnabled     bool   `json:"withdrawal_enabled,omitempty"`
+	ID        string `json:"id"`
+	Name      string `json:"name,omitempty"`
+	Position  int64  `json:"position,omitempty"`
+	Status    string `json:"status,omitempty"`
+	Precision int64  `json:"precision,omitempty"`
+	IconURL   string `json:"icon_url,omitempty"`
+}
+
+type UpdateBlockchainCurrencyParams struct {
+	ID                  string                 `json:"id"`
+	DepositFee          string                 `json:"deposit_fee,omitempty"`
+	MinDepositAmount    string                 `json:"min_deposit_amount,omitempty"`
+	MinCollectionAmount string                 `json:"min_collection_amount,omitempty"`
+	WithdrawFee         string                 `json:"withdraw_fee,omitempty"`
+	MinWithdrawAmount   string                 `json:"min_withdraw_amount,omitempty"`
+	DepositEnabled      bool                   `json:"deposit_enabled,omitempty"`
+	WithdrawEnabled     bool                   `json:"withdrawal_enabled,omitempty"`
+	Status              string                 `json:"status,omitempty"`
+	Options             map[string]interface{} `json:"options"`
 }
 
 type CreateMemberParams struct {
