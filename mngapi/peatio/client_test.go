@@ -2187,6 +2187,24 @@ func TestGetWalletByID(t *testing.T) {
 		assert.Equal(t, result, []byte(expected))
 	})
 
+	t.Run("Success response with no linked currencies", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
+		expected := `{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":[],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":null,"blockchain_key":"opendax_cloud","status":"active"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		wallet, apiError := client.GetWalletByID(1)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(wallet)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
 	t.Run("Error response", func(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
