@@ -94,6 +94,7 @@ type CurrenciesListParams struct {
 
 type CreateCurrencyParams struct {
 	Code                string `json:"code"`
+	Name                string `json:"name,omitempty"`
 	Type                string `json:"type,omitempty"`
 	BaseFactor          int64  `json:"base_factor,omitempty"`
 	Position            int64  `json:"position,omitempty"`
