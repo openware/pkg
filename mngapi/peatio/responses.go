@@ -113,14 +113,14 @@ type Member struct {
 }
 
 type Wallet struct {
-	ID            int      `json:"id"`
-	Name          string   `json:"name"`
-	Kind          string   `json:"kind"`
-	Currencies    []string `json:"currencies"`
-	Address       string   `json:"address"`
-	Gateway       string   `json:"gateway"`
-	MaxBalance    string   `json:"max_balance"`
-	Balance       string   `json:"balance"`
-	BlockchainKey string   `json:"blockchain_key"`
-	Status        string   `json:"status"`
+	ID            int                    `json:"id"`
+	Name          string                 `json:"name"`
+	Kind          string                 `json:"kind"`
+	Currencies    []string               `json:"currencies"`
+	Address       string                 `json:"address"`
+	Gateway       string                 `json:"gateway"`
+	MaxBalance    string                 `json:"max_balance"`
+	Balance       map[string]interface{} `json:"balance"`
+	BlockchainKey string                 `json:"blockchain_key"`
+	Status        string                 `json:"status"`
 }

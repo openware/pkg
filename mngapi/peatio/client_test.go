@@ -1859,7 +1859,7 @@ func TestGetWallets(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `[{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":["btc"],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":"8","blockchain_key":"opendax_cloud","status":"active"}]`
+		expected := `[{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":["btc","xtz"],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":{"btc":"8","xtz":"N/A"},"blockchain_key":"opendax_cloud","status":"active"}]`
 
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
@@ -1936,7 +1936,7 @@ func TestUpdateWallet(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":["btc"],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":"8","blockchain_key":"opendax_cloud","status":"active"}`
+		expected := `{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":["btc","xtz"],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":{"btc":"8","xtz":"N/A"},"blockchain_key":"opendax_cloud","status":"active"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -2058,7 +2058,7 @@ func TestCreateWallet(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":["btc"],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":"8","blockchain_key":"opendax_cloud","status":"active"}`
+		expected := `{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":["btc","xtz"],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":{"btc":"8","xtz":"N/A"},"blockchain_key":"opendax_cloud","status":"active"}`
 
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
@@ -2178,7 +2178,7 @@ func TestGetWalletByID(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":["btc"],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":"8","blockchain_key":"opendax_cloud","status":"active"}`
+		expected := `{"id":1,"name":"BTC Wallet","kind":"deposit","currencies":["btc","xtz"],"address":"address","gateway":"opendax-cloud","max_balance":"0.00000001","balance":{"btc":"8","xtz":"N/A"},"blockchain_key":"opendax_cloud","status":"active"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
