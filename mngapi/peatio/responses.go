@@ -18,7 +18,7 @@ type Withdraw struct {
 type Currency struct {
 	ID                  string                 `json:"id"`
 	Name                string                 `json:"name"`
-	Description         string                 `json:"descritpion"`
+	Description         string                 `json:"description"`
 	Homepage            string                 `json:"homepage"`
 	Price               string                 `json:"price"`
 	ParentID            string                 `json:"parent_id"`

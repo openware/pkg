@@ -108,6 +108,7 @@ type CreateCurrencyParams struct {
 	WithdrawLimit72     string `json:"withdraw_limit_72h,omitempty"`
 	DepositEnabled      bool   `json:"deposit_enabled,omitempty"`
 	WithdrawEnabled     bool   `json:"withdrawal_enabled,omitempty"`
+	Visible             bool   `json:"visible"`
 	Precision           int64  `json:"precision,omitempty"`
 	Price               string `json:"price,omitempty"`
 	IconURL             string `json:"icon_url,omitempty"`
@@ -130,6 +131,7 @@ type UpdateCurrencyParams struct {
 	Position            int64  `json:"position,omitempty"`
 	DepositEnabled      bool   `json:"deposit_enabled,omitempty"`
 	WithdrawEnabled     bool   `json:"withdrawal_enabled,omitempty"`
+	Visible             bool   `json:"visible"`
 }
 
 type CreateMemberParams struct {

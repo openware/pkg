@@ -64,7 +64,7 @@ func TestGetCurrencyByCode(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
+		expected := `{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -140,16 +140,17 @@ func TestCreateCurrency(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
+		expected := `{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
 		}
 
 		params := CreateCurrencyParams{
-			Code:  "bnb",
-			Type:  "coin",
-			Price: "10.0",
+			Code:    "bnb",
+			Type:    "coin",
+			Price:   "10.0",
+			Visible: true,
 		}
 		currency, apiError := client.CreateCurrency(params)
 		assert.Nil(t, apiError)
@@ -236,7 +237,7 @@ func TestCurrenciesList(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `[{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}]`
+		expected := `[{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}]`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -256,7 +257,7 @@ func TestCurrenciesList(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `[{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}]`
+		expected := `[{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}]`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -326,7 +327,7 @@ func TestUpdateCurrency(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"id":"bnb","name":"Binance Coin","descritpion":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
+		expected := `{"id":"bnb","name":"Binance Coin","description":"","homepage":"","price":"23.8","parent_id":"","explorer_transaction":"https://kovan.etherscan.io/tx/#{txid}","explorer_address":"https://kovan.etherscan.io/address/#{address}","type":"coin","deposit_enabled":true,"withdrawal_enabled":true,"deposit_fee":"0.0","min_deposit_amount":"0.3455425","withdraw_fee":"0.0","min_withdraw_amount":"0.3455425","withdraw_limit_24h":"100000.0","withdraw_limit_72h":"200000.0","base_factor":1000000000000000000,"precision":10,"position":48,"icon_url":"https://sorage.googleapis.com/devel-yellow-exchange-applogic/uploads/asset/icon/bnb/8ea0f30c1b.png","min_confirmations":10,"code":"bnb","min_collection_amount":"0.3455425","visible":true,"subunits":18,"options":{"erc20_contract_address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52"},"created_at":"2020-02-24T15:34:03+01:00","updated_at":"2020-12-02T10:42:33+01:00"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
@@ -336,6 +337,7 @@ func TestUpdateCurrency(t *testing.T) {
 			ID:                "bnb",
 			MinWithdrawAmount: "2",
 			Price:             "10.0",
+			Visible:           true,
 		}
 		currency, apiError := client.UpdateCurrency(params)
 		assert.Nil(t, apiError)
