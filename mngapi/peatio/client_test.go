@@ -424,6 +424,29 @@ func TestCreateWithdraw(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
+		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":null,"transfer_type":"crypto"}`
+		client.mngapiClient = &MockClient{
+			response: []byte(expected),
+			apiError: nil,
+		}
+
+		params := CreateWithdrawParams{
+			UID:      "IDCA2AC08296",
+			Currency: "bnb",
+			Amount:   10.0,
+		}
+		withdraw, apiError := client.CreateWithdraw(params)
+		assert.Nil(t, apiError)
+
+		result, err := json.Marshal(withdraw)
+		assert.NoError(t, err)
+		assert.Equal(t, result, []byte(expected))
+	})
+
+	t.Run("Success response with empty txid", func(t *testing.T) {
+		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
+		assert.NoError(t, err)
+
 		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
@@ -520,7 +543,7 @@ func TestGetWithdrawByID(t *testing.T) {
 		client, err := New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey)
 		assert.NoError(t, err)
 
-		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":"","transfer_type":"crypto"}`
+		expected := `{"tid":"TIDE54B7D229E","uid":"ID16421C020A","currency":"btc","note":"","type":"coin","amount":"0.1195","fee":"0.0005","rid":"1CzSHQnuwp52ErrrtM169FW4FuuRhEksMR","state":"skipped","created_at":"2021-01-12T07:27:41+01:00","blockchain_txid":null,"transfer_type":"crypto"}`
 		client.mngapiClient = &MockClient{
 			response: []byte(expected),
 			apiError: nil,
