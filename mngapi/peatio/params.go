@@ -88,6 +88,8 @@ type UpdateMarketParams struct {
 	MinPrice  string `json:"min_price,omitempty"`
 	MaxPrice  string `json:"max_price,omitempty"`
 	MinAmount string `json:"min_amount,omitempty"`
+	AmountPrecision int64  `json:"amount_precision,omitempty"`
+	PricePrecision  int64  `json:"price_precision,omitempty"`
 }
 
 type CurrenciesListParams struct {
