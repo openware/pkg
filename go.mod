@@ -14,7 +14,7 @@ require (
 	github.com/onsi/ginkgo v1.16.1 // indirect
 	github.com/onsi/gomega v1.11.0 // indirect
 	github.com/openware/kaigara/pkg/vault v0.0.0-20210428072529-c9aa6080bfe8
-	github.com/openware/pkg/mngapi v0.0.0-20210903205123-f3f95e54b030
+	github.com/openware/pkg/mngapi v0.0.0-20210909215422-545bdd9fd380
 	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4 // indirect
