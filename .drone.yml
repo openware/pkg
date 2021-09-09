@@ -4,7 +4,7 @@ name: default
 
 steps:
   - name: Test & vet
-    image: golang:1.15
+    image: golang:1.16
     environment:
       GO111MODULE: on
     commands:

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	jwtgo "github.com/dgrijalva/jwt-go"
+	jwtgo "github.com/golang-jwt/jwt"
 )
 
 const (
@@ -61,7 +61,7 @@ func TestCreateNewClient(t *testing.T) {
 
 	t.Run("Invalid private key", func(t *testing.T) {
 		_, err := New(URL, jwtIssuer, jwtAlgo, "")
-		assert.EqualError(t, err, "Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
+		assert.EqualError(t, err, "Invalid Key: Key must be a PEM encoded PKCS1 or PKCS8 key")
 	})
 }
 

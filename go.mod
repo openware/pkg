@@ -4,16 +4,17 @@ go 1.16
 
 require (
 	github.com/alicebob/miniredis/v2 v2.14.3
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gofrs/uuid v4.0.0+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gomarkdown/markdown v0.0.0-20210514010506-3b9f47219fe7
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.16.1 // indirect
 	github.com/onsi/gomega v1.11.0 // indirect
 	github.com/openware/kaigara/pkg/vault v0.0.0-20210428072529-c9aa6080bfe8
+	github.com/openware/pkg/mngapi v0.0.0-20210903205123-f3f95e54b030
 	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4 // indirect

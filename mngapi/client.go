@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	jwtgo "github.com/dgrijalva/jwt-go"
+	jwtgo "github.com/golang-jwt/jwt"
 )
 
 const (

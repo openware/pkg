@@ -55,7 +55,7 @@ func TestCreateNewClient(t *testing.T) {
 
 		assert.Nil(t, client)
 		assert.NotNil(t, err)
-		assert.EqualError(t, err, "Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
+		assert.EqualError(t, err, "Invalid Key: Key must be a PEM encoded PKCS1 or PKCS8 key")
 	})
 }
 
