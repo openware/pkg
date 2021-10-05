@@ -10,8 +10,9 @@ type Config struct {
 	Database database.Config `yaml:"database"`
 	// TODO Create a redis and vault package
 	Redis struct {
-		Host string `yaml:"host" env:"REDIS_HOST" env-description:"Redis Server host" env-default:"localhost"`
-		Port string `yaml:"port" env:"REDIS_PORT" env-description:"Redis Server port" env-default:"6379"`
+		Host     string `yaml:"host" env:"REDIS_HOST" env-description:"Redis Server host" env-default:"localhost"`
+		Port     string `yaml:"port" env:"REDIS_PORT" env-description:"Redis Server port" env-default:"6379"`
+		Password string `yaml:"port" env:"REDIS_PASSWORD" env-description:"Redis Server password"`
 	} `yaml:"redis"`
 	Port                string        `env:"APP_PORT" env-description:"Port for HTTP service" env-default:"6009"`
 	MngAPI              mngapi.Config `yaml:"mngapi"`
