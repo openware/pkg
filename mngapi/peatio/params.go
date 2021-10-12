@@ -174,3 +174,12 @@ type UpdateWalletParams struct {
 	MaxBalance    string   `json:"max_balance,omitempty"`
 	Status        string   `json:"status,omitempty"`
 }
+
+type UpdateTradingFeeGroupParams struct {
+	ID         int64  `json:"id"`
+	Group      string `json:"group"`
+	Maker      string `json:"maker"`
+	Taker      string `json:"taker"`
+	MarketID   string `json:"market_id"`
+	MarketType string `json:"market_type"`
+}

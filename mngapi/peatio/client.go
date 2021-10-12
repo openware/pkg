@@ -399,3 +399,36 @@ func (p *Client) GetWalletByID(id int) (*Wallet, *mngapi.APIError) {
 
 	return wallet, nil
 }
+
+// GetTradingFeeGroups call peatio management api to get trading fee groups
+func (p *Client) GetTradingFeeGroups() ([]*TradingFeeGroup,  *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPost,  "fee_schedule/trading_fees", nil)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	tradingFeeGroups := make([]*TradingFeeGroup, 0)
+
+	err := json.Unmarshal([]byte(res), &tradingFeeGroups)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return tradingFeeGroups, nil
+}
+
+// UpdateTradingFeeGroup call peatio management api to update trading fee group
+func (p *Client) UpdateTradingFeeGroup(params UpdateTradingFeeGroupParams) (*TradingFeeGroup, *mngapi.APIError) {
+	res, apiError := p.mngapiClient.Request(http.MethodPut, "fee_schedule/trading_fees/update", params)
+	if apiError != nil {
+		return nil, apiError
+	}
+
+	tradingFeeGroup := &TradingFeeGroup{}
+	err := json.Unmarshal([]byte(res), tradingFeeGroup)
+	if err != nil {
+		return nil, &mngapi.APIError{StatusCode: 500, Error: err.Error()}
+	}
+
+	return tradingFeeGroup, nil
+}

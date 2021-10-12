@@ -124,3 +124,12 @@ type Wallet struct {
 	BlockchainKey string                 `json:"blockchain_key"`
 	Status        string                 `json:"status"`
 }
+
+type TradingFeeGroup struct {
+	ID         int64  `json:"id"`
+	Group      string `json:"group"`
+	Maker      string `json:"maker"`
+	Taker      string `json:"taker"`
+	MarketID   string `json:"market_id"`
+	MarketType string `json:"market_type"`
+}
