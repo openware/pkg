@@ -9,7 +9,7 @@ import (
 
 // Client is barong management api client instance
 type Client struct {
-	mngapiClient mngapi.DefaultClient
+	MngapiClient mngapi.DefaultClient
 }
 
 // New return barong management api client
@@ -20,13 +20,13 @@ func New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey string) (*Client, error) {
 	}
 
 	return &Client{
-		mngapiClient: client,
+		MngapiClient: client,
 	}, nil
 }
 
 // CreateServiceAccount call barong management api to create new service account
 func (b *Client) CreateServiceAccount(params CreateServiceAccountParams) (*ServiceAccount, *mngapi.APIError) {
-	res, apiError := b.mngapiClient.Request(http.MethodPost, "service_accounts/create", params)
+	res, apiError := b.MngapiClient.Request(http.MethodPost, "service_accounts/create", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -42,7 +42,7 @@ func (b *Client) CreateServiceAccount(params CreateServiceAccountParams) (*Servi
 
 // CreateAPIKey calls Barong Management Api to create a new API key for a given
 func (b *Client) CreateAPIKey(params CreateAPIKeyParams) (*APIKey, *mngapi.APIError) {
-	res, apiError := b.mngapiClient.Request(http.MethodPost, "api_keys", params)
+	res, apiError := b.MngapiClient.Request(http.MethodPost, "api_keys", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -63,7 +63,7 @@ func (b *Client) DeleteServiceAccountByUID(uid string) (*ServiceAccount, *mngapi
 		"uid": uid,
 	}
 
-	res, apiError := b.mngapiClient.Request(http.MethodPost, "service_accounts/delete", params)
+	res, apiError := b.MngapiClient.Request(http.MethodPost, "service_accounts/delete", params)
 	if apiError != nil {
 		return nil, apiError
 	}
