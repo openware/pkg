@@ -10,7 +10,7 @@ import (
 
 // Client is peatio management api client instance
 type Client struct {
-	mngapiClient mngapi.DefaultClient
+	MngapiClient mngapi.DefaultClient
 }
 
 // New return peatio management api client
@@ -21,13 +21,13 @@ func New(URL, jwtIssuer, jwtAlgo, jwtPrivateKey string) (*Client, error) {
 	}
 
 	return &Client{
-		mngapiClient: client,
+		MngapiClient: client,
 	}, nil
 }
 
 // GetCurrencyByCode call peatio management api to get currency information by code name
 func (p *Client) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, fmt.Sprintf("currencies/%v", code), nil)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, fmt.Sprintf("currencies/%v", code), nil)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -43,7 +43,7 @@ func (p *Client) GetCurrencyByCode(code string) (*Currency, *mngapi.APIError) {
 
 // GetBlockchainCurrencyByID call peatio management api to get blockchain currency information by id
 func (p *Client) GetBlockchainCurrencyByID(id string) (*BlockchainCurrency, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, fmt.Sprintf("blockchain_currencies/%v", id), nil)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, fmt.Sprintf("blockchain_currencies/%v", id), nil)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -59,7 +59,7 @@ func (p *Client) GetBlockchainCurrencyByID(id string) (*BlockchainCurrency, *mng
 
 // GetCurrenciesList call peatio management api to get currency information by code name
 func (p *Client) GetCurrenciesList(params CurrenciesListParams) (*[]Currency, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "currencies/list", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "currencies/list", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -74,7 +74,7 @@ func (p *Client) GetCurrenciesList(params CurrenciesListParams) (*[]Currency, *m
 }
 
 func (p *Client) CreateCurrency(params CreateCurrencyParams) (*Currency, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "currencies/create", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "currencies/create", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -89,7 +89,7 @@ func (p *Client) CreateCurrency(params CreateCurrencyParams) (*Currency, *mngapi
 }
 
 func (p *Client) CreateBlockchainCurrency(params CreateBlockchainCurrencyParams) (*BlockchainCurrency, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "blockchain_currencies/new", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "blockchain_currencies/new", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -104,7 +104,7 @@ func (p *Client) CreateBlockchainCurrency(params CreateBlockchainCurrencyParams)
 }
 
 func (p *Client) UpdateCurrency(params UpdateCurrencyParams) (*Currency, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPut, "currencies/update", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPut, "currencies/update", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -119,7 +119,7 @@ func (p *Client) UpdateCurrency(params UpdateCurrencyParams) (*Currency, *mngapi
 }
 
 func (p *Client) UpdateBlockchainCurrency(params UpdateBlockchainCurrencyParams) (*BlockchainCurrency, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPut, "blockchain_currencies/update", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPut, "blockchain_currencies/update", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -135,7 +135,7 @@ func (p *Client) UpdateBlockchainCurrency(params UpdateBlockchainCurrencyParams)
 
 // CreateWithdraw call peatio management api to create new withdraw
 func (p *Client) CreateWithdraw(params CreateWithdrawParams) (*Withdraw, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "withdraws/new", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "withdraws/new", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -156,7 +156,7 @@ func (p *Client) GetWithdrawByID(tid string) (*Withdraw, *mngapi.APIError) {
 		"tid": tid,
 	}
 
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "withdraws/get", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "withdraws/get", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -172,7 +172,7 @@ func (p *Client) GetWithdrawByID(tid string) (*Withdraw, *mngapi.APIError) {
 
 // GetAccountBalance call peatio management api to get account balance
 func (p *Client) GetAccountBalance(params GetAccountBalanceParams) (*Balance, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "accounts/balance", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "accounts/balance", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -188,7 +188,7 @@ func (p *Client) GetAccountBalance(params GetAccountBalanceParams) (*Balance, *m
 
 // GenerateDepositAddress call peatio management api to generate new deposit address
 func (p *Client) GenerateDepositAddress(params GenerateDepositAddressParams) (*PaymentAddress, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "deposit_address/new", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "deposit_address/new", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -204,7 +204,7 @@ func (p *Client) GenerateDepositAddress(params GenerateDepositAddressParams) (*P
 
 // CreateDeposit call peatio management api to create new deposit
 func (p *Client) CreateDeposit(params CreateDepositParams) (*Deposit, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "deposits/new", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "deposits/new", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -225,7 +225,7 @@ func (p *Client) GetDepositByID(tid string) (*Deposit, *mngapi.APIError) {
 		"tid": tid,
 	}
 
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "deposits/get", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "deposits/get", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -241,7 +241,7 @@ func (p *Client) GetDepositByID(tid string) (*Deposit, *mngapi.APIError) {
 
 // GetDeposits call peatio management api to get deposits as paginated collection
 func (p *Client) GetDeposits(params GetDepositsParams) ([]*Deposit, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "deposits", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "deposits", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -257,7 +257,7 @@ func (p *Client) GetDeposits(params GetDepositsParams) ([]*Deposit, *mngapi.APIE
 
 // CreateEngine call peatio management api to create new engine
 func (p *Client) CreateEngine(params CreateEngineParams) (*Engine, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "engines/new", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "engines/new", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -273,7 +273,7 @@ func (p *Client) CreateEngine(params CreateEngineParams) (*Engine, *mngapi.APIEr
 
 // UpdateEngine call peatio management api to update engine
 func (p *Client) UpdateEngine(params UpdateEngineParams) (*Engine, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "engines/update", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "engines/update", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -289,7 +289,7 @@ func (p *Client) UpdateEngine(params UpdateEngineParams) (*Engine, *mngapi.APIEr
 
 // GetEngines call peatio management api to get engines
 func (p *Client) GetEngines(params GetEngineParams) ([]*Engine, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "engines/get", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "engines/get", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -306,7 +306,7 @@ func (p *Client) GetEngines(params GetEngineParams) ([]*Engine, *mngapi.APIError
 
 // GetMarkets call peatio management api to get all markets
 func (p *Client) GetMarkets() ([]*Market, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "/markets/list", nil)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "/markets/list", nil)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -323,7 +323,7 @@ func (p *Client) GetMarkets() ([]*Market, *mngapi.APIError) {
 
 // UpdateMarket call peatio management api to update market
 func (p *Client) UpdateMarket(params UpdateMarketParams) (*Market, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPut, "/markets/update", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPut, "/markets/update", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -338,7 +338,7 @@ func (p *Client) UpdateMarket(params UpdateMarketParams) (*Market, *mngapi.APIEr
 }
 
 func (p *Client) CreateMarket(params CreateMarketParams) (*Market, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "markets/new", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "markets/new", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -353,7 +353,7 @@ func (p *Client) CreateMarket(params CreateMarketParams) (*Market, *mngapi.APIEr
 }
 
 func (p *Client) GetMarketByID(id string) (*Market, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, fmt.Sprintf("markets/%v", id), nil)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, fmt.Sprintf("markets/%v", id), nil)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -368,7 +368,7 @@ func (p *Client) GetMarketByID(id string) (*Market, *mngapi.APIError) {
 }
 
 func (p *Client) CreateMember(params CreateMemberParams) (*Member, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "members", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "members", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -384,7 +384,7 @@ func (p *Client) CreateMember(params CreateMemberParams) (*Member, *mngapi.APIEr
 
 // CreateWallet call peatio management api to create wallet
 func (p *Client) CreateWallet(params CreateWalletParams) (*Wallet, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "wallets/new", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "wallets/new", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -400,7 +400,7 @@ func (p *Client) CreateWallet(params CreateWalletParams) (*Wallet, *mngapi.APIEr
 
 // UpdateWallet call peatio management api to update wallet
 func (p *Client) UpdateWallet(params UpdateWalletParams) (*Wallet, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "wallets/update", params)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "wallets/update", params)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -416,7 +416,7 @@ func (p *Client) UpdateWallet(params UpdateWalletParams) (*Wallet, *mngapi.APIEr
 
 // GetWallets call peatio management api to get wallets
 func (p *Client) GetWallets() ([]*Wallet, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, "wallets", nil)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, "wallets", nil)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -432,7 +432,7 @@ func (p *Client) GetWallets() ([]*Wallet, *mngapi.APIError) {
 }
 
 func (p *Client) GetWalletByID(id int) (*Wallet, *mngapi.APIError) {
-	res, apiError := p.mngapiClient.Request(http.MethodPost, fmt.Sprintf("wallets/%v", id), nil)
+	res, apiError := p.MngapiClient.Request(http.MethodPost, fmt.Sprintf("wallets/%v", id), nil)
 	if apiError != nil {
 		return nil, apiError
 	}
