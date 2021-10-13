@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/openware/kaigara/pkg/vault"
-	sonic "github.com/openware/pkg/sonic/config"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"path"
 	"time"
+
+	sonic "github.com/openware/pkg/sonic/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/openware/pkg/jwt"
@@ -23,7 +23,7 @@ const (
 	RequestTimeout = time.Duration(30 * time.Second)
 )
 
-type LicenseCreator func(appName string, config *sonic.OpendaxConfig, service *vault.Service) error
+type LicenseCreator func(appName string, config *sonic.OpendaxConfig, service VaultService) error
 type FetchConfigFunction func(client *peatio.Client, opendaxAddr string, platformID string) error
 
 // CreatePlatformParams from request parameter
@@ -272,7 +272,6 @@ func updateMarkets(sc *SonicContext, engineID string) error {
 	return nil
 }
 
-
 // CreatePlatform to handler '/api/v2/admin/platforms/new'
 func CreatePlatform(ctx *gin.Context, licenseCreator LicenseCreator, fetchConfig FetchConfigFunction) gin.HandlerFunc {
 	return func(context *gin.Context) {
@@ -307,8 +306,8 @@ func createPlatform(ctx *gin.Context, creator LicenseCreator, fetchConfig FetchC
 
 	// Allow only "superadmin" to create new platform
 	if auth.Role != "superadmin" {
-		log.Printf("WARN: %s is not superadmin %s", auth.Role, err.Error())
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		log.Printf("WARN: %s is not superadmin %s", auth.Role, err.Error())
 		return
 	}
 
