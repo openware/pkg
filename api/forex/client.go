@@ -171,6 +171,11 @@ func (c *Client) parsePriceData(message interface{}) (*PriceResponse, error) {
 	if code != responseCode && rType != priceResponseType {
 		return nil, nil
 	}
+
+	fmt.Printf("DEBUG: res: %v\n", res)
+	fmt.Printf("DEBUG: res data: %v\n", res[2])
+	fmt.Printf("DEBUG: res data parsed: %v\n", res[2].([]interface{}))
+
 	if data, ok = res[2].([]interface{}); !ok {
 		return nil, errors.New(`Can not parse response.data`)
 	}
