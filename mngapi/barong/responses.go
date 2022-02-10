@@ -34,3 +34,8 @@ type APIKey struct {
 	CreatedAt string   `json:"created_at"`
 	UpdatedAt string   `json:"updated_at"`
 }
+
+type Attachment struct {
+	ID  uint64 `json:"id"`
+	UID string `json:"user_uid"`
+}
