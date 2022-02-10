@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -30,6 +31,12 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 		)
 		dial = mysql.Open(dsn)
 
+	case "postgres":
+		dsn := fmt.Sprintf(
+			"user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+			cnf.User, cnf.Pass, cnf.Host, cnf.Port, cnf.Name,
+		)
+		dial = postgres.Open(dsn)
 	default:
 		return nil, fmt.Errorf("Unsupported DATABASE_DRIVER: %s", cnf.Driver)
 	}
