@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/openware/kaigara/pkg/vault"
+	"github.com/openware/kaigara/pkg/storage/vault"
 	"github.com/openware/pkg/jwt"
 	"github.com/openware/pkg/sonic/config"
 )
@@ -59,7 +59,7 @@ func GetVaultService(ctx *gin.Context) (*vault.Service, error) {
 // 'firstRun' variable will help to run writing to cache on first system start
 // as on the start latest and current versions are the same
 func WriteCache(vaultService *vault.Service, scope string, firstRun bool) {
-	err := vaultService.LoadSecrets("global", scope)
+	err := vaultService.Read("global", scope)
 	if err != nil {
 		panic(err)
 	}
@@ -80,13 +80,13 @@ func WriteCache(vaultService *vault.Service, scope string, firstRun bool) {
 
 	if current != latest || firstRun {
 		log.Println("Writing to cache")
-		keys, err := vaultService.ListSecrets("global", scope)
+		keys, err := vaultService.ListEntries("global", scope)
 		if err != nil {
 			panic(err)
 		}
 
 		for _, key := range keys {
-			val, err := vaultService.GetSecret("global", key, scope)
+			val, err := vaultService.GetEntry("global", key, scope)
 			if err != nil {
 				panic(err)
 			}

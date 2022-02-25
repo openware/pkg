@@ -1,14 +1,15 @@
 package handlers
 
 import (
-	"github.com/openware/kaigara/pkg/vault"
-	"github.com/openware/pkg/mngapi/peatio"
 	"sync"
 	"time"
+
+	"github.com/openware/kaigara/pkg/storage/vault"
+	"github.com/openware/pkg/mngapi/peatio"
 )
 
 var (
-	memoryCache  = cache{
+	memoryCache = cache{
 		Data:  make(map[string]interface{}),
 		Mutex: sync.RWMutex{},
 	}

@@ -9,11 +9,10 @@ require (
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gomarkdown/markdown v0.0.0-20210514010506-3b9f47219fe7
-	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.16.1 // indirect
 	github.com/onsi/gomega v1.11.0 // indirect
-	github.com/openware/kaigara/pkg/vault v0.0.0-20210428072529-c9aa6080bfe8
+	github.com/openware/kaigara/pkg/storage/vault v0.0.0-20220225071429-1a6cebf94389
 	github.com/openware/pkg/mngapi v0.0.0-20210909215422-545bdd9fd380
 	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.7.0

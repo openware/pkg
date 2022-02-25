@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/openware/kaigara/pkg/vault"
-	sonic "github.com/openware/pkg/sonic/config"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"path"
 	"time"
+
+	"github.com/openware/kaigara/pkg/storage/vault"
+	sonic "github.com/openware/pkg/sonic/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/openware/pkg/jwt"
@@ -62,22 +63,22 @@ func SetSecret(ctx *gin.Context) {
 
 	appName := ctx.Param("component")
 
-	if err := vaultService.LoadSecrets(appName, params.Scope); err != nil {
-		log.Printf("ERR: LoadSecrets: %s", err)
+	if err := vaultService.Read(appName, params.Scope); err != nil {
+		log.Printf("ERR: Read: %s", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = vaultService.SetSecret(appName, params.Key, params.Value, params.Scope)
+	err = vaultService.SetEntry(appName, params.Scope, params.Key, params.Value)
 	if err != nil {
 		log.Printf("ERR: SetSecret: %s", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = vaultService.SaveSecrets(appName, params.Scope)
+	err = vaultService.Write(appName, params.Scope)
 	if err != nil {
-		log.Printf("ERR: SaveSecrets: %s", err)
+		log.Printf("ERR: Write: %s", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -108,7 +109,7 @@ func GetSecrets(ctx *gin.Context) {
 		result[app] = make(map[string]interface{})
 
 		for _, scope := range scopes {
-			if err := vaultService.LoadSecrets(app, scope); err != nil {
+			if err := vaultService.Read(app, scope); err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
@@ -116,7 +117,7 @@ func GetSecrets(ctx *gin.Context) {
 			result[app][scope] = make(map[string]interface{})
 
 			if scope == "secret" {
-				secretsKeys, err := vaultService.ListSecrets(app, scope)
+				secretsKeys, err := vaultService.ListEntries(app, scope)
 				if err != nil {
 					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 					return
@@ -126,7 +127,7 @@ func GetSecrets(ctx *gin.Context) {
 					result[app][scope].(map[string]interface{})[key] = "******"
 				}
 			} else {
-				secrets, err := vaultService.GetSecrets(app, scope)
+				secrets, err := vaultService.GetEntries(app, scope)
 				if err != nil {
 					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 					return
@@ -272,7 +273,6 @@ func updateMarkets(sc *SonicContext, engineID string) error {
 	return nil
 }
 
-
 // CreatePlatform to handler '/api/v2/admin/platforms/new'
 func CreatePlatform(ctx *gin.Context, licenseCreator LicenseCreator, fetchConfig FetchConfigFunction) gin.HandlerFunc {
 	return func(context *gin.Context) {
@@ -374,10 +374,10 @@ func createPlatform(ctx *gin.Context, creator LicenseCreator, fetchConfig FetchC
 	scope := "private"
 	key := "platform_id"
 	// Load secret
-	vaultService.LoadSecrets(app, scope)
+	vaultService.Read(app, scope)
 
 	// Set Platform ID to secret
-	err = vaultService.SetSecret(app, key, platform.PID, scope)
+	err = vaultService.SetEntry(app, scope, key, platform.PID)
 	if err != nil {
 		log.Printf("ERROR: Failed to store Platform ID in vault: %s", err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -385,7 +385,7 @@ func createPlatform(ctx *gin.Context, creator LicenseCreator, fetchConfig FetchC
 	}
 
 	// Save secret to vault
-	err = vaultService.SaveSecrets(app, scope)
+	err = vaultService.Write(app, scope)
 	if err != nil {
 		log.Printf("ERROR: Failed to store secrets: %s", err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
