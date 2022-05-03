@@ -36,6 +36,11 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 			"user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
 			cnf.User, cnf.Pass, cnf.Host, cnf.Port, cnf.Name,
 		)
+
+		if cnf.Schema != "" {
+			dsn = fmt.Sprintf("%s  search_path=%s", dsn, cnf.Schema)
+		}
+
 		dial = postgres.Open(dsn)
 	default:
 		return nil, fmt.Errorf("Unsupported DATABASE_DRIVER: %s", cnf.Driver)
