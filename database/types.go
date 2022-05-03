@@ -12,6 +12,7 @@ type Config struct {
 	User   string `yaml:"user" env:"DATABASE_USER" env-description:"Database user"`
 	Pass   string `env:"DATABASE_PASS" env-description:"Database user password"`
 	Pool   int    `yaml:"pool" env:"DATABASE_POOL" env-description:"Database pool size"`
+	Schema string `yaml:"schema" env:"DATABASE_SCHEMA" env-description:"Database schema name"`
 }
 
 // Timestamps adding time at the end of models
