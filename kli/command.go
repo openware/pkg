@@ -120,7 +120,9 @@ func (c *Command) Action(callback Action) *Command {
 
 // PrintHelp - Output the help text for this command
 func (c *Command) PrintHelp() {
-	c.app.PrintBanner()
+	if c.app != nil {
+		c.app.PrintBanner()
+	}
 
 	commandTitle := c.commandPath
 	if c.shortdescription != "" {
@@ -161,6 +163,9 @@ func (c *Command) PrintHelp() {
 
 // isDefaultCommand returns true if called on the default command
 func (c *Command) isDefaultCommand() bool {
+	if c.app == nil {
+		return false
+	}
 	return c.app.defaultCommand == c
 }
 
