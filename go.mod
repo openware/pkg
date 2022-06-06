@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/alicebob/miniredis/v2 v2.14.3
+	github.com/fbiville/markdown-table-formatter v0.3.0
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gofrs/uuid v4.0.0+incompatible
