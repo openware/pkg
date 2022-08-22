@@ -1,10 +1,11 @@
 ---
 kind: pipeline
+type: docker
 name: default
 
 steps:
   - name: Test & vet
-    image: golang:1.16
+    image: golang:1.17
     environment:
       GO111MODULE: on
     commands:
