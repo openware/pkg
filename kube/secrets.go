@@ -120,3 +120,15 @@ func (c *K8sClient) GetSecrets(namespace string) ([]corev1.Secret, error) {
 
 	return ps, nil
 }
+
+// DeleteSecret delete a K8s secret with a given name
+func (c *K8sClient) DeleteSecret(name, namespace string) error {
+	secretsClient := c.Client.CoreV1().Secrets(namespace)
+
+	err := secretsClient.Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
