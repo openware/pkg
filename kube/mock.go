@@ -9,11 +9,7 @@ import (
 	fake "k8s.io/client-go/kubernetes/fake"
 )
 
-const (
-	mockNamespace  = "odax"
-	workloadDeploy = "Deployment"
-	workloadSts    = "StatefulSet"
-)
+const mockNamespace = "odax"
 
 func MockDeployment(name, namespace string) *v1.Deployment {
 	return &v1.Deployment{

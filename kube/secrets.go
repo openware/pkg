@@ -81,7 +81,7 @@ func (c *K8sClient) ReadSecret(name, namespace string) (map[string][]byte, error
 	return result.Data, nil
 }
 
-// GetAnnotatedSecrets get a K8s secret with a given name and annotations
+// GetAnnotatedPullSecrets get a K8s secret with a given name and annotations
 func (c *K8sClient) GetAnnotatedPullSecrets(namespace string, annotations map[string]string) ([]corev1.Secret, error) {
 	secretsClient := c.Client.CoreV1().Secrets(namespace)
 
