@@ -2,4 +2,4 @@
 
 Openware go packages
 
-## Release v0.1.0
+## Release v0.1.2
