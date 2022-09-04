@@ -3,7 +3,7 @@ module github.com/openware/pkg/database
 go 1.18
 
 require (
-	github.com/openware/pkg/ika v0.0.0-20210402092258-edc0b8ed56a0
+	github.com/openware/pkg/ika v0.0.0-20220904191345-3af2ad698e3b
 	gorm.io/driver/mysql v1.3.6
 	gorm.io/driver/postgres v1.3.9
 	gorm.io/driver/sqlite v1.3.6
