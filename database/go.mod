@@ -2,6 +2,8 @@ module github.com/openware/pkg/database
 
 go 1.18
 
+replace github.com/openware/pkg/ika => ../ika
+
 require (
 	github.com/openware/pkg/ika v0.0.0-20220904191345-3af2ad698e3b
 	gorm.io/driver/mysql v1.3.6
@@ -25,5 +27,5 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -2,12 +2,14 @@ module github.com/openware/pkg/sonic
 
 go 1.18
 
+replace github.com/openware/pkg/ika => ../ika
+
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/gomarkdown/markdown v0.0.0-20220830015526-01a3c37d6f50
 	github.com/openware/kaigara/pkg/vault v0.0.0-20220826121705-c01db9cbd34b
 	github.com/openware/pkg/ika v0.0.0-20220904191345-3af2ad698e3b
-	github.com/openware/pkg/jwt v0.0.0-20210427221722-08a80973e205
+	github.com/openware/pkg/jwt v0.0.0-20220904193134-802c2d0f96c7
 	github.com/openware/pkg/mngapi v0.0.0-20220904191345-3af2ad698e3b
 	gorm.io/driver/mysql v1.3.6
 	gorm.io/driver/sqlite v1.3.6
@@ -18,7 +20,6 @@ require (
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/cenkalti/backoff/v3 v3.0.0 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
@@ -80,4 +81,5 @@ require (
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

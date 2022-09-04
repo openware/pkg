@@ -37,8 +37,8 @@ github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7J
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
 github.com/onsi/gomega v1.20.2 h1:8uQq0zMgLEfa0vRrrBgaJF2gyW9Da9BmfGV+OyUzfkY=
 github.com/onsi/gomega v1.20.2/go.mod h1:iYAIXgPSaDHak0LCMA+AWBpIKBr8WZicMxnE8luStNc=
-github.com/openware/pkg/types v0.0.0-20210427222828-2fd93634e320 h1:l3RTokX+87gRBStBJFZu+5ywFncMJC5y/JE7nkntCs8=
-github.com/openware/pkg/types v0.0.0-20210427222828-2fd93634e320/go.mod h1:Jxx+oEVNpe/oWIL7BR9Pk/iksQ807RyxHp2Rk/C3jXU=
+github.com/openware/pkg/types v0.0.0-20220904193134-802c2d0f96c7 h1:g8JGpL/u7dDtJAQLGJgF4An9+Kc0PF4PWH6SZz82kX8=
+github.com/openware/pkg/types v0.0.0-20220904193134-802c2d0f96c7/go.mod h1:g1jfI3QFCGXlPxRzIFElVQy8M3SwpYDUmxq7/aTNYcw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
