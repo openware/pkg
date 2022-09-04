@@ -4,13 +4,17 @@ go 1.18
 
 replace github.com/openware/pkg/ika => ../ika
 
+replace github.com/openware/pkg/jwt => ../jwt
+
+replace github.com/openware/pkg/mngapi => ../mngapi
+
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/gomarkdown/markdown v0.0.0-20220830015526-01a3c37d6f50
-	github.com/openware/kaigara/pkg/vault v0.0.0-20220826121705-c01db9cbd34b
-	github.com/openware/pkg/ika v0.0.0-20220904191345-3af2ad698e3b
-	github.com/openware/pkg/jwt v0.0.0-20220904193134-802c2d0f96c7
-	github.com/openware/pkg/mngapi v0.0.0-20220904191345-3af2ad698e3b
+	github.com/openware/kaigara/pkg/vault v0.0.0-20220904195118-276d14c383e8
+	github.com/openware/pkg/ika v0.0.0-00010101000000-000000000000
+	github.com/openware/pkg/jwt v0.0.0-00010101000000-000000000000
+	github.com/openware/pkg/mngapi v0.0.0-00010101000000-000000000000
 	gorm.io/driver/mysql v1.3.6
 	gorm.io/driver/sqlite v1.3.6
 	gorm.io/gorm v1.23.8
