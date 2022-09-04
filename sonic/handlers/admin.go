@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/openware/kaigara/pkg/vault"
+	"github.com/openware/pkg/vault"
 	sonic "github.com/openware/pkg/sonic/config"
 	"io/ioutil"
 	"log"

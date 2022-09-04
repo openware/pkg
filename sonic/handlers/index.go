@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/openware/kaigara/pkg/vault"
+	"github.com/openware/pkg/vault"
 	"github.com/openware/pkg/mngapi/peatio"
 	"sync"
 	"time"

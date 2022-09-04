@@ -5,11 +5,10 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/openware/pkg/types"
 )
 
 // Connect the redis with default database
-func Connect(cnf *Config) types.KVStore {
+func Connect(cnf *Config) KVStore {
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", cnf.Host, cnf.Port),
 		Password: cnf.Pass,

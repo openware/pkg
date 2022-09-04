@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/openware/kaigara/pkg/vault"
+	"github.com/openware/pkg/vault"
 	"github.com/openware/pkg/jwt"
 	"github.com/openware/pkg/sonic/config"
 )
