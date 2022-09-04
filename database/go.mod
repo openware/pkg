@@ -5,7 +5,7 @@ go 1.18
 replace github.com/openware/pkg/ika => ../ika
 
 require (
-	github.com/openware/pkg/ika v0.0.0-20220904191345-3af2ad698e3b
+	github.com/openware/pkg/ika v0.0.0-00010101000000-000000000000
 	gorm.io/driver/mysql v1.3.6
 	gorm.io/driver/postgres v1.3.9
 	gorm.io/driver/sqlite v1.3.6
