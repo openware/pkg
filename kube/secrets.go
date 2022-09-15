@@ -36,8 +36,18 @@ func (c *K8sClient) CreateSecret(name, namespace string, secType corev1.SecretTy
 	return nil
 }
 
+// UpdateOption defines the way to update secrets
+type UpdateOption string
+
+const (
+	// Keep existing secrets and update with a given secret map
+	KeepSecret UpdateOption = "Keep"
+	// Replace all secrets by a given secret map
+	ReplaceSecret UpdateOption = "Replace"
+)
+
 // UpdateSecret updates a K8s secret with a given name from a given map and creates one if it's absent
-func (c *K8sClient) UpdateSecret(name, namespace string, data map[string]interface{}) error {
+func (c *K8sClient) UpdateSecret(name, namespace string, data map[string]interface{}, option UpdateOption) error {
 	secretsClient := c.Client.CoreV1().Secrets(namespace)
 
 	result, err := secretsClient.Get(context.TODO(), name, metav1.GetOptions{})
@@ -50,10 +60,14 @@ func (c *K8sClient) UpdateSecret(name, namespace string, data map[string]interfa
 	}
 
 	byteData := convertMapInterfaceToString(data)
-	resData := result.Data
-
-	for k, v := range byteData {
-		resData[k] = v
+	var resData map[string][]byte
+	if option == KeepSecret {
+		resData = result.Data
+		for k, v := range byteData {
+			resData[k] = v
+		}
+	} else {
+		resData = byteData
 	}
 
 	result.Data = resData
@@ -119,16 +133,4 @@ func (c *K8sClient) GetSecrets(namespace string) ([]corev1.Secret, error) {
 	}
 
 	return ps, nil
-}
-
-// DeleteSecret delete a K8s secret with a given name
-func (c *K8sClient) DeleteSecret(name, namespace string) error {
-	secretsClient := c.Client.CoreV1().Secrets(namespace)
-
-	err := secretsClient.Delete(context.TODO(), name, metav1.DeleteOptions{})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
