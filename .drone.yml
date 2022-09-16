@@ -36,4 +36,5 @@ steps:
       - ./run_tests.sh
 
 trigger:
-  event: [ push ]
+  event:
+    - push
