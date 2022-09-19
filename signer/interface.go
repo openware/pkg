@@ -5,6 +5,6 @@ import (
 )
 
 type SignerInterface interface {
-	Sign(digest []byte) (signatureECDSA, error)
+	Sign(digest []byte) (SignatureECDSA, error)
 	GetPublicKey() ecdsa.PublicKey
 }
