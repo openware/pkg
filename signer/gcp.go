@@ -47,7 +47,7 @@ func (c *GCPSigner) GetPublicKey() ecdsa.PublicKey {
 }
 
 // Sign the given digest using a KMS key and return ECDSA signature
-func (c *GCPSigner) Sign(digest []byte) (signatureECDSA, error) {
+func (c *GCPSigner) Sign(digest []byte) (SignatureECDSA, error) {
 	req := &kms.AsymmetricSignRequest{
 		Name: c.keyPath,
 		Digest: &kms.Digest{

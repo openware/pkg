@@ -21,7 +21,7 @@ var (
 	oidPublicKeyECDSA = asn1.ObjectIdentifier{1, 2, 840, 10045, 2, 1}
 )
 
-type signatureECDSA []byte
+type SignatureECDSA []byte
 
 // publicKeyInfo is an ASN.1 encoded Subject Public Key Info, defined here: https://tools.ietf.org/html/rfc5280#section-4.1.2.7
 type publicKeyInfo struct {
@@ -96,7 +96,7 @@ func verifyDigest(pubKey ecdsa.PublicKey, hash, sig []byte) bool {
 }
 
 // recoverAndVerify recovers R and S from signature and verifies digest
-func recoverAndVerify(digest, signature []byte, pubKey ecdsa.PublicKey) (signatureECDSA, error) {
+func recoverAndVerify(digest, signature []byte, pubKey ecdsa.PublicKey) (SignatureECDSA, error) {
 	r, s, err := recoverRS(signature)
 	if err != nil {
 		return nil, err

@@ -41,7 +41,7 @@ func (c *AWSSigner) GetPublicKey() ecdsa.PublicKey {
 }
 
 // Sign the given digest using a KMS key and return ECDSA signature
-func (c *AWSSigner) Sign(digest []byte) (signatureECDSA, error) {
+func (c *AWSSigner) Sign(digest []byte) (SignatureECDSA, error) {
 	// Call the API
 	res, err := c.client.Sign(&kms.SignInput{
 		KeyId:            aws.String(c.keyARN),
