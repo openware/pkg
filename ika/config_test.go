@@ -541,8 +541,13 @@ array: [1, 2, 3]`,
 	}
 
 	t.Run("invalid path", func(t *testing.T) {
-		err := parseFile("invalid file path", nil)
-		if err == nil {
+		tmpFile, err := ioutil.TempFile(os.TempDir(), "invalid file path")
+		if err != nil {
+			t.Fatal("cannot create temporary file:", err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		if err := parseFile(tmpFile.Name(), nil); err == nil {
 			t.Error("expected error for invalid file path")
 		}
 	})
