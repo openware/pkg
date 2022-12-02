@@ -1,2 +1,3 @@
 jwt/testdata/*
 mngapi/test/*
+cover.out
