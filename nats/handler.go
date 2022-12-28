@@ -23,13 +23,13 @@ type handlerConfig struct {
 	autoUnsubscribeOnShutdown bool
 }
 
-type natsEventHandler struct {
+type NatsEventHandler struct {
 	eventHandlerBase
 	nc     *nats.Conn
 	config *handlerConfig
 }
 
-type jsEventHandler struct {
+type JsEventHandler struct {
 	eventHandlerBase
 	js     nats.JetStreamContext
 	config *handlerConfig
@@ -37,8 +37,8 @@ type jsEventHandler struct {
 
 // For Checking compatibility
 var (
-	_ EventHandler = (*natsEventHandler)(nil)
-	_ EventHandler = (*jsEventHandler)(nil)
+	_ EventHandler = (*NatsEventHandler)(nil)
+	_ EventHandler = (*JsEventHandler)(nil)
 )
 
 func newHandlerBase(termination <-chan os.Signal) eventHandlerBase {
@@ -49,12 +49,12 @@ func newHandlerBase(termination <-chan os.Signal) eventHandlerBase {
 	}
 }
 
-func NewNatsHandler(nc *nats.Conn, termination <-chan os.Signal, config *handlerConfig) *natsEventHandler {
+func NewNatsHandler(nc *nats.Conn, termination <-chan os.Signal, config *handlerConfig) *NatsEventHandler {
 	if config == nil {
 		config = NewHandlerDefaultConfig()
 	}
 
-	handler := natsEventHandler{
+	handler := NatsEventHandler{
 		nc:               nc,
 		eventHandlerBase: newHandlerBase(termination),
 		config:           config,
@@ -65,7 +65,7 @@ func NewNatsHandler(nc *nats.Conn, termination <-chan os.Signal, config *handler
 	return &handler
 }
 
-func NewJsHandler(nc *nats.Conn, termination <-chan os.Signal, config *handlerConfig) (*jsEventHandler, error) {
+func NewJsHandler(nc *nats.Conn, termination <-chan os.Signal, config *handlerConfig) (*JsEventHandler, error) {
 	if config == nil {
 		config = NewHandlerDefaultConfig()
 	}
@@ -75,7 +75,7 @@ func NewJsHandler(nc *nats.Conn, termination <-chan os.Signal, config *handlerCo
 		return nil, err
 	}
 
-	handler := &jsEventHandler{
+	handler := &JsEventHandler{
 		js:               js,
 		eventHandlerBase: newHandlerBase(termination),
 		config:           config,
@@ -121,7 +121,7 @@ func (h *eventHandlerBase) pushSub(sub *nats.Subscription) {
 	h.subs = append(h.subs, sub)
 }
 
-func (j *jsEventHandler) SubscribeToQueueUsingChannel(subject string, group string, msgChannel chan *nats.Msg) error {
+func (j *JsEventHandler) SubscribeToQueueUsingChannel(subject string, group string, msgChannel chan *nats.Msg) error {
 	sub, err := j.js.ChanQueueSubscribe(subject, group, msgChannel, nats.AckExplicit())
 	if err != nil {
 		return err
@@ -131,7 +131,7 @@ func (j *jsEventHandler) SubscribeToQueueUsingChannel(subject string, group stri
 	return nil
 }
 
-func (j *jsEventHandler) SubscribeToQueue(subject string, group string, cb nats.MsgHandler) error {
+func (j *JsEventHandler) SubscribeToQueue(subject string, group string, cb nats.MsgHandler) error {
 	sub, err := j.js.QueueSubscribe(subject, group, cb, nats.AckExplicit())
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func (j *jsEventHandler) SubscribeToQueue(subject string, group string, cb nats.
 	return nil
 }
 
-func (j *jsEventHandler) Subscribe(subject string, cb nats.MsgHandler) error {
+func (j *JsEventHandler) Subscribe(subject string, cb nats.MsgHandler) error {
 	sub, err := j.js.Subscribe(subject, cb, nats.AckExplicit())
 	if err != nil {
 		return err
@@ -151,7 +151,7 @@ func (j *jsEventHandler) Subscribe(subject string, cb nats.MsgHandler) error {
 	return nil
 }
 
-func (n *natsEventHandler) SubscribeToQueueUsingChannel(subject string, group string, msgChannel chan *nats.Msg) error {
+func (n *NatsEventHandler) SubscribeToQueueUsingChannel(subject string, group string, msgChannel chan *nats.Msg) error {
 	sub, err := n.nc.ChanQueueSubscribe(subject, group, msgChannel)
 	if err != nil {
 		return err
@@ -161,7 +161,7 @@ func (n *natsEventHandler) SubscribeToQueueUsingChannel(subject string, group st
 	return nil
 }
 
-func (n *natsEventHandler) SubscribeToQueue(subject string, group string, cb nats.MsgHandler) error {
+func (n *NatsEventHandler) SubscribeToQueue(subject string, group string, cb nats.MsgHandler) error {
 	sub, err := n.nc.QueueSubscribe(subject, group, cb)
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func (n *natsEventHandler) SubscribeToQueue(subject string, group string, cb nat
 	return nil
 }
 
-func (n *natsEventHandler) Subscribe(subject string, cb nats.MsgHandler) error {
+func (n *NatsEventHandler) Subscribe(subject string, cb nats.MsgHandler) error {
 	sub, err := n.nc.Subscribe(subject, cb)
 
 	if err != nil {
