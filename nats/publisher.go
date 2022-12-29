@@ -11,7 +11,7 @@ type eventPublisherBase interface {
 	Request(subj string, data []byte) (*nats.Msg, error)
 	RequestWithTimeout(subject string, data []byte, timeout time.Duration) (*nats.Msg, error)
 	Publish(topic string, payload []byte) error
-	publishMultiple(topics []string, payload []byte) []error
+	PublishMultiple(topics []string, payload []byte) []error
 }
 
 type EventPublisher interface {
@@ -78,7 +78,7 @@ func (p *publisherBase) Publish(topic string, payload []byte) error {
 	return p.nc.Publish(topic, payload)
 }
 
-func (p *publisherBase) publishMultiple(topics []string, payload []byte) []error {
+func (p *publisherBase) PublishMultiple(topics []string, payload []byte) []error {
 	wg := sync.WaitGroup{}
 	var errors []error
 	for _, topic := range topics {
@@ -124,7 +124,7 @@ func (j *jsEventPublisher) Publish(topic string, payload []byte) error {
 	return err
 }
 
-func (j *jsEventPublisher) publishMultiple(topics []string, payload []byte) []error {
+func (j *jsEventPublisher) PublishMultiple(topics []string, payload []byte) []error {
 	wg := sync.WaitGroup{}
 	var errors []error
 	for _, topic := range topics {
