@@ -39,12 +39,6 @@ type JsEventHandler struct {
 	config *handlerConfig
 }
 
-// For Checking compatibility
-var (
-	_ EventHandler = (*NatsEventHandler)(nil)
-	_ EventHandler = (*JsEventHandler)(nil)
-)
-
 func newHandlerBase(termination <-chan os.Signal) eventHandlerBase {
 	return eventHandlerBase{
 		termination: termination,

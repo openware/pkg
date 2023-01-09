@@ -8,6 +8,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// For Checking compatibility
+var (
+	_ EventHandler = (*NatsEventHandler)(nil)
+	_ EventHandler = (*JsEventHandler)(nil)
+
+	_ eventPublisherBase = (*publisherBase)(nil)
+	_ EventPublisher     = (*natsEventPublisher)(nil)
+	_ JsEventPublisher   = (*jsEventPublisher)(nil)
+)
+
 func initNatsHandlers() (*natsEventPublisher, *NatsEventHandler) {
 	nc, _ := InitEmbededNats()
 	publisher := NewNatsEventPublisher(nc)

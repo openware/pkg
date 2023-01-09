@@ -31,20 +31,14 @@ type publisherBase struct {
 	nc *nats.Conn
 }
 
-var _ eventPublisherBase = (*publisherBase)(nil)
-
 type natsEventPublisher struct {
 	publisherBase
 }
-
-var _ EventPublisher = (*natsEventPublisher)(nil)
 
 type jsEventPublisher struct {
 	publisherBase
 	js nats.JetStreamContext
 }
-
-var _ JsEventPublisher = (*jsEventPublisher)(nil)
 
 // NewNatsEventPublisher initialize new nats event publisher
 func NewNatsEventPublisher(nc *nats.Conn) *natsEventPublisher {
