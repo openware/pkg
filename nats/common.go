@@ -1,3 +1,4 @@
+// Package nats is used for handling nats (or nats jetstream) pub/sub
 package nats
 
 import (
@@ -5,12 +6,14 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
+// InitNats initialize nats using connectionSting
 func InitNats(connectionString string) (*nats.Conn, error) {
 	nc, err := nats.Connect(connectionString)
 
 	return nc, err
 }
 
+// InitEmbededNats initialize nats in memory
 func InitEmbededNats() (*nats.Conn, error) {
 	opts := &server.Options{}
 	ns, err := server.NewServer(opts)
