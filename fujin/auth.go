@@ -8,17 +8,23 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
+type PassEntries struct {
+	adminEmail      string
+	domainName      string
+	platformVersion string
+}
+
 // ParseJwtPass verifies jwtPass with brokerId, that should be a valid ECDSA secp256k1 public key
 // and returns email and domain values if error didn't occur
-func ParseJwtPass(brokerId, jwtPass string) (string, string, error) {
+func ParseJwtPass(brokerId, jwtPass string) (*PassEntries, error) {
 	pubKeyRaw, err := base64.StdEncoding.DecodeString(brokerId)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	pubKey, err := crypto.UnmarshalPubkey(pubKeyRaw)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	token, err := jwt.Parse(jwtPass, func(token *jwt.Token) (interface{}, error) {
@@ -29,23 +35,32 @@ func ParseJwtPass(brokerId, jwtPass string) (string, string, error) {
 		return pubKey, nil
 	})
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return "", "", fmt.Errorf("token is invalid")
+		return nil, fmt.Errorf("token is invalid")
 	}
 
 	email, ok := claims["email"].(string)
 	if !ok || email == "" {
-		return "", "", fmt.Errorf("token email value is invalid: '%v'", claims["email"])
+		return nil, fmt.Errorf("token email value is invalid: '%v'", claims["email"])
 	}
 
 	domain, ok := claims["domain"].(string)
 	if !ok || domain == "" {
-		return "", "", fmt.Errorf("token domain value is invalid: '%v'", claims["domain"])
+		return nil, fmt.Errorf("token domain value is invalid: '%v'", claims["domain"])
 	}
 
-	return email, domain, nil
+	version, ok := claims["version"].(string)
+	if !ok || version == "" {
+		return nil, fmt.Errorf("token version value is invalid: '%v'", claims["version"])
+	}
+
+	return &PassEntries{
+		adminEmail:      email,
+		domainName:      domain,
+		platformVersion: version,
+	}, nil
 }
