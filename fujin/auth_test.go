@@ -3,7 +3,7 @@ package fujin
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	cryptorand "crypto/rand"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
@@ -23,13 +23,13 @@ func TestParseJwtPass(t *testing.T) {
 	}
 	validEcdsaPubKeyRaw := base64.StdEncoding.EncodeToString(crypto.FromECDSAPub(&validEcdsaPrivKey.PublicKey))
 
-	invalidEcdsaPrivKey, err := ecdsa.GenerateKey(elliptic.P256(), cryptorand.Reader)
+	invalidEcdsaPrivKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 	invalidEcdsaPubKeyRaw := base64.StdEncoding.EncodeToString(crypto.FromECDSAPub(&invalidEcdsaPrivKey.PublicKey))
 
-	invalidAlgPrivKey, err := rsa.GenerateKey(cryptorand.Reader, 4096)
+	invalidAlgPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,20 +54,26 @@ func TestParseJwtPass(t *testing.T) {
 		errorMessage string
 	}{
 		{"correct", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "some@email.com", "domain": "some.domain.com",
+			"email": "some@email.com", "domain": "some.domain.com", "version": "4.0.0",
 		}, ""},
 		{"absent email", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"domain": "some.domain.com",
+			"domain": "some.domain.com", "version": "4.0.0",
 		}, "token email value is invalid: '<nil>'"},
 		{"absent domain", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "some@email.com",
+			"email": "some@email.com", "version": "4.0.0",
 		}, "token domain value is invalid: '<nil>'"},
+		{"absent version", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
+			"email": "some@email.com", "domain": "some.domain.com",
+		}, "token version value is invalid: '<nil>'"},
 		{"empty email", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "", "domain": "some.domain.com",
+			"email": "", "domain": "some.domain.com", "version": "4.0.0",
 		}, "token email value is invalid: ''"},
 		{"empty domain", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "some@email.com", "domain": "",
+			"email": "some@email.com", "domain": "", "version": "4.0.0",
 		}, "token domain value is invalid: ''"},
+		{"empty version", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
+			"email": "some@email.com", "domain": "some.domain.com", "version": "",
+		}, "token version value is invalid: ''"},
 		{"invalid ECDSA public key", validEcdsaPrivKey, invalidEcdsaPubKeyRaw, jwt.MapClaims{}, "invalid secp256k1 public key"},
 		{"invalid ECDSA private key", invalidEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{}, "crypto/ecdsa: verification error"},
 		{"invalid algorithm public key", validEcdsaPrivKey, invalidAlgPubKeyRaw, jwt.MapClaims{}, "invalid secp256k1 public key"},
@@ -81,7 +87,7 @@ func TestParseJwtPass(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			email, domain, err := ParseJwtPass(tc.brokerId, tokenString)
+			passEntries, err := ParseJwtPass(tc.brokerId, tokenString)
 
 			if tc.errorMessage != "" {
 				assert.Error(t, err)
@@ -90,11 +96,15 @@ func TestParseJwtPass(t *testing.T) {
 				assert.NoError(t, err)
 
 				if tcEmail, ok := tc.jwtMapClaims["email"]; ok {
-					assert.Equal(t, tcEmail, email)
+					assert.Equal(t, tcEmail, passEntries.adminEmail)
 				}
 
 				if tcDomain, ok := tc.jwtMapClaims["domain"]; ok {
-					assert.Equal(t, tcDomain, domain)
+					assert.Equal(t, tcDomain, passEntries.domainName)
+				}
+
+				if tcVersion, ok := tc.jwtMapClaims["version"]; ok {
+					assert.Equal(t, tcVersion, passEntries.platformVersion)
 				}
 			}
 		})
@@ -109,7 +119,9 @@ func Test_GenerateAuthCredentials(t *testing.T) {
 
 	brokerId := base64.StdEncoding.EncodeToString(crypto.FromECDSAPub(&validEcdsaPrivKey.PublicKey))
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
-		"email": "some@email.com", "domain": "some.domain.com",
+		"email":   "some@email.com",
+		"domain":  "some.domain.com",
+		"version": "4.0.0",
 	})
 
 	jwtToken, err := token.SignedString(validEcdsaPrivKey)
