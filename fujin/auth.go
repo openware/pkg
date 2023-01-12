@@ -9,9 +9,9 @@ import (
 )
 
 type PassEntries struct {
-	adminEmail      string
-	domainName      string
-	platformVersion string
+	AdminEmail      string
+	DomainName      string
+	PlatformVersion string
 }
 
 // ParseJwtPass verifies jwtPass with brokerId, that should be a valid ECDSA secp256k1 public key
@@ -59,8 +59,8 @@ func ParseJwtPass(brokerId, jwtPass string) (*PassEntries, error) {
 	}
 
 	return &PassEntries{
-		adminEmail:      email,
-		domainName:      domain,
-		platformVersion: version,
+		AdminEmail:      email,
+		DomainName:      domain,
+		PlatformVersion: version,
 	}, nil
 }

@@ -96,15 +96,15 @@ func TestParseJwtPass(t *testing.T) {
 				assert.NoError(t, err)
 
 				if tcEmail, ok := tc.jwtMapClaims["email"]; ok {
-					assert.Equal(t, tcEmail, passEntries.adminEmail)
+					assert.Equal(t, tcEmail, passEntries.AdminEmail)
 				}
 
 				if tcDomain, ok := tc.jwtMapClaims["domain"]; ok {
-					assert.Equal(t, tcDomain, passEntries.domainName)
+					assert.Equal(t, tcDomain, passEntries.DomainName)
 				}
 
 				if tcVersion, ok := tc.jwtMapClaims["version"]; ok {
-					assert.Equal(t, tcVersion, passEntries.platformVersion)
+					assert.Equal(t, tcVersion, passEntries.PlatformVersion)
 				}
 			}
 		})
