@@ -55,7 +55,7 @@ func ParseJwtPass(brokerId, jwtPass string) (*PassEntries, error) {
 
 	version, ok := claims["version"].(string)
 	if !ok || version == "" {
-		return nil, fmt.Errorf("token version value is invalid: '%v'", claims["version"])
+		version = "empty"
 	}
 
 	return &PassEntries{
