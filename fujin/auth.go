@@ -55,7 +55,7 @@ func ParseJwtPass(brokerId, jwtPass string) (*PassEntries, error) {
 
 	version, ok := claims["version"].(string)
 	if !ok || version == "" {
-		version = "empty"
+		version = "none"
 	}
 
 	return &PassEntries{

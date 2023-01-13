@@ -104,7 +104,7 @@ func TestParseJwtPass(t *testing.T) {
 				}
 
 				if tcVersion, ok := tc.jwtMapClaims["version"]; ok && tcVersion == "" {
-					assert.Equal(t, "empty", passEntries.PlatformVersion)
+					assert.Equal(t, "none", passEntries.PlatformVersion)
 				} else if ok {
 					assert.Equal(t, tcVersion, passEntries.PlatformVersion)
 				}
