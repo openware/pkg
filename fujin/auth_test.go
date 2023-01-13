@@ -64,7 +64,7 @@ func TestParseJwtPass(t *testing.T) {
 		}, "token domain value is invalid: '<nil>'"},
 		{"absent version", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
 			"email": "some@email.com", "domain": "some.domain.com",
-		}, "token version value is invalid: '<nil>'"},
+		}, ""},
 		{"empty email", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
 			"email": "", "domain": "some.domain.com", "version": "4.0.0",
 		}, "token email value is invalid: ''"},
@@ -73,7 +73,7 @@ func TestParseJwtPass(t *testing.T) {
 		}, "token domain value is invalid: ''"},
 		{"empty version", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
 			"email": "some@email.com", "domain": "some.domain.com", "version": "",
-		}, "token version value is invalid: ''"},
+		}, ""},
 		{"invalid ECDSA public key", validEcdsaPrivKey, invalidEcdsaPubKeyRaw, jwt.MapClaims{}, "invalid secp256k1 public key"},
 		{"invalid ECDSA private key", invalidEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{}, "crypto/ecdsa: verification error"},
 		{"invalid algorithm public key", validEcdsaPrivKey, invalidAlgPubKeyRaw, jwt.MapClaims{}, "invalid secp256k1 public key"},
@@ -103,7 +103,9 @@ func TestParseJwtPass(t *testing.T) {
 					assert.Equal(t, tcDomain, passEntries.DomainName)
 				}
 
-				if tcVersion, ok := tc.jwtMapClaims["version"]; ok {
+				if tcVersion, ok := tc.jwtMapClaims["version"]; ok && tcVersion == "" {
+					assert.Equal(t, "none", passEntries.PlatformVersion)
+				} else if ok {
 					assert.Equal(t, tcVersion, passEntries.PlatformVersion)
 				}
 			}
