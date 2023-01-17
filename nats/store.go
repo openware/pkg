@@ -9,6 +9,7 @@ import (
 
 type BucketManager interface {
 	CreateBucketOrFindExisting(name string) (*bucket, error)
+	BucketExists(name string) (bool, error)
 	DeleteBucket(name string) error
 }
 
@@ -46,14 +47,14 @@ func NewBucketManager(nc *nats.Conn) (*bucketManager, error) {
 	}, nil
 }
 
-func (s *bucketManager) CreateBucketOrFindExisting(name string) (*bucket, error) {
+func (s *bucketManager) CreateBucketOrFindExisting(name string, replicas int) (*bucket, error) {
 	keyVal, err := s.js.KeyValue(name)
 	if errors.Is(err, nats.ErrBucketNotFound) {
 		keyVal, err = s.js.CreateKeyValue(&nats.KeyValueConfig{
 			Bucket:   name,
-			Replicas: 3,
+			Replicas: replicas,
 		})
-	} else {
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -66,6 +67,18 @@ func (s *bucketManager) CreateBucketOrFindExisting(name string) (*bucket, error)
 	}
 
 	return nil, err
+}
+
+func (s *bucketManager) BucketExists(name string) (bool, error) {
+	_, err := s.js.KeyValue(name)
+	if errors.Is(err, nats.ErrBucketNotFound) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (s *bucketManager) DeleteBucket(name string) error {
@@ -112,15 +125,12 @@ func (b *bucket) GetHistoryOfTheKey(key string) ([]KeyVal, error) {
 
 func (b *bucket) AddPair(key string, val []byte) error {
 	_, err := b.items.Get(key)
-	if err != nil && !errors.Is(err, nats.ErrKeyNotFound) {
-		return err
-	} else if err != nil {
-		return err
-	}
 
 	if errors.Is(err, nats.ErrKeyNotFound) {
 		_, err = b.items.Create(key, val)
-		return nil
+		return err
+	} else if err != nil {
+		return err
 	}
 
 	_, err = b.items.Put(key, val)
