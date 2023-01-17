@@ -50,8 +50,8 @@ func NewResponseMessage(msgId uint32, error any, result interface{}) *ResponseMe
 			Type:  Response,
 			MsgId: msgId,
 		},
-		Error:  nil,
-		Result: nil,
+		Error:  error,
+		Result: result,
 	}
 }
 

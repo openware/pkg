@@ -10,17 +10,17 @@ import (
 
 type CommandListener interface {
 	ListenToCommands()
-	SetServiceRestartCb(cb func() *protocol.ResponseMessage)
-	SetConfigLoadCb(cb func(string) *protocol.ResponseMessage)
-	SetConfigValueCb(cb func(string, string) *protocol.ResponseMessage)
+	SetServiceRestartCb(cb func())
+	SetConfigLoadCb(cb func(string))
+	SetConfigValueCb(cb func(string, string))
 }
 
 type commandListener struct {
 	subjectName    string
 	handler        nats.EventHandler
-	restartService func() *protocol.ResponseMessage
-	loadConfig     func(string) *protocol.ResponseMessage
-	setConfigValue func(string, string) *protocol.ResponseMessage
+	restartService func()
+	loadConfig     func(string)
+	setConfigValue func(string, string)
 }
 
 func NewCommandListener(serviceName string, handler nats.EventHandler) *commandListener {
@@ -67,14 +67,14 @@ func (c *commandListener) listenToCommands(tries int32) {
 	}
 }
 
-func (c *commandListener) SetServiceRestartCb(cb func() *protocol.ResponseMessage) {
+func (c *commandListener) SetServiceRestartCb(cb func()) {
 	c.restartService = cb
 }
 
-func (c *commandListener) SetConfigLoadCb(cb func(string) *protocol.ResponseMessage) {
+func (c *commandListener) SetConfigLoadCb(cb func(string)) {
 	c.loadConfig = cb
 }
 
-func (c *commandListener) ListenToSetConfigValue(cb func(string, string) *protocol.ResponseMessage) {
+func (c *commandListener) ListenToSetConfigValue(cb func(string, string)) {
 	c.setConfigValue = cb
 }

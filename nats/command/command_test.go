@@ -7,25 +7,21 @@ import (
 )
 
 func TestReadParam(t *testing.T) {
-	msg := &LoadConfigCommand{
-		Method: "test",
-		Params: []interface{}{"my-command"},
-	}
+	msg := NewLoadConfigCommand(123, "my-command")
 
 	param, err := msg.ReadParam()
 	assert.NoError(t, err)
+	assert.Equal(t, LOAD_CONFIG_COMMAND, msg.Method)
+	assert.Equal(t, uint32(123), msg.MsgId)
 	assert.Equal(t, "my-command", param)
 }
 
 func TestReadConfig(t *testing.T) {
-	msg := &SetConfigValueCommand{
-		Method: "test",
-		Params: []interface{}{
-			[2]string{"foo", "baz"},
-		},
-	}
+	msg := NewSetConfigValueCommand(234, []string{"foo", "baz"})
+	assert.Equal(t, SET_CONFIG_VALUE_COMMAND, msg.Method)
+	assert.Equal(t, uint32(234), msg.MsgId)
 
 	params, err := msg.ReadConfig()
 	assert.NoError(t, err)
-	assert.Equal(t, [2]string{"foo", "baz"}, params)
+	assert.Equal(t, []string{"foo", "baz"}, params)
 }
