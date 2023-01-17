@@ -28,7 +28,6 @@ func NewCommandListener(serviceName string, handler nats.EventHandler) *commandL
 		subjectName: serviceName + ".ctrl",
 		handler:     handler,
 	}
-
 }
 
 func (c *commandListener) ListenToCommands() {
@@ -37,20 +36,22 @@ func (c *commandListener) ListenToCommands() {
 
 func (c *commandListener) listenToCommands(tries int32) {
 	err := c.handler.Subscribe(c.subjectName, func(msg *natspkg.Msg) {
-		request := &protocol.RequestMessage{}
-		request.UnmarshalMsg(msg.Data)
-
+		request, err := protocol.UnmarshalMessage[protocol.RequestMessage](msg.Data)
+		// TODO: handle error
+		if err != nil {
+			return
+		}
 		switch request.Method {
 		case RESTART_SERVICE_COMMAND:
 			c.restartService()
 			break
 		case LOAD_CONFIG_COMMAND:
-			command := (*LoadConfigCommand)(request)
+			command := (LoadConfigCommand)(*request)
 			param, _ := command.ReadParam()
 			c.loadConfig(param)
 			break
 		case SET_CONFIG_VALUE_COMMAND:
-			command := (*SetConfigValueCommand)(request)
+			command := (SetConfigValueCommand)(*request)
 			param, _ := command.ReadConfig()
 			c.setConfigValue(param[0], param[1])
 			break

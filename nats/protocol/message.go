@@ -1,6 +1,8 @@
 package protocol
 
-type MessageType int32
+import "encoding/json"
+
+type MessageType uint8
 
 const (
 	Request MessageType = iota
@@ -8,34 +10,32 @@ const (
 	Event
 )
 
-//go:generate msgp
-
-type MessageBase struct {
-	Type  MessageType `msg:"message_type"`
-	MsgId uint32      `msg:"msg_id"`
+type messageBase struct {
+	Type  MessageType `json:"message_type"`
+	MsgId uint32      `json:"msg_id"`
 }
 
 type RequestMessage struct {
-	MessageBase
-	Method string        `msg:"method"`
-	Params []interface{} `msg:"params"`
+	messageBase
+	Method string        `json:"method"`
+	Params []interface{} `json:"params"`
 }
 
 type ResponseMessage struct {
-	MessageBase
-	Error  interface{} `msg:"method"`
-	Result interface{} `msg:"result"`
+	messageBase
+	Error  interface{} `json:"method"`
+	Result interface{} `json:"result"`
 }
 
 type EventMessage struct {
-	MessageBase
-	Method string        `msg:"method"`
-	Params []interface{} `msg:"params"`
+	messageBase
+	Method string        `json:"method"`
+	Params []interface{} `json:"params"`
 }
 
 func NewRequestMessage(msgId uint32, method string, params []interface{}) *RequestMessage {
 	return &RequestMessage{
-		MessageBase: MessageBase{
+		messageBase: messageBase{
 			Type:  Request,
 			MsgId: msgId,
 		},
@@ -46,7 +46,7 @@ func NewRequestMessage(msgId uint32, method string, params []interface{}) *Reque
 
 func NewResponseMessage(msgId uint32, error any, result interface{}) *ResponseMessage {
 	return &ResponseMessage{
-		MessageBase: MessageBase{
+		messageBase: messageBase{
 			Type:  Response,
 			MsgId: msgId,
 		},
@@ -57,11 +57,21 @@ func NewResponseMessage(msgId uint32, error any, result interface{}) *ResponseMe
 
 func NewEventMessage(msgId uint32, method string, params []interface{}) *EventMessage {
 	return &EventMessage{
-		MessageBase: MessageBase{
+		messageBase: messageBase{
 			Type:  Event,
 			MsgId: msgId,
 		},
 		Method: method,
 		Params: params,
 	}
+}
+
+func MarshalMessage[T RequestMessage | ResponseMessage | EventMessage](message *T) ([]byte, error) {
+	return json.Marshal(message)
+}
+
+func UnmarshalMessage[T RequestMessage | ResponseMessage | EventMessage](data []byte) (*T, error) {
+	message := new(T)
+	err := json.Unmarshal(data, message)
+	return message, err
 }
