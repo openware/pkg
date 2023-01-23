@@ -12,6 +12,7 @@ type PassEntries struct {
 	AdminEmail      string
 	DomainName      string
 	PlatformVersion string
+	CustodyMode     string
 }
 
 // ParseJwtPass verifies jwtPass with brokerId, that should be a valid ECDSA secp256k1 public key
@@ -34,6 +35,7 @@ func ParseJwtPass(brokerId, jwtPass string) (*PassEntries, error) {
 
 		return pubKey, nil
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +60,15 @@ func ParseJwtPass(brokerId, jwtPass string) (*PassEntries, error) {
 		version = "none"
 	}
 
+	custody, ok := claims["custody"].(string)
+	if !ok || custody == "" {
+		custody = "none"
+	}
+
 	return &PassEntries{
 		AdminEmail:      email,
 		DomainName:      domain,
 		PlatformVersion: version,
+		CustodyMode:     custody,
 	}, nil
 }

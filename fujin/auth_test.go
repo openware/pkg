@@ -54,25 +54,31 @@ func TestParseJwtPass(t *testing.T) {
 		errorMessage string
 	}{
 		{"correct", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "some@email.com", "domain": "some.domain.com", "version": "4.0.0",
+			"email": "some@email.com", "domain": "some.domain.com", "version": "4.0.0", "custody": "mainnet",
 		}, ""},
 		{"absent email", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"domain": "some.domain.com", "version": "4.0.0",
+			"domain": "some.domain.com", "version": "4.0.0", "custody": "mainnet",
 		}, "token email value is invalid: '<nil>'"},
 		{"absent domain", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "some@email.com", "version": "4.0.0",
+			"email": "some@email.com", "version": "4.0.0", "custody": "mainnet",
 		}, "token domain value is invalid: '<nil>'"},
 		{"absent version", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
 			"email": "some@email.com", "domain": "some.domain.com",
 		}, ""},
+		{"absent custody", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
+			"email": "some@email.com", "domain": "some.domain.com", "version": "4.0.0",
+		}, ""},
 		{"empty email", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "", "domain": "some.domain.com", "version": "4.0.0",
+			"email": "", "domain": "some.domain.com", "version": "4.0.0", "custody": "mainnet",
 		}, "token email value is invalid: ''"},
 		{"empty domain", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "some@email.com", "domain": "", "version": "4.0.0",
+			"email": "some@email.com", "domain": "", "version": "4.0.0", "custody": "mainnet",
 		}, "token domain value is invalid: ''"},
 		{"empty version", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
-			"email": "some@email.com", "domain": "some.domain.com", "version": "",
+			"email": "some@email.com", "domain": "some.domain.com", "version": "", "custody": "mainnet",
+		}, ""},
+		{"empty custody", validEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{
+			"email": "some@email.com", "domain": "some.domain.com", "version": "4.0.0", "custody": "",
 		}, ""},
 		{"invalid ECDSA public key", validEcdsaPrivKey, invalidEcdsaPubKeyRaw, jwt.MapClaims{}, "invalid secp256k1 public key"},
 		{"invalid ECDSA private key", invalidEcdsaPrivKey, validEcdsaPubKeyRaw, jwt.MapClaims{}, "crypto/ecdsa: verification error"},
@@ -108,6 +114,12 @@ func TestParseJwtPass(t *testing.T) {
 				} else if ok {
 					assert.Equal(t, tcVersion, passEntries.PlatformVersion)
 				}
+
+				if tcCustody, ok := tc.jwtMapClaims["custody"]; ok && tcCustody == "" {
+					assert.Equal(t, "none", passEntries.CustodyMode)
+				} else if ok {
+					assert.Equal(t, tcCustody, passEntries.CustodyMode)
+				}
 			}
 		})
 	}
@@ -124,6 +136,7 @@ func Test_GenerateAuthCredentials(t *testing.T) {
 		"email":   "some@email.com",
 		"domain":  "some.domain.com",
 		"version": "4.0.0",
+		"custody": "mainnet",
 	})
 
 	jwtToken, err := token.SignedString(validEcdsaPrivKey)
