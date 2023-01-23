@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func initBucketManager() *bucketManager {
+func initBucketManager() *Manager {
 	//nc, _ := InitNats("localhost:4222")
 	nc, _ := InitEmbededNats()
 	bm, _ := NewBucketManager(nc)

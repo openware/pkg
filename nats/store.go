@@ -8,12 +8,12 @@ import (
 )
 
 type BucketManager interface {
-	CreateBucketOrFindExisting(name string) (*bucket, error)
+	CreateBucketOrFindExisting(name string, replicas int) (*Bucket, error)
 	BucketExists(name string) (bool, error)
 	DeleteBucket(name string) error
 }
 
-type Bucket interface {
+type BucketInterface interface {
 	GetValue(key string) ([]byte, error)
 	GetKeyCreateDate(key string) (time.Time, error)
 	GetAllTheKeys() ([]string, error)
@@ -22,12 +22,12 @@ type Bucket interface {
 	Delete(key string) error
 }
 
-type bucketManager struct {
-	js nats.JetStreamContext
+type Manager struct {
+	Js nats.JetStreamContext
 }
 
-type bucket struct {
-	items nats.KeyValue
+type Bucket struct {
+	Items nats.KeyValue
 }
 
 type KeyVal struct {
@@ -36,21 +36,21 @@ type KeyVal struct {
 	CreateDate time.Time
 }
 
-func NewBucketManager(nc *nats.Conn) (*bucketManager, error) {
+func NewBucketManager(nc *nats.Conn) (*Manager, error) {
 	js, err := nc.JetStream()
 	if err != nil {
 		return nil, err
 	}
 
-	return &bucketManager{
-		js: js,
+	return &Manager{
+		Js: js,
 	}, nil
 }
 
-func (s *bucketManager) CreateBucketOrFindExisting(name string, replicas int) (*bucket, error) {
-	keyVal, err := s.js.KeyValue(name)
+func (s *Manager) CreateBucketOrFindExisting(name string, replicas int) (*Bucket, error) {
+	keyVal, err := s.Js.KeyValue(name)
 	if errors.Is(err, nats.ErrBucketNotFound) {
-		keyVal, err = s.js.CreateKeyValue(&nats.KeyValueConfig{
+		keyVal, err = s.Js.CreateKeyValue(&nats.KeyValueConfig{
 			Bucket:   name,
 			Replicas: replicas,
 		})
@@ -59,8 +59,8 @@ func (s *bucketManager) CreateBucketOrFindExisting(name string, replicas int) (*
 	}
 
 	if keyVal != nil {
-		bucket := &bucket{
-			items: keyVal,
+		bucket := &Bucket{
+			Items: keyVal,
 		}
 
 		return bucket, nil
@@ -69,8 +69,8 @@ func (s *bucketManager) CreateBucketOrFindExisting(name string, replicas int) (*
 	return nil, err
 }
 
-func (s *bucketManager) BucketExists(name string) (bool, error) {
-	_, err := s.js.KeyValue(name)
+func (s *Manager) BucketExists(name string) (bool, error) {
+	_, err := s.Js.KeyValue(name)
 	if errors.Is(err, nats.ErrBucketNotFound) {
 		return false, nil
 	}
@@ -81,32 +81,32 @@ func (s *bucketManager) BucketExists(name string) (bool, error) {
 	return true, nil
 }
 
-func (s *bucketManager) DeleteBucket(name string) error {
-	return s.js.DeleteKeyValue(name)
+func (s *Manager) DeleteBucket(name string) error {
+	return s.Js.DeleteKeyValue(name)
 }
 
-func (b *bucket) GetValue(key string) ([]byte, error) {
-	val, err := b.items.Get(key)
+func (b *Bucket) GetValue(key string) ([]byte, error) {
+	val, err := b.Items.Get(key)
 	if err != nil {
 		return nil, err
 	}
 	return val.Value(), nil
 }
 
-func (b *bucket) GetKeyCreateDate(key string) (time.Time, error) {
-	val, err := b.items.Get(key)
+func (b *Bucket) GetKeyCreateDate(key string) (time.Time, error) {
+	val, err := b.Items.Get(key)
 	if err != nil {
 		return time.Time{}, err
 	}
 	return val.Created(), err
 }
 
-func (b *bucket) GetAllTheKeys() ([]string, error) {
-	return b.items.Keys()
+func (b *Bucket) GetAllTheKeys() ([]string, error) {
+	return b.Items.Keys()
 }
 
-func (b *bucket) GetHistoryOfTheKey(key string) ([]KeyVal, error) {
-	keyHistory, err := b.items.History(key)
+func (b *Bucket) GetHistoryOfTheKey(key string) ([]KeyVal, error) {
+	keyHistory, err := b.Items.History(key)
 	if err != nil {
 		return nil, err
 	}
@@ -123,20 +123,20 @@ func (b *bucket) GetHistoryOfTheKey(key string) ([]KeyVal, error) {
 	return history, nil
 }
 
-func (b *bucket) AddPair(key string, val []byte) error {
-	_, err := b.items.Get(key)
+func (b *Bucket) AddPair(key string, val []byte) error {
+	_, err := b.Items.Get(key)
 
 	if errors.Is(err, nats.ErrKeyNotFound) {
-		_, err = b.items.Create(key, val)
+		_, err = b.Items.Create(key, val)
 		return err
 	} else if err != nil {
 		return err
 	}
 
-	_, err = b.items.Put(key, val)
+	_, err = b.Items.Put(key, val)
 	return err
 }
 
-func (b *bucket) Delete(key string) error {
-	return b.items.Delete(key)
+func (b *Bucket) Delete(key string) error {
+	return b.Items.Delete(key)
 }
