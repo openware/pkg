@@ -65,7 +65,7 @@ func (l *GORMLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && level.Level() >= zapcore.WarnLevel:
 		slowLog := fmt.Sprintf("SLOW SQL >= %v", l.SlowThreshold)
 		l.logger.Warnw(sql, "elapsed", elapsed, "rows", rows, "warn", slowLog)
-	case level.Level() <= zapcore.InfoLevel:
-		l.logger.Infow(sql, "elapsed", elapsed, "rows", rows)
+	case level.Level() < zapcore.InfoLevel:
+		l.logger.Debugw(sql, "elapsed", elapsed, "rows", rows)
 	}
 }
