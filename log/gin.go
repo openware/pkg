@@ -25,7 +25,7 @@ func GinLogger() gin.HandlerFunc {
 		errorMessage := c.Errors.ByType(gin.ErrorTypePrivate).String()
 		bodySize := c.Writer.Size()
 
-		if statusCode >= http.StatusInternalServerError {
+		if statusCode >= http.StatusBadRequest {
 			logger.Errorw(errorMessage,
 				"method", method,
 				"status", statusCode,
