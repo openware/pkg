@@ -103,6 +103,9 @@ func Drop(cnf *Config) error {
 		}
 		cnf.Name = dbName
 		err = db.Exec(fmt.Sprintf("DROP DATABASE `%s`;", cnf.Name)).Error
+		if err != nil {
+			return err
+		}
 	}
 	// Close the database connection, SQLite also drop the in-memory database
 	sql, _ := db.DB()
