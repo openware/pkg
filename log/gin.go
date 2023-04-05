@@ -22,10 +22,10 @@ func GinLogger() gin.HandlerFunc {
 		clientIP := c.ClientIP()
 		method := c.Request.Method
 		statusCode := c.Writer.Status()
-		errorMessage := c.Errors.ByType(gin.ErrorTypePrivate).String()
+		errorMessage := c.Errors.ByType(gin.ErrorTypePrivate).String() // Can be empty string
 		bodySize := c.Writer.Size()
 
-		if statusCode >= http.StatusBadRequest {
+		if statusCode >= http.StatusInternalServerError {
 			logger.Errorw(errorMessage,
 				"method", method,
 				"status", statusCode,
@@ -36,7 +36,7 @@ func GinLogger() gin.HandlerFunc {
 				"client-ip", clientIP,
 			)
 		} else {
-			logger.Infow("",
+			logger.Infow(errorMessage,
 				"method", method,
 				"status", statusCode,
 				"latency", latency,
