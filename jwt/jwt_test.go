@@ -53,7 +53,7 @@ func TestAuth_appendClaims(t *testing.T) {
 	})
 }
 
-func TestAuth_JWT(t *testing.T) {
+func TestAuth_JWT_RSA(t *testing.T) {
 	ks, err := LoadOrGenerateKeys("./testdata/rsa-key", "./testdata/rsa-key.pub")
 	if err != nil {
 		t.Fatal(err)
@@ -66,6 +66,24 @@ func TestAuth_JWT(t *testing.T) {
 		}
 
 		_, err = ParseAndValidate(token, ks.PublicKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+func TestAuth_JWT_EdDSA(t *testing.T) {
+	ks, err := LoadOrGenerateKeysEdDSA("./testdata/ed25519-key", "./testdata/ed25519-key.pub")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("should validate jwt", func(t *testing.T) {
+		token, err := ForgeTokenEdDSA("uid", "email", "role", 3, 1, ks.PrivateKey, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = ParseAndValidateEdDSA(token, ks.PublicKey)
 		if err != nil {
 			t.Fatal(err)
 		}
