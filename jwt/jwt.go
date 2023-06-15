@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"crypto/ed25519"
 	"crypto/rsa"
 	"encoding/json"
 	"strconv"
@@ -23,8 +24,37 @@ type Auth struct {
 	jwt.StandardClaims
 }
 
-// ParseAndValidate parses token and validates it's jwt signature with given key.
+// ForgeToken creates a valid JWT signed with RS256 algorithm by the given private key
+func ForgeToken(uid, email, role string, level int, referralID int, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
+	claims := appendClaims(newClaims(uid, email, role, level, referralID), customClaims)
+	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	return t.SignedString(key)
+}
+
+// ParseAndValidate parses token and validates it's JWT signature with given RSA key.
 func ParseAndValidate(token string, key *rsa.PublicKey) (Auth, error) {
+	auth := Auth{}
+
+	_, err := jwt.ParseWithClaims(token, &auth, func(t *jwt.Token) (interface{}, error) {
+		return key, nil
+	})
+
+	return auth, err
+}
+
+// ForgeTokenEdDSA creates a valid JWT signed with EdDSA algorithm by the given private key
+func ForgeTokenEdDSA(uid, email, role string, level int, referralID int, key ed25519.PrivateKey, customClaims jwt.MapClaims) (string, error) {
+	claims := appendClaims(newClaims(uid, email, role, level, referralID), customClaims)
+
+	t := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
+	token, err := t.SignedString(key)
+
+	return token, err
+}
+
+// ParseAndValidateEdDSA parses token and validates it's JWT signature with given EdDSA key.
+func ParseAndValidateEdDSA(token string, key ed25519.PublicKey) (Auth, error) {
 	auth := Auth{}
 
 	_, err := jwt.ParseWithClaims(token, &auth, func(t *jwt.Token) (interface{}, error) {
@@ -50,9 +80,8 @@ func appendClaims(defaultClaims, customClaims jwt.MapClaims) jwt.MapClaims {
 	return defaultClaims
 }
 
-// ForgeToken creates a valid JWT signed by the given private key
-func ForgeToken(uid, email, role string, level int, referralID int, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
-	claims := appendClaims(jwt.MapClaims{
+func newClaims(uid, email, role string, level int, referralID int) jwt.MapClaims {
+	return jwt.MapClaims{
 		"iat":         time.Now().Unix(),
 		"jti":         strconv.FormatInt(time.Now().Unix(), 10),
 		"exp":         time.Now().UTC().Add(time.Hour).Unix(),
@@ -65,9 +94,5 @@ func ForgeToken(uid, email, role string, level int, referralID int, key *rsa.Pri
 		"level":       level,
 		"state":       "active",
 		"referral_id": referralID,
-	}, customClaims)
-
-	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-
-	return t.SignedString(key)
+	}
 }
