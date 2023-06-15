@@ -100,6 +100,20 @@ func (ks *KeyStore) LoadPrivateKey(path string) error {
 	return nil
 }
 
+func (ks *KeyStore) LoadPrivateKeyFromString(str string) error {
+	pem, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
+		return err
+	}
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(pem)
+	if err != nil {
+		return err
+	}
+
+	ks.PrivateKey = key
+	return nil
+}
+
 func (ks *KeyStore) GenerateKeys() error {
 	reader := rand.Reader
 	bitSize := 2048
