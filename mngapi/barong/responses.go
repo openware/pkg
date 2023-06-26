@@ -5,7 +5,7 @@ type User struct {
 	Email       string `json:"email"`
 	UID         string `json:"uid"`
 	Role        string `json:"role"`
-	Level       uint64 `json:"level"`
+	Level       int64  `json:"level"`
 	OTP         bool   `json:"otp"`
 	State       string `json:"state"`
 	ReferralUID string `json:"referral_uid"`
@@ -17,7 +17,7 @@ type ServiceAccount struct {
 	Email     string `json:"email"`
 	UID       string `json:"uid"`
 	Role      string `json:"role"`
-	Level     uint64 `json:"level"`
+	Level     int64  `json:"level"`
 	State     string `json:"state"`
 	User      User   `json:"user"`
 	CreatedAt string `json:"created_at"`
@@ -36,6 +36,6 @@ type APIKey struct {
 }
 
 type Attachment struct {
-	ID  uint64 `json:"id"`
+	ID  int64  `json:"id"`
 	UID string `json:"user_uid"`
 }
