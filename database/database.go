@@ -21,17 +21,22 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 	var dsn string
 
 	switch cnf.Driver {
-	case "memory":
-		dial = sqlite.Open(":memory:")
+	case SqliteDriver:
+		dsn = fmt.Sprintf("file:%s", cnf.Name)
+		if cnf.InMemory {
+			dsn = dsn + "?mode=memory&cache=shared"
+		}
 
-	case "mysql":
+		dial = sqlite.Open(dsn)
+
+	case MySQLDriver:
 		dsn = fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 			cnf.User, cnf.Pass, cnf.Host, cnf.Port, cnf.Name,
 		)
 		dial = mysql.Open(dsn)
 
-	case "postgres":
+	case PostgresDriver:
 		dsn := fmt.Sprintf(
 			"user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
 			cnf.User, cnf.Pass, cnf.Host, cnf.Port, cnf.Name,
@@ -43,7 +48,7 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 
 		dial = postgres.Open(dsn)
 	default:
-		return nil, fmt.Errorf("Unsupported DATABASE_DRIVER: %s", cnf.Driver)
+		return nil, fmt.Errorf("unsupported driver: %s", cnf.Driver)
 	}
 
 	db, err = gorm.Open(dial, &gorm.Config{})
@@ -58,19 +63,20 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 	}
 
 	// Additional database setup
-	switch dsn {
-	case "":
+	switch cnf.Driver {
+	case SqliteDriver:
 		// No setup for sqlite
 	default:
 		sql.SetMaxOpenConns(cnf.Pool)
 	}
+
 	return db, nil
 }
 
 // Create the database MySQL/SQLite by name with existing connection
 func Create(cnf *Config) error {
 	// No need to exec create database cmd for SQlite
-	if cnf.Driver == "memory" {
+	if cnf.Driver == SqliteDriver {
 		return nil
 	}
 
@@ -93,7 +99,7 @@ func Create(cnf *Config) error {
 func Drop(cnf *Config) error {
 	var err error
 	// No need to exec drop database cmd for SQlite
-	if cnf.Driver != "memory" {
+	if cnf.Driver != SqliteDriver {
 		// Connect to the database with given config
 		dbName := cnf.Name
 		cnf.Name = ""
