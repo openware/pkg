@@ -14,7 +14,7 @@ import (
 func Test_Connect(t *testing.T) {
 	t.Run("Connection to sqlite", func(t *testing.T) {
 		_, err := database.Connect(&database.Config{
-			Driver: "memory",
+			Driver: database.SqliteDriver,
 			Pool:   5,
 		})
 		if err != nil {
@@ -43,7 +43,7 @@ func Test_Connect(t *testing.T) {
 		const configFile = `
 port: 6009
 database:
-  driver: memory
+  driver: sqlite
   host: localhost
   port: 3006
   name: opendax
@@ -84,7 +84,7 @@ database:
 func Test_Create(t *testing.T) {
 	t.Run("Create database with sqlite driver", func(t *testing.T) {
 		err := database.Create(&database.Config{
-			Driver: "memory",
+			Driver: database.SqliteDriver,
 			Pool:   5,
 		})
 		if err != nil {
@@ -96,7 +96,7 @@ func Test_Create(t *testing.T) {
 func Test_Drop(t *testing.T) {
 	t.Run("Drop database with sqlite driver", func(t *testing.T) {
 		err := database.Drop(&database.Config{
-			Driver: "memory",
+			Driver: database.SqliteDriver,
 			Pool:   5,
 		})
 		if err != nil {
