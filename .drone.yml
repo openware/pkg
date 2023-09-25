@@ -27,7 +27,7 @@ steps:
       - vault secrets enable transit
 
   - name: Test & vet
-    image: golang:1.18
+    image: golang:1.21
     environment:
       GO111MODULE: on
       COVER_OUT: cover.out
