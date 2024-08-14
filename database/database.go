@@ -7,6 +7,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 // Internal database pointer
@@ -19,6 +20,7 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 	var err error
 	var dial gorm.Dialector
 	var dsn string
+	gormConfig := &gorm.Config{}
 
 	switch cnf.Driver {
 	case SqliteDriver:
@@ -44,14 +46,16 @@ func Connect(cnf *Config) (*gorm.DB, error) {
 
 		if cnf.Schema != "" {
 			dsn = fmt.Sprintf("%s  search_path=%s", dsn, cnf.Schema)
+			gormConfig.NamingStrategy = schema.NamingStrategy{
+				TablePrefix: cnf.Schema + ".",
+			}
 		}
-
 		dial = postgres.Open(dsn)
 	default:
 		return nil, fmt.Errorf("unsupported driver: %s", cnf.Driver)
 	}
 
-	db, err = gorm.Open(dial, &gorm.Config{})
+	db, err = gorm.Open(dial, gormConfig)
 	if err != nil {
 		return nil, err
 	}
