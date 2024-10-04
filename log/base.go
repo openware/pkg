@@ -31,6 +31,8 @@ func (l baseLogger) Fatal(msg string, keysAndValues ...interface{}) {
 	l.lg.Fatalw(msg, keysAndValues...)
 }
 
+func (l baseLogger) Trace(msg string, keysAndValues ...interface{}) {}
+
 func (l baseLogger) With(keysAndValues ...interface{}) Logger {
 	return baseLogger{lg: l.lg.With(keysAndValues...)}
 }

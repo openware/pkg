@@ -1,7 +1,3 @@
-// Copyright (c) 2019 The Jaeger Authors.
-// Copyright (c) 2017 Uber Technologies, Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package log
 
 import (
@@ -43,6 +39,10 @@ func (sl spanLogger) Fatal(msg string, keysAndValues ...interface{}) {
 	sl.logToSpan("fatal", msg, keysAndValues...)
 	sl.span.SetStatus(codes.Error, msg)
 	sl.logger.Fatalw(msg, append(sl.spanKeysAndValues, keysAndValues...)...)
+}
+
+func (sl spanLogger) Trace(msg string, keysAndValues ...interface{}) {
+	sl.logToSpan("trace", msg, keysAndValues...)
 }
 
 // With creates a child logger, and optionally adds some context fields to that logger.
