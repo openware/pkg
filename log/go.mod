@@ -1,11 +1,15 @@
 module github.com/openware/pkg/log
 
-go 1.18
+go 1.22
+
+toolchain go1.22.8
 
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/jsternberg/zap-logfmt v1.3.0
-	go.uber.org/zap v1.24.0
+	go.opentelemetry.io/otel v1.30.0
+	go.opentelemetry.io/otel/trace v1.30.0
+	go.uber.org/zap v1.27.0
 	gorm.io/gorm v1.23.10
 )
 
@@ -22,8 +26,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
 	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
