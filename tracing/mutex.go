@@ -39,7 +39,7 @@ func (sm *Mutex) Lock(ctx context.Context) {
 
 	sm.waitersLock.Lock()
 	if waiting := len(sm.waiters); waiting > 0 {
-		logger.Info("waiting for lock", "session", session, "waiting", waiting, "waiters", sm.waitersString(0, waiting))
+		logger.Trace("waiting for lock", "session", session, "queueLen", waiting)
 	}
 	sm.waiters = append(sm.waiters, session)
 	sm.waitersLock.Unlock()
@@ -50,7 +50,7 @@ func (sm *Mutex) Lock(ctx context.Context) {
 	behindLen := len(sm.waiters) - 1
 	sm.waitersLock.Unlock()
 
-	logger.Info("acquired lock", "session", session, "waiting", behindLen, "waiters", sm.waitersString(0, behindLen+1))
+	logger.Trace("acquired lock", "session", session, "queueLen", behindLen)
 }
 
 // Unlock releases the lock.
@@ -58,27 +58,9 @@ func (sm *Mutex) Unlock() {
 	sm.waitersLock.Lock()
 	// remove self from the list of waiters
 	if len(sm.waiters) > 0 {
-		sm.logger.Info("released lock", "session", sm.waiters[0], "waiting", len(sm.waiters), "waiters", sm.waitersString(1, len(sm.waiters)))
 		sm.waiters = sm.waiters[1:]
 	}
 	sm.waitersLock.Unlock()
 
 	sm.realLock.Unlock()
-}
-
-func (sm *Mutex) waitersString(from, to int) string {
-	if from >= to || from < 0 || from >= len(sm.waiters) {
-		return ""
-	}
-
-	if to > len(sm.waiters) {
-		to = len(sm.waiters)
-	}
-
-	str := sm.waiters[from]
-	for i := from + 1; i < to; i++ {
-		str += "," + sm.waiters[i]
-	}
-
-	return str
 }

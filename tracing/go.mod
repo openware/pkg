@@ -6,7 +6,7 @@ toolchain go1.22.8
 
 require (
 	github.com/jaegertracing/jaeger v1.61.0
-	github.com/openware/pkg/log v0.1.3-0.20241004145419-85ce549683bd
+	github.com/openware/pkg/log v0.1.3-0.20241008132728-4e3e9e8048d8
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/otel v1.30.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.30.0
