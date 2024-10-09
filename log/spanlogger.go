@@ -7,6 +7,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type spanLogger struct {
@@ -17,28 +18,28 @@ type spanLogger struct {
 
 func (sl spanLogger) Debug(msg string, keysAndValues ...interface{}) {
 	sl.logToSpan("debug", msg, keysAndValues...)
-	sl.logger.Debugw(msg, append(sl.spanKeysAndValues, keysAndValues...)...)
+	sl.log(zapcore.DebugLevel, msg, keysAndValues...)
 }
 
 func (sl spanLogger) Info(msg string, keysAndValues ...interface{}) {
 	sl.logToSpan("info", msg, keysAndValues...)
-	sl.logger.Infow(msg, append(sl.spanKeysAndValues, keysAndValues...)...)
+	sl.log(zapcore.InfoLevel, msg, keysAndValues...)
 }
 
 func (sl spanLogger) Warn(msg string, keysAndValues ...interface{}) {
 	sl.logToSpan("warn", msg, keysAndValues...)
-	sl.logger.Warnw(msg, append(sl.spanKeysAndValues, keysAndValues...)...)
+	sl.log(zapcore.WarnLevel, msg, keysAndValues...)
 }
 
 func (sl spanLogger) Error(msg string, keysAndValues ...interface{}) {
 	sl.logToSpan("error", msg, keysAndValues...)
-	sl.logger.Errorw(msg, append(sl.spanKeysAndValues, keysAndValues...)...)
+	sl.log(zapcore.ErrorLevel, msg, keysAndValues...)
 }
 
 func (sl spanLogger) Fatal(msg string, keysAndValues ...interface{}) {
 	sl.logToSpan("fatal", msg, keysAndValues...)
 	sl.span.SetStatus(codes.Error, msg)
-	sl.logger.Fatalw(msg, append(sl.spanKeysAndValues, keysAndValues...)...)
+	sl.log(zapcore.FatalLevel, msg, keysAndValues...)
 }
 
 func (sl spanLogger) Trace(msg string, keysAndValues ...interface{}) {
@@ -48,6 +49,10 @@ func (sl spanLogger) Trace(msg string, keysAndValues ...interface{}) {
 // With creates a child logger, and optionally adds some context fields to that logger.
 func (sl spanLogger) With(keysAndValues ...interface{}) Logger {
 	return spanLogger{logger: sl.logger.With(keysAndValues...), span: sl.span, spanKeysAndValues: sl.spanKeysAndValues}
+}
+
+func (sl spanLogger) log(level zapcore.Level, msg string, keysAndValues ...interface{}) {
+	sl.logger.Logw(level, msg, append(sl.spanKeysAndValues, withCaller(keysAndValues)...)...)
 }
 
 func (sl spanLogger) logToSpan(level, msg string, keysAndValues ...interface{}) {

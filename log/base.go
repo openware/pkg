@@ -5,6 +5,7 @@ import (
 
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type baseLogger struct {
@@ -12,23 +13,23 @@ type baseLogger struct {
 }
 
 func (l baseLogger) Debug(msg string, keysAndValues ...interface{}) {
-	l.lg.Debugw(msg, keysAndValues...)
+	l.log(zap.DebugLevel, msg, keysAndValues...)
 }
 
 func (l baseLogger) Info(msg string, keysAndValues ...interface{}) {
-	l.lg.Infow(msg, keysAndValues...)
+	l.log(zap.InfoLevel, msg, keysAndValues...)
 }
 
 func (l baseLogger) Warn(msg string, keysAndValues ...interface{}) {
-	l.lg.Warnw(msg, keysAndValues...)
+	l.log(zap.WarnLevel, msg, keysAndValues...)
 }
 
 func (l baseLogger) Error(msg string, keysAndValues ...interface{}) {
-	l.lg.Errorw(msg, keysAndValues...)
+	l.log(zap.ErrorLevel, msg, keysAndValues...)
 }
 
 func (l baseLogger) Fatal(msg string, keysAndValues ...interface{}) {
-	l.lg.Fatalw(msg, keysAndValues...)
+	l.log(zap.FatalLevel, msg, keysAndValues...)
 }
 
 func (l baseLogger) Trace(msg string, keysAndValues ...interface{}) {}
@@ -51,4 +52,8 @@ func (l baseLogger) For(ctx context.Context) Logger {
 			"span_id", span.SpanContext().SpanID().String(),
 		},
 	}
+}
+
+func (l baseLogger) log(level zapcore.Level, msg string, keysAndValues ...interface{}) {
+	l.lg.Logw(level, msg, withCaller(keysAndValues)...)
 }
