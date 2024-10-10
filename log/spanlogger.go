@@ -34,6 +34,7 @@ func (sl spanLogger) Warn(msg string, keysAndValues ...interface{}) {
 func (sl spanLogger) Error(msg string, keysAndValues ...interface{}) {
 	sl.logToSpan("error", msg, keysAndValues...)
 	sl.log(zapcore.ErrorLevel, msg, keysAndValues...)
+	sl.span.SetStatus(codes.Error, msg)
 }
 
 func (sl spanLogger) Fatal(msg string, keysAndValues ...interface{}) {
@@ -87,17 +88,11 @@ func (sl spanLogger) logToSpan(level, msg string, keysAndValues ...interface{}) 
 			keyValue = attribute.Bool(key, v)
 		case int:
 			keyValue = attribute.Int(key, v)
-		case int16:
-		case int32:
-		case int64:
-		case uint8:
-		case uint16:
-		case uint32:
-			keyValue = attribute.Int64(key, int64(v))
-		case float32:
-		case float64:
-			keyValue = attribute.Float64(key, float64(v))
-		case stringer:
+		case int16, int32, int64, uint8, uint16, uint32:
+			keyValue = attribute.Int64(key, toInt64(v))
+		case float32, float64:
+			keyValue = attribute.Float64(key, toFloat64(v))
+		case fmt.Stringer:
 			keyValue = attribute.String(key, v.String())
 		default:
 			keyValue = attribute.String(key, fmt.Sprint(v))
@@ -112,6 +107,34 @@ func (sl spanLogger) logToSpan(level, msg string, keysAndValues ...interface{}) 
 	)
 }
 
-type stringer interface {
-	String() string
+// Helper function to convert integer types to int64
+func toInt64(value interface{}) int64 {
+	switch v := value.(type) {
+	case int16:
+		return int64(v)
+	case int32:
+		return int64(v)
+	case int64:
+		return v
+	case uint8:
+		return int64(v)
+	case uint16:
+		return int64(v)
+	case uint32:
+		return int64(v)
+	default:
+		return 0
+	}
+}
+
+// Helper function to convert float types to float64
+func toFloat64(value interface{}) float64 {
+	switch v := value.(type) {
+	case float32:
+		return float64(v)
+	case float64:
+		return v
+	default:
+		return 0
+	}
 }

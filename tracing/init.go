@@ -64,7 +64,7 @@ func createOtelExporter(exporterType string) (sdktrace.SpanExporter, error) {
 	case "otlp":
 		exporter, err = otlptrace.New(
 			context.Background(),
-			otlptracehttp.NewClient(otlptracehttp.WithInsecure()),
+			otlptracehttp.NewClient(),
 		)
 	case "stdout":
 		exporter, err = stdouttrace.New()
