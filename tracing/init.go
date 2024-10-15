@@ -68,6 +68,8 @@ func createOtelExporter(exporterType string) (sdktrace.SpanExporter, error) {
 		)
 	case "stdout":
 		exporter, err = stdouttrace.New()
+	case "muted":
+		exporter = &MutedExporter{}
 	default:
 		return nil, fmt.Errorf("unrecognized exporter type %s", exporterType)
 	}
