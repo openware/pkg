@@ -12,8 +12,8 @@ func SetRootPath(path string) {
 	rootPath = path
 }
 
-func withCaller(keysAndValues []interface{}) []interface{} {
-	_, file, line, ok := runtime.Caller(3)
+func withCaller(level int, keysAndValues []interface{}) []interface{} {
+	_, file, line, ok := runtime.Caller(3 + level)
 	if !ok {
 		return keysAndValues
 	}

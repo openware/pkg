@@ -9,7 +9,8 @@ import (
 )
 
 type baseLogger struct {
-	lg *zap.SugaredLogger
+	lg          *zap.SugaredLogger
+	callerLevel int
 }
 
 func (l baseLogger) Debug(msg string, keysAndValues ...interface{}) {
@@ -51,9 +52,10 @@ func (l baseLogger) For(ctx context.Context) Logger {
 			"trace_id", span.SpanContext().TraceID().String(),
 			"span_id", span.SpanContext().SpanID().String(),
 		},
+		callerLevel: l.callerLevel,
 	}
 }
 
 func (l baseLogger) log(level zapcore.Level, msg string, keysAndValues ...interface{}) {
-	l.lg.Logw(level, msg, withCaller(keysAndValues)...)
+	l.lg.Logw(level, msg, withCaller(l.callerLevel, keysAndValues)...)
 }

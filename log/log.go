@@ -23,12 +23,20 @@ func init() {
 		zaplogfmt.NewEncoder(config),
 		os.Stdout,
 		level,
-	), zap.AddCaller()).Sugar()
+	)).Sugar()
 }
 
 func NewLogger(pkg string) CtxLogger {
 	return baseLogger{
 		logger.With("pkg", pkg),
+		0,
+	}
+}
+
+func NewLoggerWithCallerLevel(pkg string, callerLevel int) CtxLogger {
+	return baseLogger{
+		logger.With("pkg", pkg),
+		callerLevel,
 	}
 }
 

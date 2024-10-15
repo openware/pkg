@@ -14,6 +14,7 @@ type spanLogger struct {
 	logger            *zap.SugaredLogger
 	span              trace.Span
 	spanKeysAndValues []interface{}
+	callerLevel       int
 }
 
 func (sl spanLogger) Debug(msg string, keysAndValues ...interface{}) {
@@ -53,7 +54,7 @@ func (sl spanLogger) With(keysAndValues ...interface{}) Logger {
 }
 
 func (sl spanLogger) log(level zapcore.Level, msg string, keysAndValues ...interface{}) {
-	sl.logger.Logw(level, msg, append(sl.spanKeysAndValues, withCaller(keysAndValues)...)...)
+	sl.logger.Logw(level, msg, append(sl.spanKeysAndValues, withCaller(sl.callerLevel, keysAndValues)...)...)
 }
 
 func (sl spanLogger) logToSpan(level, msg string, keysAndValues ...interface{}) {
