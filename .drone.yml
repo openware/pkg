@@ -27,7 +27,7 @@ steps:
       - vault secrets enable transit
 
   - name: Test & vet
-    image: golang:1.18
+    image: golang:1.22.8
     environment:
       GO111MODULE: on
       COVER_OUT: cover.out
@@ -36,51 +36,6 @@ steps:
     commands:
       - ./run_tests.sh
       - find . -type f -name "*.out"
-
-  - name: Go Coverage master
-    image: golang:1.18
-    environment: &envs
-      GO111MODULE: "on"
-      COVER_OUT: cover.out
-      ANALYTICS_DATABASE_HOST: pg.opendax.app
-      ANALYTICS_DATABASE_PORT: 30432
-      ANALYTICS_DATABASE_USERNAME: postgres
-      ANALYTICS_DATABASE_USERNAME: coverage_analytics
-      ANALYTICS_DATABASE_PASSWORD:
-        from_secret: pgpass_coverage
-      ANALYTICS_DATABASE_NAME: coverage_analytics
-    commands: &cmds
-      - apt-get update
-      - apt-get install -y p7zip-full
-      - |
-        curl -s -L "https://github.com/boumenot/gocover-cobertura/releases/download/v1.1.0/gocover-cobertura.linux.x64.7z" -o ./gocover-cobertura.7z
-        curl -s -L https://github.com/openware/go-coverage/releases/download/v1.0.0-alpha/go-coverage -o ./go-coverage
-        7z x ./gocover-cobertura.7z
-        chmod +x ./gocover-cobertura
-        chmod +x ./go-coverage
-      - |
-        for d in */ ; do
-          covers=$(< $d/$COVER_OUT wc -l)
-          if [ $covers -gt 1 ]; then
-            export ANALYTICS_COMPONENT=$(basename -- $d)
-            ./gocover-cobertura < $d/$COVER_OUT > $d/coverage.xml || true
-            ./go-coverage $d/coverage.xml || true
-          fi
-        done
-    when:
-      event:
-        - push
-      branch:
-        - master
-
-  - name: Go coverage tag
-    image: golang:1.18
-    environment:
-      <<: *envs
-    commands: *cmds
-    when:
-      event:
-        - tag
 
 trigger:
   event:
