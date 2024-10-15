@@ -23,15 +23,21 @@ func init() {
 		zaplogfmt.NewEncoder(config),
 		os.Stdout,
 		level,
-	), zap.AddCaller()).Sugar()
+	)).Sugar()
 }
 
-func NewLogger(pkg string) *zap.SugaredLogger {
-	return logger.With("pkg", pkg)
+func NewLogger(pkg string) CtxLogger {
+	return baseLogger{
+		logger.With("pkg", pkg),
+		0,
+	}
 }
 
-func ExtendLogger(logger *zap.SugaredLogger, label string, value interface{}) *zap.SugaredLogger {
-	return logger.With(label, value)
+func NewLoggerWithCallerLevel(pkg string, callerLevel int) CtxLogger {
+	return baseLogger{
+		logger.With("pkg", pkg),
+		callerLevel,
+	}
 }
 
 func SetLogLevel(logLevel string) {
