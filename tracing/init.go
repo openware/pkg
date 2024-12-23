@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	gcptrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -66,6 +67,8 @@ func createOtelExporter(exporterType string) (sdktrace.SpanExporter, error) {
 			context.Background(),
 			otlptracehttp.NewClient(),
 		)
+	case "gcp":
+		exporter, err = gcptrace.New()
 	case "stdout":
 		exporter, err = stdouttrace.New()
 	case "muted":
